@@ -23,8 +23,7 @@ def select_jet(data, num):
   Select data with jets #num from data file
   """
   if max_tt_num <= num:
-    print(f"Requested jet {num} is not in data. Max jet number is {max_tt_num}")
-    sys.exit(1)
+    raise ValueError(f"Requested jet {num} is not in data. Max jet number is {max_tt_num}")
   return data[data[:,0] == num]
 
 def p_magnitude(p):
@@ -44,8 +43,7 @@ def pseudorapidity(p_mag, p_z):
     https://en.wikipedia.org/wiki/Pseudorapidity
   """
   if ( np.shape(p_mag) != np.shape(p_z)):
-    print("Error: p_mag shape not equal to p_z shape")
-    sys.exit(1)
+    raise ValueError("Error: p_mag shape not equal to p_z shape")
   return np.arctanh(p_z/p_mag)
 
 def to_phi(p_x, p_y):
@@ -55,8 +53,7 @@ def to_phi(p_x, p_y):
   This function finds the angle phi (radians) from the 2 components of transverse momentum p_x,  p_y using arctan(p_y/p_x)
   """
   if (np.shape(p_x) != np.shape(p_y)):
-    print("Error: p_x shape not equal to p_y shape")
-    sys.exit(1)
+    raise ValueError("Error: p_x shape not equal to p_y shape")
   return np.arctan2(p_y, p_x)
 
 jet_no = 0
