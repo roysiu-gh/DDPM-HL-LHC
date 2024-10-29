@@ -7,9 +7,10 @@ import matplotlib as mpl
 plt.rcParams['text.usetex'] = False  # Use LaTeX for rendering text
 plt.rcParams['font.size'] = 12      # Set default font size (optional)
 
-file_dir = os.path.dirname(os.path.realpath(__file__))
-pile_path = f"{file_dir}/../data/1-initial/pileup.csv"
-tt_path = f"{file_dir}/../data/1-initial/ttbar.csv"
+CWD = os.getcwd()
+pile_path = f"{CWD}/data/1-initial/pileup.csv"
+tt_path = f"{CWD}/data/1-initial/ttbar.csv"
+
 # jetnumber , pdgid , charge , px , py , pz
 pile_up = np.genfromtxt(pile_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=10)
 tt = np.genfromtxt(tt_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=1000)
@@ -64,7 +65,7 @@ data = select_jet(tt, jet_no)
 tt_momenta = data[:,3:]
 # print(tt_momenta)
 tt_pmag = p_magnitude(tt_momenta)
-print(tt_pmag)
+print("Constituent momenta:\n", tt_pmag)
 tt_pz = data[:,5]
 # print(tt_pz)
 tt_eta = pseudorapidity(tt_pmag, tt_pz)
@@ -86,5 +87,5 @@ ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(base=np.pi / 4))
 ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda val, pos: f"{(val / np.pi)}$\pi$" if val != 0 else "0"))
 ax.grid(axis='y', linestyle='--', color='gray', alpha=0.7)
 
-plt.savefig("eta_phi.png", dpi=600)
+plt.savefig(f"{CWD}/data/plots/test/eta_phi.png", dpi=600)
 sys.exit(0)
