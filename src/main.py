@@ -3,6 +3,7 @@ import sys, os
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.colors import ListedColormap
+from matplotlib.patches import Patch
 
 # ======= global matplotlib params =====
 plt.rcParams['text.usetex'] = False  # Use LaTeX for rendering text
@@ -78,13 +79,34 @@ cmap = ListedColormap(plt.cm.tab10(np.linspace(0, 1, num_colours)))  # Cmap tab1
 colour_mapping = {pid: cmap(i) for i, pid in enumerate(unique_pdgid)}
 colours = [colour_mapping[pid] for pid in pdgid_values]
 
+pdg_dict = {
+  -211: r"$\pi^-$ (Pion)",
+  -321: r"$K^-$ (Kaon)",
+  0: r"$\gamma$ (Photon)",
+  130: r"$K^0_S$ (K-short)",
+  211: r"$\pi^+$ (Pion)",
+  22: r"$\gamma$ (Photon)",
+  321: r"$K^+$ (Kaon)",
+  11: r"$e^-$ (Electron)",
+}
+
 # Plotting
-fig, ax = plt.subplots(figsize=(6, 6))
+fig, ax = plt.subplots(figsize=(8, 6))
 ax.set_title(f"$\phi$ vs $\eta$ of jet {jet_no}")
 ax.set_xlabel("$\eta$")
 ax.set_ylabel("$\phi$")
 
 ax.scatter(tt_eta, tt_phi, color=colours, marker='o', facecolors="none", linewidths=0.1 ,s=dot_sizes)
+
+# Add legend for pdgid values and particle names
+handles = []
+for pid in unique_pdgid:
+    particle_name = pdg_dict.get(pid, "Not in dict")
+    handles.append(Patch(color=colour_mapping[pid], label=f"PDG ID: {int(pid)}, \n{particle_name}"))
+# Shrink plot and put right of the current axis
+box = ax.get_position()
+ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+ax.legend(handles=handles, loc='center left', bbox_to_anchor=(1, 0.5))
 
 # Set phi range to -π to π and adjust tick marks
 # ax.set_ylim(-np.pi, np.pi)
@@ -92,5 +114,5 @@ ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(base=np.pi / 4))
 ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda val, pos: f"{(val / np.pi)}$\pi$" if val != 0 else "0"))
 ax.grid(axis='y', linestyle='--', color='gray', alpha=0.7)
 
-plt.savefig(f"{CWD}/data/plots/test/eta_phi.png", dpi=1200)
+plt.savefig(f"{CWD}/data/plots/test/eta_phi.png", dpi=1000)
 sys.exit(0)
