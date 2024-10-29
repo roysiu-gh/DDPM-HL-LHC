@@ -56,7 +56,7 @@ def to_phi(p_x, p_y):
   if (np.shape(p_x) != np.shape(p_y)):
     print("Error: p_x shape not equal to p_y shape")
     sys.exit(1)
-  return np.arctan(p_y / p_x)
+  return np.arctan2(p_y, p_x)
 
 jet_no = 0
 data = select_jet(tt, jet_no)
