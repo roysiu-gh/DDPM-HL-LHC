@@ -22,6 +22,10 @@ PDG_IDS = {
     22: r"$\gamma$ (Photon)",
     321: r"$K^+$ (Kaon)",
     11: r"$e^-$ (Electron)",
+    -2112: r"$\bar{n}$ (Antineutron)",
+    -11: r"$e^+$ (Positron)",
+    2112: r"$n$ (Neutron)",
+    2212: r"$p$ (Proton)"
 }
 
 MAX_DATA_ROWS = 1000
@@ -67,8 +71,18 @@ def to_phi(p_x, p_y):
         raise ValueError("Error: p_x shape not equal to p_y shape")
     return np.arctan2(p_y, p_x)
 
-def plot_detections(data, jet_no=0, filename="eta_phi", base_dot_size=100, verbose=True):
-    """Plot a jet and output to a PNG. Pretty self-explanatory."""
+def plot_detections(data, jet_no=0, filename="eta_phi", base_dot_size=100, momentum_display_proportion=1.0, verbose=True):
+    """Plot a jet and output to a PNG. Pretty self-explanatory.
+    
+    Parameters:
+    - data: dataset containing particle information
+    - jet_no: specific jet number to plot from dataset
+    - filename: The name to save the file as (PNG)
+    - base_dot_size: base size for plot circles
+    - momentum_display_proportion: proportion of total momentum to display in plot limits - default 1.0 (display all detections)
+    - verbose: print detailed information
+    """
+    # Retrieve data for the specified jet and calculate momenta and angles
     jet_data = select_jet(data, jet_no)
     momenta = jet_data[:,3:]
     pmag = p_magnitude(momenta)
@@ -91,7 +105,7 @@ def plot_detections(data, jet_no=0, filename="eta_phi", base_dot_size=100, verbo
     # Plotting
     # Grid stuff
     fig, ax = plt.subplots(figsize=(8, 6))
-    ax.set_title(f"$\phi$ vs $\eta$ of jet {jet_no}")
+    ax.set_title(f"$\phi$ vs $\eta$ of jet ${jet_no}, prop={momentum_display_proportion}$")
     ax.set_xlabel("$\eta$")
     ax.set_ylabel("$\phi$")
     # Set phi range to +/-pi and adjust tick marks
@@ -99,7 +113,24 @@ def plot_detections(data, jet_no=0, filename="eta_phi", base_dot_size=100, verbo
     ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda val, pos: f"{(val / np.pi)}$\pi$" if val != 0 else "0"))
     ax.grid(axis='y', linestyle='--', color='gray', alpha=0.7)
 
-    ax.scatter(eta, phi, color=colours, marker='o', facecolors="none", linewidths=0.1 ,s=dot_sizes)
+    if momentum_display_proportion == 1.0:  # Show all
+        ax.scatter(eta, phi, color=colours, marker='o', facecolors="none", linewidths=0.1, s=dot_sizes)
+    else:  # Show a certain proportion
+        # Calculate cumulative momentum and sort by eta to adjust limits
+        total_momentum = np.sum(pmag)
+        sorted_indices = np.argsort(pmag)[::-1]  # Sort by descending momentum
+        cumulative_momentum = np.cumsum(pmag[sorted_indices])
+        target_momentum = total_momentum * momentum_display_proportion
+
+        # Find cutoff index where cumulative momentum reaches target ratio
+        cutoff_index = np.searchsorted(cumulative_momentum, target_momentum, side='right')
+        eta_cropped = eta[sorted_indices][:cutoff_index]
+        phi_cropped = phi[sorted_indices][:cutoff_index]
+        pmag_cropped = pmag[sorted_indices][:cutoff_index]
+        colours_cropped = [colours[i] for i in sorted_indices[:cutoff_index]]
+        dot_sizes_cropped = dot_sizes[sorted_indices[:cutoff_index]]
+
+        ax.scatter(eta_cropped, phi_cropped, color=colours_cropped, marker='o', facecolors="none", linewidths=1 ,s=dot_sizes_cropped*5)
 
     # Add legend for pdgid values and particle names
     handles = []
@@ -113,4 +144,6 @@ def plot_detections(data, jet_no=0, filename="eta_phi", base_dot_size=100, verbo
     
     plt.savefig(f"{CWD}/data/plots/test/{filename}.png", dpi=1000)
 
-plot_detections(data=tt, jet_no=12)
+
+plot_detections(data=tt, jet_no=0, filename="eta_phi")
+plot_detections(data=tt, jet_no=0,filename="eta_phi_cropped", momentum_display_proportion=0.9)
