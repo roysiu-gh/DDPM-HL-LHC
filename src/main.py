@@ -1,5 +1,5 @@
 import numpy as np
-import sys
+import sys, os
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
@@ -7,11 +7,12 @@ import matplotlib as mpl
 plt.rcParams['text.usetex'] = False  # Use LaTeX for rendering text
 plt.rcParams['font.size'] = 12      # Set default font size (optional)
 
-pile_path = "../data/1-initial/pileup.csv"
-tt_path = "../data/1-initial/ttbar.csv"
+file_dir = os.path.dirname(os.path.realpath(__file__))
+pile_path = f"{file_dir}/../data/1-initial/pileup.csv"
+tt_path = f"{file_dir}/../data/1-initial/ttbar.csv"
 # jetnumber , pdgid , charge , px , py , pz
 pile_up = np.genfromtxt(pile_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=10)
-tt = np.genfromtxt(tt_path, delimiter=",", encoding="utf-8", skip_header=1)
+tt = np.genfromtxt(tt_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=1000)
 
 max_tt_num = np.max(tt[:,0])
 max_pile_num = np.max(pile_up[:,0])
@@ -57,7 +58,8 @@ def to_phi(p_x, p_y):
     sys.exit(1)
   return np.arctan(p_y / p_x)
 
-data = select_jet(tt, 70000)
+jet_no = 0
+data = select_jet(tt, jet_no)
 print(data)
 tt_momenta = data[:,3:]
 # print(tt_momenta)
@@ -72,9 +74,9 @@ fig, ax = plt.subplots(figsize=(4,4))
 ax.scatter(tt_eta, tt_phi, color='blue', marker='o', s=0.1)
 
 # Add titles and labels
-plt.title("Scatter Plot of $\phi$ vs $\eta$")
+plt.title(f"$\phi$ vs $\eta$ of jet {jet_no}")
 ax.set_xlabel("$\eta$")
-ax.set_ylabel("$\\phi$")
+ax.set_ylabel("$\phi$")
 plt.savefig("eta_phi.png", format="png", dpi=100)
 # plt.close()
 # print("done")
