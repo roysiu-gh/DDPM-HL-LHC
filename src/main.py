@@ -145,39 +145,27 @@ def plot_detections(
     )
     ax.grid(axis="y", linestyle="--", color="gray", alpha=0.7)
 
-    if momentum_display_proportion == 1.0:  # Show all particles
-        ax.scatter(
-            eta,
-            phi,
-            color=colours,
-            marker="o",
-            facecolors="none",
-            linewidths=0.1,
-            s=dot_sizes,
-        )
-    else:  # Show particles up to the target proportion of total momentum
+    # Show particles up to the target proportion of total momentum
+    sorted_indices = np.argsort(pmag)[::-1]
+    if momentum_display_proportion != 1.0:  # Do some calculating for the cutoff idx
         total_momentum = np.sum(pmag)
-        sorted_indices = np.argsort(pmag)[::-1]
         cumulative_momentum = np.cumsum(pmag[sorted_indices])
         target_momentum = total_momentum * momentum_display_proportion
+        cutoff_index = np.searchsorted(cumulative_momentum, target_momentum, side='right')
 
-        cutoff_index = np.searchsorted(
-            cumulative_momentum, target_momentum, side="right"
-        )
-        eta_cropped = eta[sorted_indices][:cutoff_index]
-        phi_cropped = phi[sorted_indices][:cutoff_index]
-        colours_cropped = [colours[i] for i in sorted_indices[:cutoff_index]]
-        dot_sizes_cropped = dot_sizes[sorted_indices[:cutoff_index]]
+        # Delete unwanted particles from plotting data
+        eta = eta[sorted_indices][:cutoff_index]
+        phi = phi[sorted_indices][:cutoff_index]
+        colours = [colours[i] for i in sorted_indices[:cutoff_index]]
+        dot_sizes = dot_sizes[sorted_indices[:cutoff_index]]
+        crop_dot_size_scale = 5  # make linewidths thicker for cropped plots, consider making this variable in future
+        dot_sizes *= crop_dot_size_scale
+        linewidths = 1
+    else:  # Show all particles
+        cutoff_index = None
+        linewidths = 0.1
 
-        ax.scatter(
-            eta_cropped,
-            phi_cropped,
-            color=colours_cropped,
-            marker="o",
-            facecolors="none",
-            linewidths=1,
-            s=dot_sizes_cropped * 5,
-        )
+    ax.scatter(eta, phi, color=colours, marker='o', facecolors="none", linewidths=linewidths, s=dot_sizes)
 
     # Add legend for pdgid values and particle names
     # NB this will show all particles in the collision in the legend, even if cropped out (is desired behaviour)
@@ -249,16 +237,15 @@ def delta_R(jet_centre, jet_no, jet_data, boundary=1.0):
     print("critR: ", crit_R)
     keep = jet_data[crit_R <= boundary]
     return keep
-jet_no = 0
 
 data = select_jet(tt, 1)
-# print(jet_axis(data[:, 3:]))
 jet_centre = jet_axis(data)
+
+jet_no = 0
 print(delta_R(jet_centre, 0, data))
 plot_detections(data=tt, jet_no=jet_no, filename=f"eta_phi_jet{jet_no}")
-plot_detections(
-    data=tt,
-    jet_no=jet_no,
-    filename=f"eta_phi_jet{jet_no}_cropped",
-    momentum_display_proportion=0.9,
-)
+plot_detections(data=tt, jet_no=jet_no, filename=f"eta_phi_jet{jet_no}_cropped", momentum_display_proportion=0.9)
+
+jet_no = 12
+plot_detections(data=tt, jet_no=jet_no, filename=f"eta_phi_jet{jet_no}")
+plot_detections(data=tt, jet_no=jet_no, filename=f"eta_phi_jet{jet_no}_cropped", momentum_display_proportion=0.9)
