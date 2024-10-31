@@ -158,15 +158,16 @@ def plot_detections(
         cutoff_index = np.searchsorted(cumulative_momentum, target_momentum, side='right')
 
         # Delete unwanted particles from plotting data
+        pdgid_values = pdgid_values[sorted_indices][:cutoff_index]
         eta = eta[sorted_indices][:cutoff_index]
         phi = phi[sorted_indices][:cutoff_index]
         colours = [colours[i] for i in sorted_indices[:cutoff_index]]
         radius_sizes = radius_sizes[sorted_indices[:cutoff_index]]
         radius_sizes *= 5  # Make larger radius for cropped plots, consider making this variable in future
-        linewidths = 1
+        linewidth = 1
     else:  # Show all particles
         cutoff_index = None
-        linewidths = 0.1
+        linewidth = 0.1
 
     # Plot centres
     # FIX THIS FOR CROPS
@@ -174,8 +175,9 @@ def plot_detections(
     ax.scatter(eta, phi, color=colours, marker='.', edgecolors='none', s=dot_sizes)
 
     # Plot circles prop to width
-    for e, p, color, size in zip(eta, phi, colours, radius_sizes):
-        circle = Circle((e, p), radius=size/100, edgecolor=color, facecolor='none', linewidth=linewidths)
+    for pdgid, e, p, color, radius in zip(pdgid_values, eta, phi, colours, radius_sizes):
+        linestyle = "-" if pdgid >= 0 else "--"
+        circle = Circle((e, p), radius=radius/100, edgecolor=color, facecolor='none', linewidth=linewidth, linestyle=linestyle)
         ax.add_patch(circle)
 
     # Add legend for pdgid values and particle names
