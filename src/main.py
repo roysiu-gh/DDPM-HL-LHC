@@ -2,6 +2,7 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import random
 from matplotlib.colors import ListedColormap
 from matplotlib.patches import Patch
 
@@ -87,6 +88,7 @@ def to_phi(p_x, p_y):
 
 def plot_detections(
     data,
+    jet_axis,
     jet_no=0,
     filename="eta_phi",
     base_dot_size=100,
@@ -101,6 +103,8 @@ def plot_detections(
         2D dataset containing particle information
     jet_no: int
         Specific jet number to plot from dataset
+    jet_axis: (float,float)
+        (eta,phi) of the jet axis.
     filename: str
         The name to save the file as (PNG)
     base_dot_size: float
@@ -208,7 +212,7 @@ def jet_axis(p):
     phi = to_phi(total_p[0], total_p[1])
     return eta, phi
 
-def delta_R(jet_centre, jet_no, jet_data, boundary=1.0):
+def delta_R(jet_centre, jet_data, boundary=1.0):
     """
     This function takes in particle information, and removes particles whose \Delta R(eta,phi) > 1.0 and returns all the others.
 
@@ -233,19 +237,35 @@ def delta_R(jet_centre, jet_no, jet_data, boundary=1.0):
     etas = pseudorapidity(p_mag, jet_data[:,5])
     phis = to_phi(jet_data[:,3], jet_data[:,4])
     # Calculate the values of Delta R for each particle
-    crit_R = np.sqrt((etas - jet_centre[0])*(etas - jet_centre[0]) + (phis - jet_centre[1])*(phis - jet_centre[1]))
+    delta_eta= (etas - jet_centre[0])
+    delta_phi = (phis - jet_centre[1])
+    crit_R = np.sqrt(delta_eta*delta_eta + delta_phi*delta_phi)
     print("critR: ", crit_R)
     keep = jet_data[crit_R <= boundary]
     return keep
 
-data = select_jet(tt, 1)
+def random_rows_from_csv(data, num_rows):
+    num_rows = min(num_rows, data.shape[0])
+    random_indices = np.random.choice(data.shape[0], num_rows, replace=False)
+    random_rows = data[random_indices]
+    
+    return random_rows
+# MU to define the number of random pileup events to take
+MU: int = 3
+MAX_EVENT_NUM = 999999
+chosen_pile_up = random_rows_from_csv(pile_up, MU)
+# for i in range(0,MU):
+jet_no = 1
+data = np.concatenate((select_jet(tt, jet_no), chosen_pile_up), axis=0) 
+# print(jet_axis(data[:, 3:]))
 jet_centre = jet_axis(data)
-
-jet_no = 0
-print(delta_R(jet_centre, 0, data))
-plot_detections(data=tt, jet_no=jet_no, filename=f"eta_phi_jet{jet_no}")
-plot_detections(data=tt, jet_no=jet_no, filename=f"eta_phi_jet{jet_no}_cropped", momentum_display_proportion=0.9)
-
-jet_no = 12
-plot_detections(data=tt, jet_no=jet_no, filename=f"eta_phi_jet{jet_no}")
-plot_detections(data=tt, jet_no=jet_no, filename=f"eta_phi_jet{jet_no}_cropped", momentum_display_proportion=0.9)
+# print()
+# plot_detections(data=delta_R(jet_centre, data), jet_no=jet_no, filename=f"eta_phi_jet{jet_no}")
+plot_detections(
+    data=tt,
+    jet_no=jet_no,
+    jet_axis = jet_centre,
+    filename=f"eta_phi_jet{jet_no}_cropped",
+    base_dot_size=1000,
+    momentum_display_proportion=1,
+)
