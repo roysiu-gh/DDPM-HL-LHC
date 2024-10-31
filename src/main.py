@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import random
 from matplotlib.colors import ListedColormap
-from matplotlib.patches import Patch
+from matplotlib.patches import Patch, Circle
 
 # ======= global matplotlib params =====
 plt.rcParams["text.usetex"] = False  # Use LaTeX for rendering text
@@ -15,24 +15,25 @@ pile_path = f"{CWD}/data/1-initial/pileup.csv"
 tt_path = f"{CWD}/data/1-initial/ttbar.csv"
 
 PDG_IDS = {
-    -211: r"$\pi^-$ (Pion)",
-    -321: r"$K^-$ (Kaon)",
     0: r"$\gamma$ (Photon)",
+    11: r"$e^-$ (Electron)",
+    -11: r"$e^+$ (Positron)",
+    22: r"$\gamma$ (Photon)",
     130: r"$K^0_S$ (K-short)",
     211: r"$\pi^+$ (Pion)",
-    22: r"$\gamma$ (Photon)",
+    -211: r"$\pi^-$ (Pion)",
     321: r"$K^+$ (Kaon)",
-    11: r"$e^-$ (Electron)",
-    -2112: r"$\bar{n}$ (Antineutron)",
-    -11: r"$e^+$ (Positron)",
+    -321: r"$K^-$ (Kaon)",
     2112: r"$n$ (Neutron)",
+    -2112: r"$\bar{n}$ (Antineutron)",
     2212: r"$p$ (Proton)",
 }
 
 # Global color scheme (tab20 for extended color range)
-unique_pdgids = sorted(PDG_IDS.keys())
-cmap = ListedColormap(plt.cm.tab20(np.linspace(0, 1, len(unique_pdgids))))
-GLOBAL_CMAP = {pid: cmap(i) for i, pid in enumerate(unique_pdgids)}
+# unique_pdgids = sorted(PDG_IDS.keys())  # Used later in legend code
+unique_abs_pdgids = sorted(abs(pdgid) for pdgid in PDG_IDS.keys())
+cmap = ListedColormap(plt.cm.tab20(np.linspace(0, 1, len(unique_abs_pdgids))))
+GLOBAL_CMAP = {pid: cmap(i) for i, pid in enumerate(unique_abs_pdgids)}
 # === BEGIN Reading in Data ===
 MAX_DATA_ROWS = 1000
 pile_up = np.genfromtxt(
@@ -91,7 +92,7 @@ def plot_detections(
     jet_axis,
     jet_no=0,
     filename="eta_phi",
-    base_dot_size=100,
+    base_radius_size=1,
     momentum_display_proportion=1.0,
     verbose=True,
 ) -> None:
@@ -128,15 +129,15 @@ def plot_detections(
     phi = to_phi(momenta[:, 0], momenta[:, 1])
 
     # Variable dot sizes, prop to pmag
-    dot_sizes = base_dot_size * (pmag / np.max(pmag))
+    radius_sizes = 0.1 * base_radius_size * (pmag / np.max(pmag))
 
     # Get colours from global cmap based on PDG IDs
     pdgid_values = jet_data[:, 1]
-    colours = [GLOBAL_CMAP.get(pid, "black") for pid in pdgid_values]
+    colours = [GLOBAL_CMAP.get(abs(pid), "black") for pid in pdgid_values]
 
     fig, ax = plt.subplots(figsize=(8, 6))
     ax.set_title(
-        f"$\phi$ vs $\eta$ of jet {jet_no}, prop={momentum_display_proportion}"
+        f"$\phi$ vs $\eta$ of jet {jet_no}, tot_num_parts={len(jet_data)}, mmtm_crop={momentum_display_proportion}"
     )
     ax.set_xlabel("$\eta$")
     ax.set_ylabel("$\phi$")
@@ -158,33 +159,54 @@ def plot_detections(
         cutoff_index = np.searchsorted(cumulative_momentum, target_momentum, side='right')
 
         # Delete unwanted particles from plotting data
+        pdgid_values = pdgid_values[sorted_indices][:cutoff_index]
         eta = eta[sorted_indices][:cutoff_index]
         phi = phi[sorted_indices][:cutoff_index]
         colours = [colours[i] for i in sorted_indices[:cutoff_index]]
-        dot_sizes = dot_sizes[sorted_indices[:cutoff_index]]
-        crop_dot_size_scale = 5  # make linewidths thicker for cropped plots, consider making this variable in future
-        dot_sizes *= crop_dot_size_scale
-        linewidths = 1
+        radius_sizes = radius_sizes[sorted_indices[:cutoff_index]]
+        radius_sizes *= 5  # Make larger radius for cropped plots, consider making this variable in future
+        linewidth = 1
     else:  # Show all particles
         cutoff_index = None
-        linewidths = 0.1
+        linewidth = 0.1
 
-    ax.scatter(eta, phi, color=colours, marker='o', facecolors="none", linewidths=linewidths, s=dot_sizes)
+    # Plot centres
+    # FIX THIS FOR CROPS
+    dot_sizes = radius_sizes*radius_sizes  # Dots sizes based on area so scale as square
+    ax.scatter(eta, phi, color=colours, marker='.', edgecolors='none', s=dot_sizes)
+
+    # Plot circles prop to width
+    for pdgid, e, p, color, radius in zip(pdgid_values, eta, phi, colours, radius_sizes):
+        linestyle = "-" if pdgid >= 0 else "--"
+        circle = Circle((e, p), radius=radius/100, edgecolor=color, facecolor='none', linewidth=linewidth, linestyle=linestyle)
+        ax.add_patch(circle)
 
     # Add legend for pdgid values and particle names
     # NB this will show all particles in the collision in the legend, even if cropped out (is desired behaviour)
     handles = []
-    detected_pdgids = set(pdgid_values)
-    for pid in unique_pdgids:
-        particle_name = PDG_IDS.get(pid, "Not in PDGID dict")
-        if pid not in detected_pdgids:
-            continue  # Remove particles not detected
-        handles.append(
-            Patch(
-                color=GLOBAL_CMAP[pid], label=f"PDG ID: {int(pid)}, \n{particle_name}"
-            )
-        )
+    pdgid_values = jet_data[:, 1]  # Reset toget all PDG IDs again, in case some lost from the crop
+    unique_detected_pdgids = sorted(set(pdgid_values))
+    unique_abs_detected_pdgids = sorted(set(abs(i) for i in pdgid_values))
 
+    # Arrange legend in ascending abs PDG IDs, with antiparts below if detected
+    for abs_pid in unique_abs_detected_pdgids:
+        colour = GLOBAL_CMAP[abs_pid]
+        if abs_pid in unique_detected_pdgids:
+            pid = abs_pid
+            particle_name = PDG_IDS.get(pid, "Not in PDGID dict")
+            handles.append( Patch(
+                label=f"PDG ID: {int(pid)}, \n{particle_name}",
+                color=colour
+            ) )
+        if -abs_pid in unique_detected_pdgids:
+            pid = -abs_pid
+            particle_name = PDG_IDS.get(pid, "Not in PDGID dict")
+            handles.append( Patch(
+                label=f"PDG ID: {int(pid)}, \n{particle_name}",
+                edgecolor=colour, facecolor="none"
+            ) )
+    
+    # Resize main plot and put legend to right
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
     ax.legend(handles=handles, loc="center left", bbox_to_anchor=(1, 0.5))
@@ -255,7 +277,7 @@ MU: int = 3
 MAX_EVENT_NUM = 999999
 chosen_pile_up = random_rows_from_csv(pile_up, MU)
 # for i in range(0,MU):
-jet_no = 1
+jet_no = 0
 data = np.concatenate((select_jet(tt, jet_no), chosen_pile_up), axis=0) 
 # print(jet_axis(data[:, 3:]))
 jet_centre = jet_axis(data)
@@ -265,7 +287,15 @@ plot_detections(
     data=tt,
     jet_no=jet_no,
     jet_axis = jet_centre,
-    filename=f"eta_phi_jet{jet_no}_cropped",
-    base_dot_size=1000,
+    filename=f"eta_phi_jet{jet_no}",
+    base_radius_size=10,
     momentum_display_proportion=1,
+)
+plot_detections(
+    data=tt,
+    jet_no=jet_no,
+    jet_axis = jet_centre,
+    filename=f"eta_phi_jet{jet_no}_cropped",
+    base_radius_size=1,
+    momentum_display_proportion=0.9,
 )
