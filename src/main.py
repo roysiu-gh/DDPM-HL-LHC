@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import random
 from matplotlib.colors import ListedColormap
-from matplotlib.patches import Patch
+from matplotlib.patches import Patch, Circle
 
 # ======= global matplotlib params =====
 plt.rcParams["text.usetex"] = False  # Use LaTeX for rendering text
@@ -91,7 +91,7 @@ def plot_detections(
     jet_axis,
     jet_no=0,
     filename="eta_phi",
-    base_dot_size=100,
+    base_radius_size=1,
     momentum_display_proportion=1.0,
     verbose=True,
 ) -> None:
@@ -128,7 +128,7 @@ def plot_detections(
     phi = to_phi(momenta[:, 0], momenta[:, 1])
 
     # Variable dot sizes, prop to pmag
-    dot_sizes = base_dot_size * (pmag / np.max(pmag))
+    radius_sizes = 0.1 * base_radius_size * (pmag / np.max(pmag))
 
     # Get colours from global cmap based on PDG IDs
     pdgid_values = jet_data[:, 1]
@@ -161,15 +161,22 @@ def plot_detections(
         eta = eta[sorted_indices][:cutoff_index]
         phi = phi[sorted_indices][:cutoff_index]
         colours = [colours[i] for i in sorted_indices[:cutoff_index]]
-        dot_sizes = dot_sizes[sorted_indices[:cutoff_index]]
-        crop_dot_size_scale = 5  # make linewidths thicker for cropped plots, consider making this variable in future
-        dot_sizes *= crop_dot_size_scale
+        radius_sizes = radius_sizes[sorted_indices[:cutoff_index]]
+        radius_sizes *= 5  # Make larger radius for cropped plots, consider making this variable in future
         linewidths = 1
     else:  # Show all particles
         cutoff_index = None
         linewidths = 0.1
 
-    ax.scatter(eta, phi, color=colours, marker='o', facecolors="none", linewidths=linewidths, s=dot_sizes)
+    # Plot centres
+    # FIX THIS FOR CROPS
+    dot_sizes = radius_sizes*radius_sizes  # Dots sizes based on area so scale as square
+    ax.scatter(eta, phi, color=colours, marker='.', edgecolors='none', s=dot_sizes)
+
+    # Plot circles prop to width
+    for e, p, color, size in zip(eta, phi, colours, radius_sizes):
+        circle = Circle((e, p), radius=size/100, edgecolor=color, facecolor='none', linewidth=linewidths)
+        ax.add_patch(circle)
 
     # Add legend for pdgid values and particle names
     # NB this will show all particles in the collision in the legend, even if cropped out (is desired behaviour)
@@ -255,7 +262,7 @@ MU: int = 3
 MAX_EVENT_NUM = 999999
 chosen_pile_up = random_rows_from_csv(pile_up, MU)
 # for i in range(0,MU):
-jet_no = 1
+jet_no = 0
 data = np.concatenate((select_jet(tt, jet_no), chosen_pile_up), axis=0) 
 # print(jet_axis(data[:, 3:]))
 jet_centre = jet_axis(data)
@@ -265,7 +272,15 @@ plot_detections(
     data=tt,
     jet_no=jet_no,
     jet_axis = jet_centre,
-    filename=f"eta_phi_jet{jet_no}_cropped",
-    base_dot_size=1000,
+    filename=f"eta_phi_jet{jet_no}",
+    base_radius_size=10,
     momentum_display_proportion=1,
+)
+plot_detections(
+    data=tt,
+    jet_no=jet_no,
+    jet_axis = jet_centre,
+    filename=f"eta_phi_jet{jet_no}_cropped",
+    base_radius_size=1,
+    momentum_display_proportion=0.9,
 )
