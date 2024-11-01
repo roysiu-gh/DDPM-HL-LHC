@@ -2,11 +2,12 @@
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+import seaborn as sb
 
 # Local imports
 from visualisation import plot_detections
 from data_loading import select_jet, random_rows_from_csv
-from calculate_quantities import pseudorapidity, to_phi
+from calculate_quantities import pseudorapidity, to_phi, p_magnitude
 
 # ======= global matplotlib params =====
 plt.rcParams["text.usetex"] = False  # Use LaTeX for rendering text
@@ -17,7 +18,7 @@ file_path = f"{CWD}/data/1-initial/pileup.csv"
 tt_path = f"{CWD}/data/1-initial/ttbar.csv"
 
 # === BEGIN Reading in Data ===
-MAX_DATA_ROWS = 1000
+MAX_DATA_ROWS = 100_000
 pile_up = np.genfromtxt(
     file_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
 )
@@ -78,29 +79,78 @@ def delta_R(jet_centre, jet_data, boundary=1.0):
     keep = jet_data[crit_R <= boundary]
     return keep
 
-# MU to define the number of random pileup events to take
-MU = 3
-MAX_EVENT_NUM = 999999
-chosen_pile_up = random_rows_from_csv(pile_up, MU)
-jet_no = 0
-data = np.concatenate((select_jet(tt, jet_no), chosen_pile_up), axis=0) 
-jet_centre = jet_axis(data)
+# # MU to define the number of random pileup events to take
+# MU = 3
+# MAX_EVENT_NUM = 999999
+# chosen_pile_up = random_rows_from_csv(pile_up, MU)
+# jet_no = 0
+# data = np.concatenate((select_jet(tt, jet_no), chosen_pile_up), axis=0) 
+# jet_centre = jet_axis(data)
 
-plot_data = select_jet(tt, jet_no)
+# plot_data = select_jet(tt, jet_no)
 
-plot_detections(
-    plot_data=plot_data,
-    centre = jet_centre,
-    filename=f"eta_phi_jet{jet_no}",
-    base_radius_size=10,
-    momentum_display_proportion=1,
-    cwd=CWD,
-)
-plot_detections(
-    plot_data=plot_data,
-    centre = jet_centre,
-    filename=f"eta_phi_jet{jet_no}_cropped",
-    base_radius_size=1,
-    momentum_display_proportion=0.9,
-    cwd=CWD,
-)
+# plot_detections(
+#     plot_data=plot_data,
+#     centre = jet_centre,
+#     filename=f"eta_phi_jet{jet_no}",
+#     base_radius_size=10,
+#     momentum_display_proportion=1,
+#     cwd=CWD,
+# )
+# plot_detections(
+#     plot_data=plot_data,
+#     centre = jet_centre,
+#     filename=f"eta_phi_jet{jet_no}_cropped",
+#     base_radius_size=1,
+#     momentum_display_proportion=0.9,
+#     cwd=CWD,
+# )
+
+
+
+# Set Seaborn theme for consistent styling
+sb.set_theme(style="whitegrid")
+
+# Calculate particle momentum magnitudes and pseudorapidity
+num = len(tt)
+p_mag = p_magnitude(tt[:, 3:])
+pz, p_x, p_y = tt[:, 5], tt[:, 3], tt[:, 4]
+eta = pseudorapidity(p_mag, pz)
+p_T = np.sqrt(p_x**2 + p_y**2)
+
+# Define the save path and plot characteristics
+save_path = f"{CWD}/data/plots/data_exploration/"
+plot_params = {
+    "bins": 500,
+    "color": "skyblue",
+    "edgecolor": "none",
+    "kde": True,
+    "stat": "density"  # Equivalent to `density=True` in plt.hist
+}
+
+# Histogram of momentum magnitudes (normalised)
+plt.figure(figsize=(10, 6))
+sb.histplot(p_mag, **plot_params)
+plt.title(f"Normalised Histogram of {num} Individual Particle Momentum Magnitudes")
+plt.xlabel("Momentum Magnitude")
+plt.ylabel("Frequency Density")
+plt.grid(axis="y", alpha=0.75)
+plt.savefig(f"{save_path}/p_mag.png", dpi=600)
+
+# Histogram of pseudorapidity (normalised)
+plt.figure(figsize=(10, 6))
+sb.histplot(eta, **plot_params)  # Adjust bins for eta
+plt.title(f"Normalised Histogram of {num} Individual Particle Pseudorapidity ($\eta$)")
+plt.xlabel("Pseudorapidity (η)")
+plt.ylabel("Frequency Density")
+plt.grid(axis="y", alpha=0.75)
+plt.savefig(f"{save_path}/eta.png", dpi=600)
+
+# Histogram of transverse momentum (p_T, normalised)
+plt.figure(figsize=(10, 6))
+sb.histplot(p_T, **plot_params)
+plt.title(f"Normalised Histogram of {num} Individual Particle Transverse Momentum ($p_T$)")
+plt.xlabel("Transverse Momentum (p_T)")
+plt.ylabel("Frequency Density")
+plt.grid(axis="y", alpha=0.75)
+plt.savefig(f"{save_path}/p_T.png", dpi=600)
