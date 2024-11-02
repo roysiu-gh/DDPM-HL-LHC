@@ -161,7 +161,7 @@ def plot_detections(
 
     plt.savefig(f"{cwd}/data/plots/test/{filename}.png", dpi=1000)
     plt.savefig(f"{cwd}/data/plots/test/{filename}.pdf",)
-
+    plt.close()
 
 def count_hist(
     plot_data,
@@ -207,3 +207,4 @@ def count_hist(
     )
     plt.savefig(f"{cwd}/data/plots/hist/{filename}_hist.png", dpi=600)
     plt.savefig(f"{cwd}/data/plots/hist/{filename}_hist.pdf",)
+    plt.close()
