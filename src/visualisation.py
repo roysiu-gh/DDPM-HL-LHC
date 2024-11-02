@@ -138,7 +138,7 @@ def plot_detections(
 
     # Arrange legend in ascending abs PDG IDs, with antiparts below if detected
     for abs_pid in unique_abs_detected_pdgids:
-        colour = GLOBAL_CMAP[abs_pid]
+        colour = GLOBAL_CMAP.get(abs_pid, "grey")
         if abs_pid in unique_detected_pdgids:
             pid = abs_pid
             particle_name = PDG_IDS.get(pid, "Not in PDGID dict")

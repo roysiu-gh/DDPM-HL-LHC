@@ -2,11 +2,12 @@
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+import seaborn as sb
 
 # Local imports
 from visualisation import plot_detections, count_hist
 from data_loading import select_jet, random_rows_from_csv
-from calculate_quantities import pseudorapidity, to_phi, p_magnitude
+from calculate_quantities import *
 
 # ======= global matplotlib params =====
 plt.rcParams["text.usetex"] = False  # Use LaTeX for rendering text
@@ -101,6 +102,116 @@ def merge_data(tt_data, pile_up_data):
 # Larger mu => more pileups sampled => noiser histogram
 MUs = [5, 10, 100, 1000, 5000]
 MAX_EVENT_NUM = 999999
+chosen_pile_up = random_rows_from_csv(pile_up, MU)
+jet_no = 0
+data = np.concatenate((select_jet(tt, jet_no), chosen_pile_up), axis=0) 
+jet_centre = jet_axis(data)
+
+#################################################################################
+
+plot_data = select_jet(tt, jet_no)
+
+plot_detections(
+    plot_data=plot_data,
+    centre = jet_centre,
+    filename=f"eta_phi_jet{jet_no}",
+    base_radius_size=10,
+    momentum_display_proportion=1,
+    cwd=CWD,
+)
+plot_detections(
+    plot_data=plot_data,
+    centre = jet_centre,
+    filename=f"eta_phi_jet{jet_no}_cropped",
+    base_radius_size=1,
+    momentum_display_proportion=0.9,
+    cwd=CWD,
+)
+
+#################################################################################
+
+# === 1D Histograms ===
+
+# Calculate particle momentum magnitudes and pseudorapidity
+num = len(tt)
+jet_ids = tt[:, 0]
+p_mag = p_magnitude(tt[:, 3:])
+pz, px, py = tt[:, 5], tt[:, 3], tt[:, 4]
+eta = pseudorapidity(p_mag, pz)
+p_T = np.sqrt(px**2 + py**2)
+
+jet_four_momenta = calculate_four_momentum_massless(jet_ids, px, py, pz)
+jet_p2 = contraction(jet_four_momenta)
+jet_masses = np.sqrt(jet_p2)
+
+# Kinda fun to print
+for jet_id in range(0, len(jet_four_momenta), 132):
+    four_mmtm = jet_four_momenta[jet_id]
+    p2 = jet_p2[jet_id]
+    print(f"Jet ID: {jet_id}, Total 4-Momenta: [{four_mmtm[0]:.3f}, {four_mmtm[1]:.3f}, {four_mmtm[2]:.3f}, {four_mmtm[3]:.3f}], Contraction p^2: {p2:.3f}")
+
+# Define the save path and plot characteristics
+save_path = f"{CWD}/data/plots/data_exploration/"
+plot_params = {
+    "bins": 500,
+    "color": "skyblue",
+    "edgecolor": "none",
+    "kde": True,
+    "stat": "density"  # Equivalent to `density=True` in plt.hist
+}
+
+print("Plotting histograms...")
+sb.set_theme(style="whitegrid")
+
+# Histogram of momentum magnitudes
+plt.figure(figsize=(10, 6))
+sb.histplot(p_mag, **plot_params)
+plt.title(f"Normalised Histogram of {num} Individual Particle Momentum Magnitudes")
+plt.xlabel("Momentum Magnitude")
+plt.ylabel("Frequency Density")
+plt.grid(axis="y", alpha=0.75)
+plt.savefig(f"{save_path}/p_mag.png", dpi=600)
+
+# Histogram of pseudorapidity
+plt.figure(figsize=(10, 6))
+sb.histplot(eta, **plot_params)  # Adjust bins for eta
+plt.title(f"Normalised Histogram of {num} Individual Particle Pseudorapidity ($\eta$)")
+plt.xlabel("Pseudorapidity (η)")
+plt.ylabel("Frequency Density")
+plt.grid(axis="y", alpha=0.75)
+plt.savefig(f"{save_path}/eta.png", dpi=600)
+
+# Histogram of transverse momentum
+plt.figure(figsize=(10, 6))
+sb.histplot(p_T, **plot_params)
+plt.title(f"Normalised Histogram of {num} Individual Particle Transverse Momentum ($p_T$)")
+plt.xlabel("Transverse Momentum (p_T)")
+plt.ylabel("Frequency Density")
+plt.grid(axis="y", alpha=0.75)
+plt.savefig(f"{save_path}/p_T.png", dpi=600)
+
+# Histogram of p^2
+plt.figure(figsize=(10, 6))
+sb.histplot(jet_p2, **plot_params)
+plt.title(f"Normalised Histogram of {len(jet_p2)} Jet ($p^2$)")
+plt.xlabel("p2")
+plt.ylabel("Frequency Density")
+plt.grid(axis="y", alpha=0.75)
+plt.savefig(f"{save_path}/jet_p2.png", dpi=600)
+
+
+# Histogram of p^2
+plt.figure(figsize=(10, 6))
+sb.histplot(jet_masses, **plot_params)
+plt.title(f"Normalised Histogram of {len(jet_p2)} Jet Mass")
+plt.xlabel("Mass")
+plt.ylabel("Frequency Density")
+plt.grid(axis="y", alpha=0.75)
+plt.savefig(f"{save_path}/jet_mass.png", dpi=600)
+
+
+
+# === 2D Histograms ===
 BINS = (10,10)
 jet_no = 493
  
