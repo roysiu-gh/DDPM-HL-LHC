@@ -204,3 +204,48 @@ def count_hist(
     plt.savefig(f"{cwd}/data/hist/{filename}_hist.png", dpi=600)
     plt.savefig(f"{cwd}/data/hist/{filename}_hist.pdf",)
     plt.close()
+
+def energy_hist(
+    eta,
+    phi,
+    energies,
+    jet_no,
+    bins=(10,10),
+    filename="eta_phi",
+    cwd=".",
+) -> None:
+    """
+    Plots a 2D histogram of particle counts (colour map) against eta and phi bins.
+
+    Parameters
+    ----------
+    eta: ndarray
+        1D dataset containing particle etas
+    phi: ndarray
+        1D dataset containing particle phis
+    energies: ndarray
+        1D dataset containing particle energies (to use for histogram)
+    jet_no: int,
+        Select jet to plot (only useful for the title)
+    bins: (int, int)
+        Number of (eta,phi) bins to use. Default: (10,10).
+    filename: str
+        The name to save the file as (PNG & PDF)
+
+    Returns
+    ---------
+    None
+    """
+    plt.figure(figsize=(8, 6))
+    plt.hist2d(eta, phi, bins=bins, weights=energies, cmap='Greys',)
+
+    # Customizing the plot
+    plt.colorbar(label='Energies')  # Colorbar to show counts
+    plt.xlabel(r'$\eta$')
+    plt.ylabel(r'$\phi$')
+    plt.title(
+        f"$\phi$ vs $\eta$ of jet {jet_no}, tot_num_parts={len(eta)}, bins={bins}"
+    )
+    plt.savefig(f"{cwd}/data/hist/{filename}_energies.png", dpi=600)
+    plt.savefig(f"{cwd}/data/hist/{filename}_energies.pdf",)
+    plt.close()
