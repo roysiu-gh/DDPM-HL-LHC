@@ -40,7 +40,6 @@ def jet_axis(p):
         Location of jet axis in eta-phi space.
     """
     total_p = np.sum(p, axis=0)
-    # jet_mag = p_magnitude(total_p)
     jet_mag = np.linalg.norm(total_p)
     eta = pseudorapidity(jet_mag, total_p[2])
     phi = to_phi(total_p[0], total_p[1])
@@ -70,7 +69,6 @@ def delta_R(jet_centre, jet_data, boundary=1.0):
         1D dataset of particle phis, with particles whose \Delta R is greater than `boundary` removed.
     """
     # Calculate eta, phi of every particle in data
-    # jet_data = select_jet(data, jet_no)
     p_mag = p_magnitude(jet_data[:,3:])
     etas = pseudorapidity(p_mag, jet_data[:,5])
     phis = to_phi(jet_data[:,3], jet_data[:,4])
@@ -78,7 +76,6 @@ def delta_R(jet_centre, jet_data, boundary=1.0):
     delta_eta= (etas - jet_centre[0])
     delta_phi = (phis - jet_centre[1])
     crit_R = np.sqrt(delta_eta*delta_eta + delta_phi*delta_phi)
-    # print("critR: ", crit_R)
     bounded_data = jet_data[crit_R <= boundary]
     return bounded_data, etas[crit_R <= boundary], phis[crit_R <= boundary]
 
@@ -144,14 +141,8 @@ def generate_hist(tt_data, pile_up_data, jet_no, bins, mu) -> None:
     # print("centre", jet_centre)
 
     # Delta R is calculated relative to the jet centre, and over all particles including pile-up
-    masked_data, etas, phis = delta_R(jet_centre, data)
-    # Now used masked_data to calculate relevant etas and phis
-    # momenta = masked_data[:, 3:]
-    # pmag = p_magnitude(momenta)
-    # pz = masked_data[:, 5]
-    # eta = pseudorapidity(pmag, pz)
-    # phi = to_phi(momenta[:, 0], momenta[:, 1])
-
+    masked_data, etas, phis = delta_R(jet_centre, data
+                                      
     # Function appends "_hist" to the end
     count_hist(etas, phis, jet_no=jet_no,bins=bins, filename=f"eta_phi_jet{jet_no}_MU{mu}")
 

@@ -115,7 +115,7 @@ def plot_detections(
 
     # Plot centres
     # FIX THIS FOR CROPS
-    dot_sizes = radius_sizes*radius_sizes  # Dots sizes based on area so scale as square
+    # dot_sizes = radius_sizes*radius_sizes  # Dots sizes based on area so scale as square
     ax.scatter(eta, phi, color=colours, marker='.', edgecolors='none', s=0)
 
     # Plot circles prop to width
@@ -124,11 +124,11 @@ def plot_detections(
         circle = Circle((e, p), radius=radius/100, edgecolor=color, facecolor='none', linewidth=linewidth, linestyle=linestyle, fill=False)
         ax.add_patch(circle)
     
-    # To  plot the jet centre without it being broken, need to duplicate axes since otherwise it breaks the previous circle code.
-    # ax2 = ax.twinx().twiny()
+    # Add circle to visualise boundary and jet centre
     ax.plot(centre[0], centre[1], marker="o", color="blue")
     boundary_circle = plt.Circle(centre, 1.0, fill=False)
     ax.add_patch(boundary_circle)
+
     # Add legend for pdgid values and particle names
     # NB this will show all particles in the collision in the legend, even if cropped out (is desired behaviour)
     handles = []
