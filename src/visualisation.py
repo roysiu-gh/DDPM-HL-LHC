@@ -115,14 +115,19 @@ def plot_detections(
 
     # Plot centres
     # FIX THIS FOR CROPS
-    dot_sizes = radius_sizes*radius_sizes  # Dots sizes based on area so scale as square
-    ax.scatter(eta, phi, color=colours, marker='.', edgecolors='none', s=dot_sizes)
+    # dot_sizes = radius_sizes*radius_sizes  # Dots sizes based on area so scale as square
+    ax.scatter(eta, phi, color=colours, marker='.', edgecolors='none', s=0)
 
     # Plot circles prop to width
     for pdgid, e, p, color, radius in zip(pdgid_values, eta, phi, colours, radius_sizes):
         linestyle = "-" if pdgid >= 0 else "--"
-        circle = Circle((e, p), radius=radius/100, edgecolor=color, facecolor='none', linewidth=linewidth, linestyle=linestyle)
+        circle = Circle((e, p), radius=radius/100, edgecolor=color, facecolor='none', linewidth=linewidth, linestyle=linestyle, fill=False)
         ax.add_patch(circle)
+    
+    # Add circle to visualise boundary and jet centre
+    ax.plot(centre[0], centre[1], marker="o", color="blue")
+    boundary_circle = plt.Circle(centre, 1.0, fill=False)
+    ax.add_patch(boundary_circle)
 
     # Add legend for pdgid values and particle names
     # NB this will show all particles in the collision in the legend, even if cropped out (is desired behaviour)
@@ -155,3 +160,47 @@ def plot_detections(
     ax.legend(handles=handles, loc="center left", bbox_to_anchor=(1, 0.5))
 
     plt.savefig(f"{cwd}/data/plots/test/{filename}.png", dpi=1000)
+    plt.savefig(f"{cwd}/data/plots/test/{filename}.pdf",)
+    plt.close()
+
+def count_hist(
+    eta,
+    phi,
+    jet_no,
+    bins=(10,10),
+    filename="eta_phi",
+    cwd=".",
+) -> None:
+    """
+    Plots a 2D histogram of particle counts (colour map) against eta and phi bins.
+
+    Parameters
+    ----------
+    eta: ndarray
+        1D dataset containing particle etas
+    phi: ndarray
+        1D dataset containing particle phis
+    jet_no: int,
+        Select jet to plot (only useful for the title)
+    bins: (int, int)
+        Number of (eta,phi) bins to use. Default: (10,10).
+    filename: str
+        The name to save the file as (PNG & PDF)
+
+    Returns
+    ---------
+    None
+    """
+    plt.figure(figsize=(8, 6))
+    plt.hist2d(eta, phi, bins=bins, cmap='Greys')  # Use grayscale colormap
+
+    # Customizing the plot
+    plt.colorbar(label='Number of Particles')  # Colorbar to show counts
+    plt.xlabel(r'$\eta$')
+    plt.ylabel(r'$\phi$')
+    plt.title(
+        f"$\phi$ vs $\eta$ of jet {jet_no}, tot_num_parts={len(eta)}, bins={bins}"
+    )
+    plt.savefig(f"{cwd}/data/hist/{filename}_hist.png", dpi=600)
+    plt.savefig(f"{cwd}/data/hist/{filename}_hist.pdf",)
+    plt.close()
