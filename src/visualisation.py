@@ -166,7 +166,7 @@ def plot_detections(
 def count_hist(
     plot_data,
     jet_no,
-    bins=(50,50),
+    bins=(10,10),
     filename="eta_phi",
     cwd=".",
 ) -> None:
@@ -177,12 +177,16 @@ def count_hist(
     ----------
     plot_data: ndarray
         2D dataset containing particle information
+    jet_no: int,
+        Select jet to plot (only useful for the title)
     bins: (int, int)
-        Number of (eta,phi) bins to use. Default: (50,50).
+        Number of (eta,phi) bins to use. Default: (10,10).
     filename: str
         The name to save the file as (PNG & PDF)
+
     Returns
     ---------
+    None
     """
     plt.figure(figsize=(8, 6))
     momenta = plot_data[:, 3:]
@@ -201,8 +205,5 @@ def count_hist(
     plt.title(
         f"$\phi$ vs $\eta$ of jet {jet_no}, tot_num_parts={len(plot_data)}, bins={bins}"
     )
-    # plt.title('2D Histogram of Particle Distribution in $\eta-\phi$ Plane')
     plt.savefig(f"{cwd}/data/plots/test/{filename}_hist.png", dpi=600)
     plt.savefig(f"{cwd}/data/plots/test/{filename}_hist.pdf",)
-
-    # plt.show()
