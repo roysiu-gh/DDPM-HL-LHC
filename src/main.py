@@ -143,6 +143,11 @@ def generate_hist(tt_data, pile_up_data, jet_no, bins, mu) -> None:
     count_hist(masked_data, jet_no=jet_no,bins=bins, filename=f"eta_phi_jet{jet_no}_MU{MU}")
 
 
+# === EXAMPLE USAGE OF GENERATING IMAGES ===
+for MU in MUs:
+   generate_hist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BINS, mu=MU)
+# === END GENERATION ===
+
 # plot_detections(
 #     plot_data=masked_data,
 #     centre = jet_centre,

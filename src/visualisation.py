@@ -205,5 +205,5 @@ def count_hist(
     plt.title(
         f"$\phi$ vs $\eta$ of jet {jet_no}, tot_num_parts={len(plot_data)}, bins={bins}"
     )
-    plt.savefig(f"{cwd}/data/plots/test/{filename}_hist.png", dpi=600)
-    plt.savefig(f"{cwd}/data/plots/test/{filename}_hist.pdf",)
+    plt.savefig(f"{cwd}/data/plots/hist/{filename}_hist.png", dpi=600)
+    plt.savefig(f"{cwd}/data/plots/hist/{filename}_hist.pdf",)
