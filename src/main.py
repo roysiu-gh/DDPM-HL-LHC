@@ -79,34 +79,34 @@ def delta_R(jet_centre, jet_data, boundary=1.0):
     keep = jet_data[crit_R <= boundary]
     return keep
 
-# # MU to define the number of random pileup events to take
-# MU = 3
-# MAX_EVENT_NUM = 999999
-# chosen_pile_up = random_rows_from_csv(pile_up, MU)
-# jet_no = 0
-# data = np.concatenate((select_jet(tt, jet_no), chosen_pile_up), axis=0) 
-# jet_centre = jet_axis(data)
+# MU to define the number of random pileup events to take
+MU = 3
+MAX_EVENT_NUM = 999999
+chosen_pile_up = random_rows_from_csv(pile_up, MU)
+jet_no = 0
+data = np.concatenate((select_jet(tt, jet_no), chosen_pile_up), axis=0) 
+jet_centre = jet_axis(data)
 
 #################################################################################
 
-# plot_data = select_jet(tt, jet_no)
+plot_data = select_jet(tt, jet_no)
 
-# plot_detections(
-#     plot_data=plot_data,
-#     centre = jet_centre,
-#     filename=f"eta_phi_jet{jet_no}",
-#     base_radius_size=10,
-#     momentum_display_proportion=1,
-#     cwd=CWD,
-# )
-# plot_detections(
-#     plot_data=plot_data,
-#     centre = jet_centre,
-#     filename=f"eta_phi_jet{jet_no}_cropped",
-#     base_radius_size=1,
-#     momentum_display_proportion=0.9,
-#     cwd=CWD,
-# )
+plot_detections(
+    plot_data=plot_data,
+    centre = jet_centre,
+    filename=f"eta_phi_jet{jet_no}",
+    base_radius_size=10,
+    momentum_display_proportion=1,
+    cwd=CWD,
+)
+plot_detections(
+    plot_data=plot_data,
+    centre = jet_centre,
+    filename=f"eta_phi_jet{jet_no}_cropped",
+    base_radius_size=1,
+    momentum_display_proportion=0.9,
+    cwd=CWD,
+)
 
 #################################################################################
 
