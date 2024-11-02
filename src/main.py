@@ -64,6 +64,10 @@ def delta_R(jet_centre, jet_data, boundary=1.0):
     ----------
     bounded_data: ndarray
         2D dataset of particle information, with particles whose \Delta R is greater than `boundary` removed.
+    etas: ndarray
+        1D dataset of particle etas, with particles whose \Delta R is greater than `boundary` removed.
+    phis: ndarray
+        1D dataset of particle phis, with particles whose \Delta R is greater than `boundary` removed.
     """
     # Calculate eta, phi of every particle in data
     # jet_data = select_jet(data, jet_no)
@@ -75,8 +79,8 @@ def delta_R(jet_centre, jet_data, boundary=1.0):
     delta_phi = (phis - jet_centre[1])
     crit_R = np.sqrt(delta_eta*delta_eta + delta_phi*delta_phi)
     # print("critR: ", crit_R)
-    keep = jet_data[crit_R <= boundary]
-    return keep
+    bounded_data = jet_data[crit_R <= boundary]
+    return bounded_data, etas[crit_R <= boundary], phis[crit_R <= boundary]
 
 
 def merge_data(tt_data, pile_up_data):
@@ -102,6 +106,7 @@ MUs = [5, 10, 100, 1000, 5000]
 MAX_EVENT_NUM = 999999
 BINS = (10,10)
 jet_no = 493
+ 
 def generate_hist(tt_data, pile_up_data, jet_no, bins, mu) -> None:
     """
     This functions wraps all routines needed to generate a 2D histogram of particle counts.
@@ -137,15 +142,26 @@ def generate_hist(tt_data, pile_up_data, jet_no, bins, mu) -> None:
     # All columns are passed in, so make sure to select last 3 columns for the 3-momenta
     jet_centre = jet_axis(plot_data[:,3:])
     # print("centre", jet_centre)
+
     # Delta R is calculated relative to the jet centre, and over all particles including pile-up
-    masked_data = delta_R(jet_centre, data)
+    masked_data, etas, phis = delta_R(jet_centre, data)
+    # Now used masked_data to calculate relevant etas and phis
+    # momenta = masked_data[:, 3:]
+    # pmag = p_magnitude(momenta)
+    # pz = masked_data[:, 5]
+    # eta = pseudorapidity(pmag, pz)
+    # phi = to_phi(momenta[:, 0], momenta[:, 1])
+
     # Function appends "_hist" to the end
-    count_hist(masked_data, jet_no=jet_no,bins=bins, filename=f"eta_phi_jet{jet_no}_MU{MU}")
+    count_hist(etas, phis, jet_no=jet_no,bins=bins, filename=f"eta_phi_jet{jet_no}_MU{mu}")
 
 
 # === EXAMPLE USAGE OF GENERATING IMAGES ===
-for MU in MUs:
-   generate_hist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BINS, mu=MU)
+generate_hist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BINS, mu=1000)
+
+# Example looping over MU, which we will probably use
+# for MU in MUs:
+#    generate_hist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BINS, mu=MU)
 # === END GENERATION ===
 
 # plot_detections(

@@ -164,7 +164,8 @@ def plot_detections(
     plt.close()
 
 def count_hist(
-    plot_data,
+    eta,
+    phi,
     jet_no,
     bins=(10,10),
     filename="eta_phi",
@@ -175,8 +176,10 @@ def count_hist(
 
     Parameters
     ----------
-    plot_data: ndarray
-        2D dataset containing particle information
+    eta: ndarray
+        1D dataset containing particle etas
+    phi: ndarray
+        1D dataset containing particle phis
     jet_no: int,
         Select jet to plot (only useful for the title)
     bins: (int, int)
@@ -189,13 +192,6 @@ def count_hist(
     None
     """
     plt.figure(figsize=(8, 6))
-    momenta = plot_data[:, 3:]
-    pmag = p_magnitude(momenta)
-    # if verbose:
-    #     print("Constituent momenta magnitudes:\n", pmag)
-    pz = plot_data[:, 5]
-    eta = pseudorapidity(pmag, pz)
-    phi = to_phi(momenta[:, 0], momenta[:, 1])
     plt.hist2d(eta, phi, bins=bins, cmap='Greys')  # Use grayscale colormap
 
     # Customizing the plot
@@ -203,8 +199,8 @@ def count_hist(
     plt.xlabel(r'$\eta$')
     plt.ylabel(r'$\phi$')
     plt.title(
-        f"$\phi$ vs $\eta$ of jet {jet_no}, tot_num_parts={len(plot_data)}, bins={bins}"
+        f"$\phi$ vs $\eta$ of jet {jet_no}, tot_num_parts={len(eta)}, bins={bins}"
     )
-    plt.savefig(f"{cwd}/data/plots/hist/{filename}_hist.png", dpi=600)
-    plt.savefig(f"{cwd}/data/plots/hist/{filename}_hist.pdf",)
+    plt.savefig(f"{cwd}/data/hist/{filename}_hist.png", dpi=600)
+    plt.savefig(f"{cwd}/data/hist/{filename}_hist.pdf",)
     plt.close()
