@@ -246,7 +246,7 @@ energy_norm_denom = (energy_max - energy_min)
 
 
 # === 2D Histograms ===
-BINS = (10,10)
+BINS = (16,16)
 jet_no = 493
  
 def generate_hist(tt_data, pile_up_data, jet_no, bins, mu, hist_plot="energy", energies = None) -> None:
@@ -261,7 +261,7 @@ def generate_hist(tt_data, pile_up_data, jet_no, bins, mu, hist_plot="energy", e
     3. Calculate the jet centre using the jet data
     4. Merge the data together
     5. Mask the data using delta_R condition
-    6. Plot the histogram using `count_hist` and saves it as png and pdf (vectorised and smaller filesize)
+    6. Plot the histogram using `count_hist/energy_hist` and saves it as png and pdf (vectorised and smaller filesize)
 
     Parameters
     ----------
@@ -287,10 +287,11 @@ def generate_hist(tt_data, pile_up_data, jet_no, bins, mu, hist_plot="energy", e
 
     # Delta R is calculated relative to the jet centre, and over all particles including pile-up
     masked_data, etas, phis = delta_R(jet_centre, data)
+    # print(len(etas) == len(phis))
     masked_energies = np.sqrt(masked_data[:,3]*masked_data[:,3] + masked_data[:,4]*masked_data[:,4]+masked_data[:,5]*masked_data[:,5])
     # energy_normed = normalize_data(energies, energy_norm_factor)
     energy_normed = (masked_energies - energy_min) / energy_norm_denom
-    print(energy_normed)
+    # print(energy_normed)
     # Function appends "_hist" to the end
     if hist_plot == "count":
         count_hist(etas, phis, jet_no=jet_no,bins=bins, filename=f"eta_phi_jet{jet_no}_MU{mu}")
@@ -298,10 +299,26 @@ def generate_hist(tt_data, pile_up_data, jet_no, bins, mu, hist_plot="energy", e
         energy_hist(etas, phis, jet_no=jet_no,bins=bins, energies=energy_normed, filename=f"eta_phi_jet{jet_no}_MU{mu}")
     else:
         raise ValueError("Error: hist_plot was not 'count' or 'energy'.\n")
+    
 # === EXAMPLE USAGE OF GENERATING IMAGES ===
-generate_hist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BINS, mu=10000)
-generate_hist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BINS, mu=10000, hist_plot="count")
-
+BINS = [(8,8), (16,16),(32,32), (64,64)]
+for bin in BINS:
+    generate_hist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=bin, mu=10000)
+    generate_hist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=bin, mu=10000, hist_plot="count")
+#  Use new visualisaton to just distinguish pile up and jet
+# tt_jet = select_jet(tt, 493, max_data_rows=MAX_DATA_ROWS)
+# plot_detections(
+#         tt_bar=delta_R(jet_axis(tt_jet[:,3:]), tt_jet)[0],
+#         pile_ups=delta_R(jet_axis(tt_jet[:,3:]), random_rows_from_csv(pile_up, 300))[0],
+#         centre = jet_axis(tt_jet[:,3:]),
+#         filename=f"eta_phi_jet{jet_no}_valid",
+#         base_radius_size=100,
+#         jet_no=493,
+#         momentum_display_proportion=1,
+#         cwd=CWD,
+#     )
+# print("lol", delta_R(jet_axis(tt_jet[:,3:]), random_rows_from_csv(pile_up, 300))[0])
+# print("tt", delta_R(jet_axis(tt_jet[:,3:]), tt_jet)[0],)
 # Example looping over MU, which we will probably use
 # for MU in MUs:
 #    generate_hist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BINS, mu=MU)
