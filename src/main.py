@@ -14,16 +14,16 @@ plt.rcParams["text.usetex"] = False  # Use LaTeX for rendering text
 plt.rcParams["font.size"] = 12  # Set default font size (optional)
 
 CWD = os.getcwd()
-file_path = f"{CWD}/data/1-initial/pileup.csv"
+pileup_path = f"{CWD}/data/1-initial/pileup.csv"
 tt_path = f"{CWD}/data/1-initial/ttbar.csv"
 
 # === BEGIN Reading in Data ===
-MAX_DATA_ROWS = 3_000_000
+MAX_DATA_ROWS = None
 pile_up = np.genfromtxt(
-    file_path, delimiter=",", encoding="utf-8", skip_header=1,
+    pileup_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
 )
 tt = np.genfromtxt(
-    tt_path, delimiter=",", encoding="utf-8", skip_header=1,
+    tt_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
 )
 
 
@@ -65,10 +65,6 @@ def normalize_data(data, norm):
     # Normalize the data
     normalized_data = data / norm
     return normalized_data
-
-
-
-
 
 def jet_axis(p):
     """
@@ -154,96 +150,6 @@ jet_no = 493
 # )
 
 #################################################################################
-
-# === 1D Histograms ===
-
-# Calculate particle momentum magnitudes and pseudorapidity
-# First
-num = len(tt)
-jet_ids = tt[:, 0]
-p_mag = p_magnitude(tt[:, 3:])
-pz, px, py = tt[:, 5], tt[:, 3], tt[:, 4]
-eta = pseudorapidity(p_mag, pz)
-p_T = np.sqrt(px**2 + py**2)
-# === BEGIN Calculating energy normalisation factor  ===
-# Massless limit, E^2 = p^2
-energies = np.sqrt(combined_data[:,3]*combined_data[:,3] + combined_data[:,4]*combined_data[:,4]+combined_data[:,5]*combined_data[:,5])
-energy_min = np.min(energies)
-energy_max = np.max(energies)
-energy_norm_denom = (energy_max - energy_min)
-# energy_norm_factor = l2_norm(energies)
-# print(energy_norm_factor)
-
-# jet_four_momenta = calculate_four_momentum_massless(jet_ids, px, py, pz)
-# jet_p2 = contraction(jet_four_momenta)
-# jet_masses = np.sqrt(jet_p2)
-
-# # Kinda fun to print
-# # for jet_id in range(0, len(jet_four_momenta), 132):
-# #     four_mmtm = jet_four_momenta[jet_id]
-# #     p2 = jet_p2[jet_id]
-# #     print(f"Jet ID: {jet_id}, Total 4-Momenta: [{four_mmtm[0]:.3f}, {four_mmtm[1]:.3f}, {four_mmtm[2]:.3f}, {four_mmtm[3]:.3f}], Contraction p^2: {p2:.3f}")
-
-# # Define the save path and plot characteristics
-# save_path = f"{CWD}/data/plots/data_exploration/"
-# plot_params = {
-#     "bins": 500,
-#     "color": "skyblue",
-#     "edgecolor": "none",
-#     "kde": True,
-#     "stat": "density"  # Equivalent to `density=True` in plt.hist
-# }
-
-# print("Plotting histograms...")
-# sb.set_theme(style="whitegrid")
-
-# # Histogram of momentum magnitudes
-# plt.figure(figsize=(10, 6))
-# sb.histplot(p_mag, **plot_params)
-# plt.title(f"Normalised Histogram of {num} Individual Particle Momentum Magnitudes")
-# plt.xlabel("Momentum Magnitude")
-# plt.ylabel("Frequency Density")
-# plt.grid(axis="y", alpha=0.75)
-# plt.savefig(f"{save_path}/p_mag.png", dpi=600)
-
-# # Histogram of pseudorapidity
-# plt.figure(figsize=(10, 6))
-# sb.histplot(eta, **plot_params)  # Adjust bins for eta
-# plt.title(f"Normalised Histogram of {num} Individual Particle Pseudorapidity ($\eta$)")
-# plt.xlabel("Pseudorapidity (η)")
-# plt.ylabel("Frequency Density")
-# plt.grid(axis="y", alpha=0.75)
-# plt.savefig(f"{save_path}/eta.png", dpi=600)
-
-# # Histogram of transverse momentum
-# plt.figure(figsize=(10, 6))
-# sb.histplot(p_T, **plot_params)
-# plt.title(f"Normalised Histogram of {num} Individual Particle Transverse Momentum ($p_T$)")
-# plt.xlabel("Transverse Momentum (p_T)")
-# plt.ylabel("Frequency Density")
-# plt.grid(axis="y", alpha=0.75)
-# plt.savefig(f"{save_path}/p_T.png", dpi=600)
-
-# # Histogram of p^2
-# plt.figure(figsize=(10, 6))
-# sb.histplot(jet_p2, **plot_params)
-# plt.title(f"Normalised Histogram of {len(jet_p2)} Jet ($p^2$)")
-# plt.xlabel("p2")
-# plt.ylabel("Frequency Density")
-# plt.grid(axis="y", alpha=0.75)
-# plt.savefig(f"{save_path}/jet_p2.png", dpi=600)
-
-
-# # Histogram of p^2
-# plt.figure(figsize=(10, 6))
-# sb.histplot(jet_masses, **plot_params)
-# plt.title(f"Normalised Histogram of {len(jet_p2)} Jet Mass")
-# plt.xlabel("Mass")
-# plt.ylabel("Frequency Density")
-# plt.grid(axis="y", alpha=0.75)
-# plt.savefig(f"{save_path}/jet_mass.png", dpi=600)
-
-
 
 # === 2D Histograms ===
 BINS = (16,16)

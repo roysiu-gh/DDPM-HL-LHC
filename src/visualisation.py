@@ -179,7 +179,7 @@ def plot_detections(
             circle = Circle((e, p), radius=radius/100, edgecolor="blue", facecolor='none', linewidth=linewidth, fill=False)
             ax.add_patch(circle)
 
-    plt.savefig(f"{cwd}/data/plots/test/{filename}.png", dpi=1000)
+    # plt.savefig(f"{cwd}/data/plots/test/{filename}.png", dpi=1000)
     plt.savefig(f"{cwd}/data/plots/test/{filename}.pdf",)
     plt.close()
 
