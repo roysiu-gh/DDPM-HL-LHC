@@ -60,7 +60,7 @@ def normalize_data(data, norm):
     
     # Avoid division by zero
     if norm == 0:
-        return data  # Return the original data if norm is zero
+        raise ValueError("Norm is zero.")
 
     # Normalize the data
     normalized_data = data / norm
@@ -150,6 +150,13 @@ jet_no = 493
 # )
 
 #################################################################################
+
+# === BEGIN Calculating energy normalisation factor  ===
+# Massless limit, E^2 = p^2
+energies = np.sqrt(combined_data[:,3]*combined_data[:,3] + combined_data[:,4]*combined_data[:,4]+combined_data[:,5]*combined_data[:,5])
+energy_min = np.min(energies)
+energy_max = np.max(energies)
+energy_norm_denom = (energy_max - energy_min)
 
 # === 2D Histograms ===
 BINS = (16,16)
