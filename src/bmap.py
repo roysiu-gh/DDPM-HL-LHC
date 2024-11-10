@@ -1,10 +1,11 @@
+# Import constants
+from config import *
+
+# Package imports
 import os
 import numpy as np
 from PIL import Image
 
-BMAP_SQUARE_SIDE_LENGTH = 16
-
-CWD = os.getcwd()
 SAVE_PATH = f"{CWD}/data/plots/bmaps/"
 
 def generate_random_points_in_unit_square(num_points=10):

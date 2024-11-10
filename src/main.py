@@ -1,3 +1,6 @@
+# Import constants
+from config import *
+
 # Package imports
 import numpy as np
 import os
@@ -6,19 +9,14 @@ import seaborn as sb
 
 # Local imports
 from visualisation import plot_detections, count_hist, energy_hist
-from data_loading import select_jet, random_rows_from_csv
+from data_loading import select_event, random_rows_from_csv
 from calculate_quantities import *
 
 # ======= global matplotlib params =====
 plt.rcParams["text.usetex"] = False  # Use LaTeX for rendering text
 plt.rcParams["font.size"] = 12  # Set default font size (optional)
 
-CWD = os.getcwd()
-pileup_path = f"{CWD}/data/1-initial/pileup.csv"
-tt_path = f"{CWD}/data/1-initial/ttbar.csv"
-
 # === BEGIN Reading in Data ===
-MAX_DATA_ROWS = None
 pile_up = np.genfromtxt(
     pileup_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
 )
@@ -125,12 +123,12 @@ MUs = [5, 10, 100, 1000, 5000]
 MAX_EVENT_NUM = 999999
 # chosen_pile_up = random_rows_from_csv(pile_up, MU)
 jet_no = 493
-# data = np.concatenate((select_jet(tt, jet_no), chosen_pile_up), axis=0) 
+# data = np.concatenate((select_event(tt, jet_no), chosen_pile_up), axis=0) 
 # jet_centre = jet_axis(data)
 
 #################################################################################
 
-# plot_data = select_jet(tt, jet_no)
+# plot_data = select_event(tt, jet_no)
 
 # plot_detections(
 #     plot_data=plot_data,
@@ -159,7 +157,7 @@ energy_max = np.max(energies)
 energy_norm_denom = (energy_max - energy_min)
 
 # === 2D Histograms ===
-BINS = (16,16)
+bins = (16,16)
 jet_no = 493
  
 def generate_hist(tt_data, pile_up_data, jet_no, bins, mu, hist_plot="energy", energies = None) -> None:
@@ -192,7 +190,7 @@ def generate_hist(tt_data, pile_up_data, jet_no, bins, mu, hist_plot="energy", e
     Returns: None
     """
     chosen_pile_up = random_rows_from_csv(pile_up_data, mu)
-    plot_data = select_jet(tt_data, jet_no, max_data_rows=MAX_DATA_ROWS)
+    plot_data = select_event(tt_data, jet_no, max_data_rows=MAX_DATA_ROWS)
     data = merge_data(plot_data, chosen_pile_up)
     # All columns are passed in, so make sure to select last 3 columns for the 3-momenta
     jet_centre = jet_axis(plot_data[:,3:])
@@ -214,12 +212,12 @@ def generate_hist(tt_data, pile_up_data, jet_no, bins, mu, hist_plot="energy", e
         raise ValueError("Error: hist_plot was not 'count' or 'energy'.\n")
     
 # === EXAMPLE USAGE OF GENERATING IMAGES ===
-BINS = [(8,8), (16,16),(32,32), (64,64)]
-for bin in BINS:
+bins = [(8,8), (16,16),(32,32), (64,64)]
+for bin in bins:
     generate_hist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=bin, mu=10000)
     generate_hist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=bin, mu=10000, hist_plot="count")
 #  Use new visualisaton to just distinguish pile up and jet
-# tt_jet = select_jet(tt, 493, max_data_rows=MAX_DATA_ROWS)
+# tt_jet = select_event(tt, 493, max_data_rows=MAX_DATA_ROWS)
 # plot_detections(
 #         tt_bar=delta_R(jet_axis(tt_jet[:,3:]), tt_jet)[0],
 #         pile_ups=delta_R(jet_axis(tt_jet[:,3:]), random_rows_from_csv(pile_up, 300))[0],
