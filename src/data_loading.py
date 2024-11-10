@@ -1,7 +1,10 @@
+# Import constants
+from config import *
+
 # Package imports
 import numpy as np
 
-def select_event(data, num, filter=False, max_data_rows=10_000):
+def select_event(data, num, filter=False, max_data_rows=MAX_DATA_ROWS):
     """Select data with IDs num from data file. Assumes IDs are in the first (index = 0) column."""
     if filter == False and (max_data_rows != None) and (max_data_rows <= num):
         raise ValueError(

@@ -1,8 +1,10 @@
 """1D Histograms"""
 
+# Import constants
+from config import *
+
 # Package imports
 import numpy as np
-import os
 import matplotlib.pyplot as plt
 import seaborn as sb
 
@@ -14,12 +16,7 @@ sb.set_theme(style="whitegrid")
 plt.rcParams["text.usetex"] = False  # Use LaTeX for rendering text
 plt.rcParams["font.size"] = 12  # Set default font size (optional)
 
-CWD = os.getcwd()
-pileup_path = f"{CWD}/data/1-initial/pileup.csv"
-tt_path = f"{CWD}/data/1-initial/ttbar.csv"
-
 # === BEGIN Reading in Data ===
-MAX_DATA_ROWS = None
 pile_up = np.genfromtxt(
     pileup_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
 )
@@ -48,7 +45,7 @@ for jet_id in range(0, len(jet_four_momenta), 132):
     print(f"Jet ID: {jet_id}, Total 4-Momenta: [{four_mmtm[0]:.3f}, {four_mmtm[1]:.3f}, {four_mmtm[2]:.3f}, {four_mmtm[3]:.3f}], Contraction p^2: {p2:.3f}")
 
 # Define the save path and plot characteristics
-save_path = f"{CWD}/data/plots/data_exploration/"
+save_path = f"{CWD}/data/plots/1D_histograms/"
 plot_params = {
     "bins": 50,
     "color": "skyblue",

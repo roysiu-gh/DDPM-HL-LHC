@@ -1,10 +1,14 @@
-import os
+# Import constants
+from config import *
+
+# Package imports
 import numpy as np
 from PIL import Image
 
-BMAP_SQUARE_SIDE_LENGTH = 16
+# Local imports
+from data_loading import select_event
+from calculate_quantities import COM_eta_phi, collection_crop_and_centre, unit_square_the_unit_circle, p_magnitude
 
-CWD = os.getcwd()
 SAVE_PATH = f"{CWD}/data/plots/bmaps/"
 
 def generate_random_points_in_unit_square(num_points=10):
@@ -13,40 +17,32 @@ def generate_random_points_in_unit_square(num_points=10):
     points = np.random.rand(num_points, 2)
     return energy, points
 
-energies, points = generate_random_points_in_unit_square(100)
+def discretise_points(x, y, N=BMAP_SQUARE_SIDE_LENGTH):
+    """Turn continuous points in the square [0,1]x[0,1] into discrete NxN grid."""
+    discrete_x = np.floor(x * N)
+    discrete_y = np.floor(y * N)
+    discrete_x = discrete_x.astype(int)
+    discrete_y = discrete_y.astype(int)
+    return discrete_x, discrete_y
 
-def scale_and_discretise(energies, points, N=BMAP_SQUARE_SIDE_LENGTH, verbose=False):
-    """Scales energies to 256 bits for printing to grayscale, up to a specifies std dev.
-    Discretises grid to integers of size NxN.
-    RENAME
-    Assumes non-negative input
-    Todo: consider doing a rectangle instead of just squares.
+def scale_energy_for_visual(energies, N=BMAP_SQUARE_SIDE_LENGTH, verbose=False):
+    """For the purpose of visualisation.
+    Scales energies to 256 bits for printing to grayscale, up to a specified std dev.
+    Assumes non-negative input.
     """
-    if verbose:
-        for e, p in zip(energies, points):
-            print(e, p)
-    
-    # Turn continuous points into discrete NxN grid
-    discrete_points = np.floor(points * N)
-
     # Calculate energy scale and scale values to 256
     SD = np.std(energies)
     scale = 256 / (3 * SD)  # Value above which we represent as full brightness (256)
     scaled_energies = np.floor(energies * scale)
     scaled_energies[scaled_energies > 256] = 256  # Maximise at 256
-
-    discrete_points = discrete_points.astype(int)
     scaled_energies = scaled_energies.astype(int)
+    return scaled_energies
 
-    return scaled_energies, discrete_points
-
-def convert_to_grid(energies, points, N=BMAP_SQUARE_SIDE_LENGTH, verbose=False):
+def convert_to_grid(energies, x, y, N=BMAP_SQUARE_SIDE_LENGTH, verbose=False):
 
     grid = np.zeros((N, N), dtype=np.uint8)  # Need np.uint8 for Image.fromarray()
 
-    for ene, point in zip(energies, points):
-        x_coord = point[0]
-        y_coord = point[1]
+    for ene, x_coord, y_coord in zip(energies, x, y):
         if verbose: print(f"Adding {ene} to x {x_coord} y {y_coord}")
         try:
             grid[x_coord, y_coord] += ene
@@ -55,18 +51,45 @@ def convert_to_grid(energies, points, N=BMAP_SQUARE_SIDE_LENGTH, verbose=False):
     
     return grid
 
-scaled_energies, discrete_points = scale_and_discretise(energies, points)
 
-# Some testing data
-# scaled_energies = np.array( [210, 50, 90, 188] )
-# discrete_points = np.array( [[0, 0], [3, 7], [3, 7], [4, 4]] )
+##########################################################################################
 
-for e, p in zip(scaled_energies, discrete_points):
-    print(e, p)
+tt = np.genfromtxt(
+    tt_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=1000
+)
 
-grid = convert_to_grid(scaled_energies, discrete_points)
+jet_no = 0
+
+jet0 = select_event(tt, jet_no)[:, 3:6]
+print(jet0)
+print(len(jet0))
+
+energies = p_magnitude(jet0)
+print("energies", energies)
+
+centre = COM_eta_phi(jet0)
+print("centre", centre)
+
+etas, phis = collection_crop_and_centre(jet0, centre, R=1)
+print("etas", etas)
+print("phis", phis)
+print(len(etas))
+print(len(phis))
+
+x, y = unit_square_the_unit_circle(etas, phis)
+
+print("x", x)
+print("y", y)
+
+def sigmoid(z):
+    return 1/(1 + np.exp(-z))
+
+scaled_energies = scale_energy_for_visual(energies)
+scaled_energies = scale_energy_for_visual(np.log(energies))
+scaled_x, scaled_y = discretise_points(x, y)
+grid = convert_to_grid(scaled_energies, scaled_x, scaled_y)
 
 print(grid)
 
 im = Image.fromarray(grid)
-im.save(f"{SAVE_PATH}/test.png")
+im.save(f"{SAVE_PATH}/jet0.png")
