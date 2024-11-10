@@ -13,32 +13,24 @@ def generate_random_points_in_unit_square(num_points=10):
     points = np.random.rand(num_points, 2)
     return energy, points
 
-energies, points = generate_random_points_in_unit_square(100)
-
-def scale_and_discretise(energies, points, N=BMAP_SQUARE_SIDE_LENGTH, verbose=False):
-    """Scales energies to 256 bits for printing to grayscale, up to a specifies std dev.
-    Discretises grid to integers of size NxN.
-    RENAME
-    Assumes non-negative input
-    Todo: consider doing a rectangle instead of just squares.
-    """
-    if verbose:
-        for e, p in zip(energies, points):
-            print(e, p)
-    
-    # Turn continuous points into discrete NxN grid
+def discretise_points(points, N=BMAP_SQUARE_SIDE_LENGTH):
+    """Turn continuous points into discrete NxN grid."""
     discrete_points = np.floor(points * N)
+    discrete_points = discrete_points.astype(int)
+    return discrete_points
 
+def scale_energy_for_visual(energies, N=BMAP_SQUARE_SIDE_LENGTH, verbose=False):
+    """For the purpose of visualisation.
+    Scales energies to 256 bits for printing to grayscale, up to a specified std dev.
+    Assumes non-negative input.
+    """
     # Calculate energy scale and scale values to 256
     SD = np.std(energies)
     scale = 256 / (3 * SD)  # Value above which we represent as full brightness (256)
     scaled_energies = np.floor(energies * scale)
     scaled_energies[scaled_energies > 256] = 256  # Maximise at 256
-
-    discrete_points = discrete_points.astype(int)
     scaled_energies = scaled_energies.astype(int)
-
-    return scaled_energies, discrete_points
+    return scaled_energies
 
 def convert_to_grid(energies, points, N=BMAP_SQUARE_SIDE_LENGTH, verbose=False):
 
@@ -55,15 +47,9 @@ def convert_to_grid(energies, points, N=BMAP_SQUARE_SIDE_LENGTH, verbose=False):
     
     return grid
 
-scaled_energies, discrete_points = scale_and_discretise(energies, points)
-
-# Some testing data
-# scaled_energies = np.array( [210, 50, 90, 188] )
-# discrete_points = np.array( [[0, 0], [3, 7], [3, 7], [4, 4]] )
-
-for e, p in zip(scaled_energies, discrete_points):
-    print(e, p)
-
+energies, points = generate_random_points_in_unit_square(100)
+scaled_energies = scale_energy_for_visual(energies)
+discrete_points = discretise_points(points)
 grid = convert_to_grid(scaled_energies, discrete_points)
 
 print(grid)
