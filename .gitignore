@@ -1,6 +1,7 @@
 # Custom
 data/1-initial/pileup.csv
 data/1-initial/ttbar.csv
+data/plots/bmaps/test_rand.png
 **/._*
 **/data/**/.*
 venv*

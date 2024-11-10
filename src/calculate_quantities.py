@@ -18,7 +18,7 @@ def pseudorapidity(p_mag, p_z):
     https://en.wikipedia.org/wiki/Pseudorapidity
     """
     if np.shape(p_mag) != np.shape(p_z):
-        raise ValueError("Error: p_mag shape not equal to p_z shape")
+        raise ValueError(f"Error: p_mag shape {np.shape(p_mag)} not equal to p_z shape {np.shape(p_z)}.")
     return np.arctanh(p_z / p_mag)
 
 
@@ -76,7 +76,7 @@ def COM_eta_phi(p):
     phi = to_phi(total_p[0], total_p[1])
     return eta, phi
 
-def delta_R(jet_centre, jet_data, boundary=1.0):
+def delta_R(centre, jet_data, boundary=1.0):
     """
     This function takes in particle information, and removes particles whose \Delta R(eta,phi) > 1.0 and returns all the others.
 
@@ -104,8 +104,35 @@ def delta_R(jet_centre, jet_data, boundary=1.0):
     etas = pseudorapidity(p_mag, jet_data[:,5])
     phis = to_phi(jet_data[:,3], jet_data[:,4])
     # Calculate the values of Delta R for each particle
-    delta_eta= (etas - jet_centre[0])
-    delta_phi = (phis - jet_centre[1])
+    delta_eta= (etas - centre[0])
+    delta_phi = (phis - centre[1])
     crit_R = np.sqrt(delta_eta*delta_eta + delta_phi*delta_phi)
-    bounded_data = jet_data[crit_R <= boundary]
-    return bounded_data, etas[crit_R <= boundary], phis[crit_R <= boundary]
+    bounded_momenta = jet_data[crit_R <= boundary]
+    return bounded_momenta, etas[crit_R <= boundary], phis[crit_R <= boundary]
+
+def collection_crop_and_centre(momenta, centre, R=1):
+    """Deletes particles outside of a critical radius (in eta-phi plane) of the collection COM.
+    
+    Take centre in tuple (eta, phi).
+    """
+    px, py, pz = momenta[:, 0], momenta[:, 1], momenta[:, 2]
+    centre_eta, centre_phi = centre[0], centre[1]
+
+    p_mag = p_magnitude(momenta)
+    etas = pseudorapidity(p_mag, pz)
+    phis = to_phi(px, py)
+
+    # Remove particles outside critical radius
+    etas_centred = (etas - centre[0])
+    phis_centred = (phis - centre[1])
+    # print(etas_centred)
+    radii = np.sqrt(etas_centred**2 + phis_centred**2)
+    return etas[radii <= R], phis[radii <= R]
+
+def unit_square_the_unit_circle(etas, phis):
+    """Squeezes unit circle (eta^2 + phi^2 = 1) into unit square [0,1]x[0,1]."""
+    etas /= 4
+    phis /= 4
+    etas += 0.5
+    phis += 0.5
+    return etas, phis

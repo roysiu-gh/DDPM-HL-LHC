@@ -2,9 +2,12 @@
 from config import *
 
 # Package imports
-import os
 import numpy as np
 from PIL import Image
+
+# Local imports
+from data_loading import select_event
+from calculate_quantities import COM_eta_phi, collection_crop_and_centre, unit_square_the_unit_circle, p_magnitude
 
 SAVE_PATH = f"{CWD}/data/plots/bmaps/"
 
@@ -14,11 +17,13 @@ def generate_random_points_in_unit_square(num_points=10):
     points = np.random.rand(num_points, 2)
     return energy, points
 
-def discretise_points(points, N=BMAP_SQUARE_SIDE_LENGTH):
+def discretise_points(x, y, N=BMAP_SQUARE_SIDE_LENGTH):
     """Turn continuous points in the square [0,1]x[0,1] into discrete NxN grid."""
-    discrete_points = np.floor(points * N)
-    discrete_points = discrete_points.astype(int)
-    return discrete_points
+    discrete_x = np.floor(x * N)
+    discrete_y = np.floor(y * N)
+    discrete_x = discrete_x.astype(int)
+    discrete_y = discrete_y.astype(int)
+    return discrete_x, discrete_y
 
 def scale_energy_for_visual(energies, N=BMAP_SQUARE_SIDE_LENGTH, verbose=False):
     """For the purpose of visualisation.
@@ -33,13 +38,11 @@ def scale_energy_for_visual(energies, N=BMAP_SQUARE_SIDE_LENGTH, verbose=False):
     scaled_energies = scaled_energies.astype(int)
     return scaled_energies
 
-def convert_to_grid(energies, points, N=BMAP_SQUARE_SIDE_LENGTH, verbose=False):
+def convert_to_grid(energies, x, y, N=BMAP_SQUARE_SIDE_LENGTH, verbose=False):
 
     grid = np.zeros((N, N), dtype=np.uint8)  # Need np.uint8 for Image.fromarray()
 
-    for ene, point in zip(energies, points):
-        x_coord = point[0]
-        y_coord = point[1]
+    for ene, x_coord, y_coord in zip(energies, x, y):
         if verbose: print(f"Adding {ene} to x {x_coord} y {y_coord}")
         try:
             grid[x_coord, y_coord] += ene
@@ -48,16 +51,45 @@ def convert_to_grid(energies, points, N=BMAP_SQUARE_SIDE_LENGTH, verbose=False):
     
     return grid
 
+
 ##########################################################################################
 
-energies, points = generate_random_points_in_unit_square(100)
+tt = np.genfromtxt(
+    tt_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=1000
+)
+
+jet_no = 0
+
+jet0 = select_event(tt, jet_no)[:, 3:6]
+print(jet0)
+print(len(jet0))
+
+energies = p_magnitude(jet0)
+print("energies", energies)
+
+centre = COM_eta_phi(jet0)
+print("centre", centre)
+
+etas, phis = collection_crop_and_centre(jet0, centre, R=1)
+print("etas", etas)
+print("phis", phis)
+print(len(etas))
+print(len(phis))
+
+x, y = unit_square_the_unit_circle(etas, phis)
+
+print("x", x)
+print("y", y)
+
+def sigmoid(z):
+    return 1/(1 + np.exp(-z))
+
 scaled_energies = scale_energy_for_visual(energies)
-discrete_points = discretise_points(points)
-grid = convert_to_grid(scaled_energies, discrete_points)
-
-
+scaled_energies = scale_energy_for_visual(np.log(energies))
+scaled_x, scaled_y = discretise_points(x, y)
+grid = convert_to_grid(scaled_energies, scaled_x, scaled_y)
 
 print(grid)
 
 im = Image.fromarray(grid)
-im.save(f"{SAVE_PATH}/test_rand.png")
+im.save(f"{SAVE_PATH}/jet0.png")
