@@ -64,59 +64,6 @@ def normalize_data(data, norm):
     normalized_data = data / norm
     return normalized_data
 
-def jet_axis(p):
-    """
-    Finds the jet axis of a given jet using the massless limit m/E \approx 0.
-
-    Parameters
-    ----------
-    p : ndarray
-        2D array of floats containing momenta of constituents of a jet.
-    Returns
-    ----------
-    eta,phi: float,float
-        Location of jet axis in eta-phi space.
-    """
-    total_p = np.sum(p, axis=0)
-    jet_mag = np.linalg.norm(total_p)
-    eta = pseudorapidity(jet_mag, total_p[2])
-    phi = to_phi(total_p[0], total_p[1])
-    return eta, phi
-
-def delta_R(jet_centre, jet_data, boundary=1.0):
-    """
-    This function takes in particle information, and removes particles whose \Delta R(eta,phi) > 1.0 and returns all the others.
-
-    Parameters
-    ----------
-    centre : tuple of (float,float)
-        The jet beam axis. 2-tuple in the form (eta,phi) used for calculating \Delta R
-    jet_no : int
-        Which jet to select from data
-    data: ndarray
-        2D dataset containing particle information.
-    boundary: float, default = 1.0
-        The maximum \Delta R for which particles with a larger value will be cut off.
-    Returns
-    ----------
-    bounded_data: ndarray
-        2D dataset of particle information, with particles whose \Delta R is greater than `boundary` removed.
-    etas: ndarray
-        1D dataset of particle etas, with particles whose \Delta R is greater than `boundary` removed.
-    phis: ndarray
-        1D dataset of particle phis, with particles whose \Delta R is greater than `boundary` removed.
-    """
-    # Calculate eta, phi of every particle in data
-    p_mag = p_magnitude(jet_data[:,3:])
-    etas = pseudorapidity(p_mag, jet_data[:,5])
-    phis = to_phi(jet_data[:,3], jet_data[:,4])
-    # Calculate the values of Delta R for each particle
-    delta_eta= (etas - jet_centre[0])
-    delta_phi = (phis - jet_centre[1])
-    crit_R = np.sqrt(delta_eta*delta_eta + delta_phi*delta_phi)
-    bounded_data = jet_data[crit_R <= boundary]
-    return bounded_data, etas[crit_R <= boundary], phis[crit_R <= boundary]
-
 # MUs to define the number of random pileup events to take.
 # Larger mu => more pileups sampled => noiser histogram
 MUs = [5, 10, 100, 1000, 5000]

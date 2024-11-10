@@ -55,3 +55,57 @@ def contraction(vec):
     space_like_2 = vec[:, 2]
     space_like_3 = vec[:, 3]
     return time_like_0**2 - (space_like_1**2 + space_like_2**2 + space_like_3**2)
+
+def COM_eta_phi(p):
+    """Find COM of a collection of particles.
+    Uses the massless limit (m << E).
+
+    Parameters
+    ----------
+    p : ndarray
+        2D array of floats containing particle momenta [px, py, pz].
+    
+    Returns
+    ----------
+    eta,phi: float,float
+        Location of jet axis in eta-phi space.
+    """
+    total_p = np.sum(p, axis=0)
+    jet_mag = np.linalg.norm(total_p)
+    eta = pseudorapidity(jet_mag, total_p[2])
+    phi = to_phi(total_p[0], total_p[1])
+    return eta, phi
+
+def delta_R(jet_centre, jet_data, boundary=1.0):
+    """
+    This function takes in particle information, and removes particles whose \Delta R(eta,phi) > 1.0 and returns all the others.
+
+    Parameters
+    ----------
+    centre : tuple of (float,float)
+        The jet beam axis. 2-tuple in the form (eta,phi) used for calculating \Delta R
+    jet_no : int
+        Which jet to select from data
+    data: ndarray
+        2D dataset containing particle information.
+    boundary: float, default = 1.0
+        The maximum \Delta R for which particles with a larger value will be cut off.
+    Returns
+    ----------
+    bounded_data: ndarray
+        2D dataset of particle information, with particles whose \Delta R is greater than `boundary` removed.
+    etas: ndarray
+        1D dataset of particle etas, with particles whose \Delta R is greater than `boundary` removed.
+    phis: ndarray
+        1D dataset of particle phis, with particles whose \Delta R is greater than `boundary` removed.
+    """
+    # Calculate eta, phi of every particle in data
+    p_mag = p_magnitude(jet_data[:,3:])
+    etas = pseudorapidity(p_mag, jet_data[:,5])
+    phis = to_phi(jet_data[:,3], jet_data[:,4])
+    # Calculate the values of Delta R for each particle
+    delta_eta= (etas - jet_centre[0])
+    delta_phi = (phis - jet_centre[1])
+    crit_R = np.sqrt(delta_eta*delta_eta + delta_phi*delta_phi)
+    bounded_data = jet_data[crit_R <= boundary]
+    return bounded_data, etas[crit_R <= boundary], phis[crit_R <= boundary]

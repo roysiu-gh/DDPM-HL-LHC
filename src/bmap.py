@@ -15,7 +15,7 @@ def generate_random_points_in_unit_square(num_points=10):
     return energy, points
 
 def discretise_points(points, N=BMAP_SQUARE_SIDE_LENGTH):
-    """Turn continuous points into discrete NxN grid."""
+    """Turn continuous points in the square [0,1]x[0,1] into discrete NxN grid."""
     discrete_points = np.floor(points * N)
     discrete_points = discrete_points.astype(int)
     return discrete_points
@@ -48,12 +48,16 @@ def convert_to_grid(energies, points, N=BMAP_SQUARE_SIDE_LENGTH, verbose=False):
     
     return grid
 
+##########################################################################################
+
 energies, points = generate_random_points_in_unit_square(100)
 scaled_energies = scale_energy_for_visual(energies)
 discrete_points = discretise_points(points)
 grid = convert_to_grid(scaled_energies, discrete_points)
 
+
+
 print(grid)
 
 im = Image.fromarray(grid)
-im.save(f"{SAVE_PATH}/test.png")
+im.save(f"{SAVE_PATH}/test_rand.png")
