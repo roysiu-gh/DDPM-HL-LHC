@@ -269,3 +269,60 @@ def energy_hist(
     plt.savefig(f"{cwd}/data/hist/{filename}_bins_{bins}_energies.png", dpi=600)
     plt.savefig(f"{cwd}/data/hist/{filename}_bins_{bins}_energies.pdf",)
     plt.close()
+
+def generate_2dhist(tt_data, pile_up_data, jet_no, bins, mu, hist_plot="energy", energies = None) -> None:
+    """
+    This functions wraps all routines needed to generate a 2D histogram of particle counts.
+
+    This allows looping over mu, the number of pile ups, which allows us to generate a sequence of noisier images.
+
+    Routine:
+    1. Extract random pile-up
+    2. Choose a jet number
+    3. Calculate the jet centre using the jet data
+    4. Merge the data together
+    5. Mask the data using delta_R condition
+    6. Plot the histogram using `count_hist/energy_hist` and saves it as png and pdf (vectorised and smaller filesize)
+
+    Parameters
+    ----------
+    tt_data: ndarray
+        2D array of particle information about t-tbar decays
+    pile_up_data: ndarray
+        2D array of pile up event information
+    jet_no: int,
+        Select jet to plot
+    bins: (int, int)
+        Number of bins to use for the 2D histogram plot (eta, phi)
+    mu: int,
+        Number of pile-up events to select
+
+    Returns: None
+    """
+    chosen_pile_up = select_event(pile_up_data, mu)
+    plot_data = select_event(tt_data, jet_no, max_data_rows=MAX_DATA_ROWS)
+    data = np.concatenate((plot_data, chosen_pile_up), axis=1) 
+    # All columns are passed in, so make sure to select last 3 columns for the 3-momenta
+    jet_centre = jet_axis(plot_data[:,3:])
+    # print("centre", jet_centre)
+
+    # Delta R is calculated relative to the jet centre, and over all particles including pile-up
+    masked_data, etas, phis = delta_R(jet_centre, data)
+    # print(len(etas) == len(phis))
+    masked_energies = np.sqrt(masked_data[:,3]*masked_data[:,3] + masked_data[:,4]*masked_data[:,4]+masked_data[:,5]*masked_data[:,5])
+    # energy_normed = normalize_data(energies, energy_norm_factor)
+    energies = np.sqrt(combined_data[:,3]*combined_data[:,3] + combined_data[:,4]*combined_data[:,4]+combined_data[:,5]*combined_data[:,5])
+    energy_min = np.min(energies)
+    energy_max = np.max(energies)
+    energy_norm_denom = (energy_max - energy_min)
+
+    energy_normed = (masked_energies - energy_min) / energy_norm_denom
+    # print(energy_normed)
+    # Function appends "_hist" to the end
+    if hist_plot == "count":
+        count_hist(etas, phis, jet_no=jet_no,bins=bins, filename=f"eta_phi_jet{jet_no}_MU{mu}")
+    elif hist_plot == "energy": 
+        energy_hist(etas, phis, jet_no=jet_no,bins=bins, energies=energy_normed, filename=f"eta_phi_jet{jet_no}_MU{mu}")
+    else:
+        raise ValueError("Error: hist_plot was not 'count' or 'energy'.\n")
+    
