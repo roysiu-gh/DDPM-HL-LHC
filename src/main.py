@@ -25,7 +25,7 @@ tt = np.genfromtxt(
 )
 
 # === Example Usage of foo_bar ===
-foo_bar([0,1], pile_up, 2)
+foo_bar([0,1], tt, pile_up, 2)
 
 #################################################################################
 
@@ -61,3 +61,27 @@ BINS = [(8,8), (16,16),(32,32), (64,64)]
 #  Use new visualisaton to just distinguish pile up and jet
 
 #====== END 2D HIST ====
+
+#################################################################################
+
+jet_no = 10
+plot_data = select_event(tt, jet_no)
+jet_centre = COM_eta_phi(plot_data[:,3:])
+mu = 3
+# event_IDS = np.random.choice(pile_up[:,0], size = mu).astype(int)
+event_IDS = np.array([1, 2, 3])
+selected_pile_ups = [select_event(pile_up, event_ID, filter=True) for event_ID in event_IDS]
+selected_pile_ups = np.vstack(selected_pile_ups)
+zero_p_mask = ~((selected_pile_ups[:, 3] == 0) & (selected_pile_ups[:, 4] == 0) & (selected_pile_ups[:, 5] == 0))
+selected_pile_ups = selected_pile_ups[zero_p_mask]
+
+plot_detections(
+    tt_bar=plot_data,
+    centre = jet_centre,
+    pile_ups=selected_pile_ups,
+    jet_no=jet_no,
+    filename=f"eta_phi_jet{jet_no}_noscreened_Mu={mu}",
+    base_radius_size=500,
+    momentum_display_proportion=1,
+    cwd=CWD,
+)
