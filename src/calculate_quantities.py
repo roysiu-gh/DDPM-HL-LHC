@@ -71,6 +71,7 @@ def COM_eta_phi(p):
         Location of jet axis in eta-phi space.
     """
     total_p = np.sum(p, axis=0)
+    print("total_p", total_p)
     jet_mag = np.linalg.norm(total_p)
     eta = pseudorapidity(jet_mag, total_p[2])
     phi = to_phi(total_p[0], total_p[1])
@@ -123,11 +124,11 @@ def collection_crop_and_centre(momenta, centre, R=1):
     phis = to_phi(px, py)
 
     # Remove particles outside critical radius
-    etas_centred = (etas - centre[0])
-    phis_centred = (phis - centre[1])
+    etas_centred = (etas - centre_eta)
+    phis_centred = (phis - centre_phi)
     # print(etas_centred)
     radii = np.sqrt(etas_centred**2 + phis_centred**2)
-    return etas[radii <= R], phis[radii <= R]
+    return etas_centred[radii <= R], phis_centred[radii <= R]
 
 def unit_square_the_unit_circle(etas, phis):
     """Squeezes unit circle (eta^2 + phi^2 = 1) into unit square [0,1]x[0,1]."""
