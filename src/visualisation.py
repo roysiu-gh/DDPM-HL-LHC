@@ -2,6 +2,9 @@
 Contains all plotting and visualisation tools. 
 """
 
+# Import constants
+from config import *
+
 # Package imports
 import numpy as np
 import matplotlib as mpl
@@ -10,7 +13,8 @@ from matplotlib.colors import ListedColormap
 from matplotlib.patches import Patch, Circle
 
 # Local imports
-from calculate_quantities import p_magnitude, pseudorapidity, to_phi
+from calculate_quantities import COM_eta_phi, delta_R, p_magnitude, pseudorapidity, to_phi
+from data_loading import select_event
 from process_data import wrap_phi
 
 PDG_IDS = {
@@ -305,26 +309,26 @@ def generate_2dhist(tt_data, pile_up_data, jet_no, bins, mu, hist_plot="energy",
     plot_data = select_event(tt_data, jet_no, max_data_rows=MAX_DATA_ROWS)
     data = np.concatenate((plot_data, chosen_pile_up), axis=1) 
     # All columns are passed in, so make sure to select last 3 columns for the 3-momenta
-    jet_centre = jet_axis(plot_data[:,3:])
+    jet_centre = COM_eta_phi(plot_data[:,3:])
     # print("centre", jet_centre)
 
     # Delta R is calculated relative to the jet centre, and over all particles including pile-up
     masked_data, etas, phis = delta_R(jet_centre, data)
     # print(len(etas) == len(phis))
-    masked_energies = np.sqrt(masked_data[:,3]*masked_data[:,3] + masked_data[:,4]*masked_data[:,4]+masked_data[:,5]*masked_data[:,5])
-    # energy_normed = normalize_data(energies, energy_norm_factor)
-    energies = np.sqrt(combined_data[:,3]*combined_data[:,3] + combined_data[:,4]*combined_data[:,4]+combined_data[:,5]*combined_data[:,5])
-    energy_min = np.min(energies)
-    energy_max = np.max(energies)
-    energy_norm_denom = (energy_max - energy_min)
+    # masked_energies = np.sqrt(masked_data[:,3]*masked_data[:,3] + masked_data[:,4]*masked_data[:,4]+masked_data[:,5]*masked_data[:,5])
+    # # energy_normed = normalize_data(energies, energy_norm_factor)
+    # energies = np.sqrt(combined_data[:,3]*combined_data[:,3] + combined_data[:,4]*combined_data[:,4]+combined_data[:,5]*combined_data[:,5])
+    # energy_min = np.min(energies)
+    # energy_max = np.max(energies)
+    # energy_norm_denom = (energy_max - energy_min)
 
-    energy_normed = (masked_energies - energy_min) / energy_norm_denom
+    # energy_normed = (masked_energies - energy_min) / energy_norm_denom
     # print(energy_normed)
     # Function appends "_hist" to the end
     if hist_plot == "count":
         count_hist(etas, phis, jet_no=jet_no,bins=bins, filename=f"eta_phi_jet{jet_no}_MU{mu}")
-    elif hist_plot == "energy": 
-        energy_hist(etas, phis, jet_no=jet_no,bins=bins, energies=energy_normed, filename=f"eta_phi_jet{jet_no}_MU{mu}")
+    # elif hist_plot == "energy": 
+    #     energy_hist(etas, phis, jet_no=jet_no,bins=bins, energies=energy_normed, filename=f"eta_phi_jet{jet_no}_MU{mu}")
     else:
         raise ValueError("Error: hist_plot was not 'count' or 'energy'.\n")
     
