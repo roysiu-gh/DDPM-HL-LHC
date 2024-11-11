@@ -7,7 +7,8 @@ from PIL import Image
 
 # Local imports
 from data_loading import select_event
-from calculate_quantities import COM_eta_phi, collection_crop_and_centre, unit_square_the_unit_circle, p_magnitude
+from calculate_quantities import COM_eta_phi, p_magnitude
+from process_data import collection_crop_and_centre, unit_square_the_unit_circle
 
 SAVE_PATH = f"{CWD}/data/plots/bmaps/"
 
