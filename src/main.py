@@ -80,7 +80,7 @@ plot_detections(
     centre = jet_centre,
     pile_ups=selected_pile_ups,
     jet_no=jet_no,
-    filename=f"eta_phi_jet{jet_no}_noscreened_Mu={mu}",
+    filename=f"eta_phi_jet{jet_no}_noscreened_Mu={mu}_wrapped",
     base_radius_size=500,
     momentum_display_proportion=1,
     cwd=CWD,

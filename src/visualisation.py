@@ -11,6 +11,7 @@ from matplotlib.patches import Patch, Circle
 
 # Local imports
 from calculate_quantities import p_magnitude, pseudorapidity, to_phi
+from process_data import wrap_phi
 
 PDG_IDS = {
     0: r"$\gamma$ (Photon)",
@@ -77,6 +78,7 @@ def plot_detections(
     pz = plot_data[:, 5]
     eta = pseudorapidity(pmag, pz)
     phi = to_phi(momenta[:, 0], momenta[:, 1])
+    phi = wrap_phi(centre[1], phi)
 
     # Variable dot sizes, prop to pmag
     radius_sizes = 0.1 * base_radius_size * (pmag / np.max(pmag))

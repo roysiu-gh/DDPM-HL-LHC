@@ -101,3 +101,16 @@ def foo_bar(jet_nos, tt_data, pile_up_data, mu: int):
     combined_array = np.vstack(combined_array)
     np.savetxt("data/combined.csv.gz", combined_array, delimiter=",", header="NID,LID,px,py,pz,eta,phi", comments="", fmt="%10.10f")
     return 0
+
+def wrap_phi(phi_centre, phis, R=1):
+    # If near top edge
+    if abs(phi_centre - np.pi) < R:
+        mask_for_bottom_half = phis < 0  # Only shift for particles below line phi=0
+        shifts = 2 * np.pi * mask_for_bottom_half
+        shifted_phis = phis + shifts
+    # If near bottom edge
+    if abs(phi_centre + np.pi) < R:
+        mask_for_top_half = phis > 0  # Only shift for particles above line phi=0
+        shifts = 2 * np.pi * mask_for_top_half
+        shifted_phis = phis - shifts
+    return shifted_phis
