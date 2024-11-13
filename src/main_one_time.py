@@ -5,6 +5,7 @@ from config import *
 
 # Package imports
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sb
 
@@ -47,28 +48,30 @@ for jet_id in range(0, len(jet_four_momenta), 132):
 # Define the save path and plot characteristics
 save_path = f"{CWD}/data/plots/1D_histograms/"
 plot_params = {
-    "bins": 50,
+    "bins": 500,
     "color": "skyblue",
     "edgecolor": "none",
-    "kde": True,
+    "kde": False,
     "stat": "density"  # Equivalent to `density=True` in plt.hist
 }
 
-def plot_1D_hist(name, data, is_jet=False, plot_params=plot_params, save_path=save_path, save_filename="out"):
+def plot_1D_hist(name, data, xscale="linear", is_jet=False, plot_params=plot_params, save_path=save_path, save_filename="out"):
     parjet = "Jets'" if is_jet else "Particles'"
     num = len(data)
     plt.figure(figsize=(10, 6))
     sb.histplot(p_mag, **plot_params)
     plt.title(f"Normalised Histogram of {num} {parjet} {name}")
     plt.xlabel(name)
+    plt.xscale(xscale)
+    # plt.yscale(xscale)
     plt.ylabel("Frequency Density")
     plt.grid(axis="y", alpha=0.75)
     plt.savefig(f"{save_path}/{save_filename}.png", dpi=600)
 
 print("Plotting histograms...")
-plot_1D_hist("Momentum Magnitudes",         p_mag,      save_filename="p_mag"                   )
-plot_1D_hist("Pseudorapidity ($\eta$)",     eta,        save_filename="p_mag"                   )
-plot_1D_hist("Transverse Momentum ($p_T$)", p_T,        save_filename="p_T"                     )
-plot_1D_hist("($p^2$)",                     jet_p2,     save_filename="jet_p2",     is_jet=True )
-plot_1D_hist("Mass",                        jet_mass,   save_filename="jet_mass",   is_jet=True )
+plot_1D_hist("Momentum Magnitudes (\si{\giga\electronvolt})",           p_mag,      save_filename="p_mag",                      xscale="log")
+plot_1D_hist("Pseudorapidity $\eta$",                                   eta,        save_filename="eta",                      xscale="linear")
+plot_1D_hist("Transverse Momentum $p_T$ (\si{\giga\electronvolt})",     p_T,        save_filename="p_T",                        xscale="log")
+plot_1D_hist("($p^2$) (\si{\giga\electronvolt}^2)",                     jet_p2,     save_filename="jet_p2",     is_jet=True,    xscale="log")
+plot_1D_hist("Mass (\si{\giga\electronvolt})",                          jet_mass,   save_filename="jet_mass",   is_jet=True,    xscale="log")
 print("Done.")
