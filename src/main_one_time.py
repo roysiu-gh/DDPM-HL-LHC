@@ -48,7 +48,7 @@ for jet_id in range(0, len(jet_four_momenta), 132):
 # Define the save path and plot characteristics
 save_path = f"{CWD}/data/plots/1D_histograms/"
 plot_params = {
-    "bins": 500,
+    "bins": 5000,
     "color": "skyblue",
     "edgecolor": "none",
     "kde": False,
@@ -72,6 +72,6 @@ print("Plotting histograms...")
 plot_1D_hist("Momentum Magnitudes (\si{\giga\electronvolt})",           p_mag,      save_filename="p_mag",                      xscale="log")
 plot_1D_hist("Pseudorapidity $\eta$",                                   eta,        save_filename="eta",                      xscale="linear")
 plot_1D_hist("Transverse Momentum $p_T$ (\si{\giga\electronvolt})",     p_T,        save_filename="p_T",                        xscale="log")
-plot_1D_hist("($p^2$) (\si{\giga\electronvolt}^2)",                     jet_p2,     save_filename="jet_p2",     is_jet=True,    xscale="log")
+plot_1D_hist("($p^2$) (\si{\giga\electronvolt^2})",                     jet_p2,     save_filename="jet_p2",     is_jet=True,    xscale="log")
 plot_1D_hist("Mass (\si{\giga\electronvolt})",                          jet_mass,   save_filename="jet_mass",   is_jet=True,    xscale="log")
 print("Done.")
