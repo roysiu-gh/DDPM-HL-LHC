@@ -55,23 +55,25 @@ plot_params = {
     "stat": "density"  # Equivalent to `density=True` in plt.hist
 }
 
-def plot_1D_hist(name, data, xscale="linear", is_jet=False, plot_params=plot_params, save_path=save_path, save_filename="out"):
+def plot_1D_hist(name, data, xlog=False, is_jet=False, plot_params=plot_params, save_path=save_path, save_filename="out"):
     parjet = "Jets'" if is_jet else "Particles'"
     num = len(data)
     plt.figure(figsize=(10, 6))
+    if xlog:
+        plt.xscale("log")
+        plot_params = plot_params.copy()
+        plot_params["bins"] = np.logspace(np.log10(0.1),np.log10(3.0), 50)
     sb.histplot(data, **plot_params)
     plt.title(f"Normalised Histogram of {num} {parjet} {name}")
     plt.xlabel(name)
-    plt.xscale(xscale)
-    # plt.yscale(xscale)
     plt.ylabel("Frequency Density")
     plt.grid(axis="y", alpha=0.75)
     plt.savefig(f"{save_path}/{save_filename}.png", dpi=600)
 
 print("Plotting histograms...")
-plot_1D_hist("Momentum Magnitudes (\si{\giga\electronvolt})",           p_mag,      save_filename="p_mag",                      xscale="log")
-plot_1D_hist("Pseudorapidity $\eta$",                                   eta,        save_filename="eta",                      xscale="linear")
-plot_1D_hist("Transverse Momentum $p_T$ (\si{\giga\electronvolt})",     p_T,        save_filename="p_T",                        xscale="log")
-plot_1D_hist("($p^2$) (\si{\giga\electronvolt^2})",                     jet_p2,     save_filename="jet_p2",     is_jet=True,    xscale="log")
-plot_1D_hist("Mass (\si{\giga\electronvolt})",                          jet_mass,   save_filename="jet_mass",   is_jet=True,    xscale="linear")
+plot_1D_hist("Momentum Magnitudes (\si{\giga\electronvolt})",           p_mag,      save_filename="p_mag",                      xlog=True)
+plot_1D_hist("Pseudorapidity $\eta$",                                   eta,        save_filename="eta",                      )
+plot_1D_hist("Transverse Momentum $p_T$ (\si{\giga\electronvolt})",     p_T,        save_filename="p_T",                        xlog=True)
+plot_1D_hist("($p^2$) (\si{\giga\electronvolt^2})",                     jet_p2,     save_filename="jet_p2",     is_jet=True,    xlog=True)
+plot_1D_hist("Mass (\si{\giga\electronvolt})",                          jet_mass,   save_filename="jet_mass",   is_jet=True,    )
 print("Done.")
