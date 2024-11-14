@@ -16,7 +16,7 @@ tt = np.genfromtxt(
     TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
 )
 
-jet_ids = tt[:, 0]
+jet_ids = tt[:, 0].astype(int)
 pxs, pys, pzs = tt[:, 3], tt[:, 4], tt[:, 5]
 
 # ===== Create Individual Particle Data ===== #
@@ -32,7 +32,7 @@ masses = np.sqrt(p2s)
 
 # Save to CSV
 combined_array = np.array([jet_ids, pxs, pys, pzs, etas, phis, pTs]).T
-np.savetxt(f"{save_path}/ttbar_extended.csv", combined_array, delimiter=",", header="jet_id, px, py, pz, eta, phi, p_T", comments="", fmt="%10.10f")
+np.savetxt(f"{save_path}/ttbar_extended.csv", combined_array, delimiter=",", header="jet_id, px, py, pz, eta, phi, p_T", comments="", fmt="%i, %10.10f,  %10.10f,  %10.10f,  %10.10f,  %10.10f,  %10.10f")
 
 
 # ===== Create Jet Data ===== #
@@ -53,4 +53,4 @@ for jet_id in range(0, len(jet_ids_unique), 1):
 
 # Save to CSV
 combined_array = np.array([jet_ids_unique, jet_pxs, jet_pys, jet_pzs, jet_etas, jet_phis, jet_masses, jet_pTs]).T
-np.savetxt(f"{save_path}/ttbar_jets.csv", combined_array, delimiter=",", header="jet_id, px, py, pz, eta, phi, mass, p_T", comments="", fmt="%10.10f")
+np.savetxt(f"{save_path}/ttbar_jets.csv", combined_array, delimiter=",", header="jet_id, px, py, pz, eta, phi, mass, p_T", comments="", fmt="%i, %10.10f,  %10.10f,  %10.10f,  %10.10f,  %10.10f,  %10.10f,  %10.10f")
