@@ -110,30 +110,3 @@ def delta_R(centre, jet_data, boundary=1.0):
     crit_R = np.sqrt(delta_eta*delta_eta + delta_phi*delta_phi)
     bounded_momenta = jet_data[crit_R <= boundary]
     return bounded_momenta, etas[crit_R <= boundary], phis[crit_R <= boundary]
-
-def collection_crop_and_centre(momenta, centre, R=1):
-    """Deletes particles outside of a critical radius (in eta-phi plane) of the collection COM.
-    
-    Take centre in tuple (eta, phi).
-    """
-    px, py, pz = momenta[:, 0], momenta[:, 1], momenta[:, 2]
-    centre_eta, centre_phi = centre[0], centre[1]
-
-    p_mag = p_magnitude(momenta)
-    etas = pseudorapidity(p_mag, pz)
-    phis = to_phi(px, py)
-
-    # Remove particles outside critical radius
-    etas_centred = (etas - centre_eta)
-    phis_centred = (phis - centre_phi)
-    # print(etas_centred)
-    radii = np.sqrt(etas_centred**2 + phis_centred**2)
-    return etas_centred[radii <= R], phis_centred[radii <= R]
-
-def unit_square_the_unit_circle(etas, phis):
-    """Squeezes unit circle (eta^2 + phi^2 = 1) into unit square [0,1]x[0,1]."""
-    etas /= 4
-    phis /= 4
-    etas += 0.5
-    phis += 0.5
-    return etas, phis

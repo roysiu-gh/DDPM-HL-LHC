@@ -7,7 +7,8 @@ from PIL import Image
 
 # Local imports
 from data_loading import select_event
-from calculate_quantities import COM_eta_phi, collection_crop_and_centre, unit_square_the_unit_circle, p_magnitude
+from calculate_quantities import COM_eta_phi, p_magnitude
+from process_data import collection_crop_and_centre, unit_square_the_unit_circle
 
 SAVE_PATH = f"{CWD}/data/plots/bmaps/"
 
@@ -60,17 +61,17 @@ tt = np.genfromtxt(
 
 jet_no = 0
 
-jet0 = select_event(tt, jet_no)[:, 3:6]
-print(jet0)
-print(len(jet0))
+jet = select_event(tt, jet_no)[:, 3:6]
+print(jet)
+print(len(jet))
 
-energies = p_magnitude(jet0)
+energies = p_magnitude(jet)
 print("energies", energies)
 
-centre = COM_eta_phi(jet0)
+centre = COM_eta_phi(jet)
 print("centre", centre)
 
-etas, phis = collection_crop_and_centre(jet0, centre, R=1)
+etas, phis = collection_crop_and_centre(jet, centre, R=1)
 print("etas", etas)
 print("phis", phis)
 print(len(etas))
