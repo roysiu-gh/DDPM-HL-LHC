@@ -3,6 +3,7 @@ data/1-initial/pileup.csv
 data/1-initial/ttbar.csv
 
 data/2-intermediate/ttbar_*
+data/2-intermediate/pileup_*
 
 data/plots/bmaps/test_rand.png
 **/._*
