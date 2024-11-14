@@ -29,8 +29,15 @@ def to_phi(p_x, p_y):
     This function finds the angle phi (radians) from the 2 components of transverse momentum p_x,  p_y using arctan(p_y/p_x)
     """
     if np.shape(p_x) != np.shape(p_y):
-        raise ValueError("Error: p_x shape not equal to p_y shape")
+        raise ValueError(f"Error: p_x shape {np.shape(p_x)} not equal to p_y {np.shape(p_y)} shape")
     return np.arctan2(p_y, p_x)
+
+def to_pT(p_x, p_y):
+    """Calculate transverse momentum."""
+    if np.shape(p_x) != np.shape(p_y):
+        raise ValueError(f"Error: p_x shape {np.shape(p_x)} not equal to p_y {np.shape(p_y)} shape")
+    return np.sqrt(p_x**2 + p_y**2)
+
 
 def calculate_four_momentum_massless(jet_ids, px, py, pz):
     """Calculate the total 4-momentum of jets. Massless limit. Natural units."""
