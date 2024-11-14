@@ -65,7 +65,11 @@ jet = select_event(tt, jet_no)[:, 3:6]
 print(jet)
 print(len(jet))
 
-energies = p_magnitude(jet)
+jet_px = tt[:, 3]
+jet_py = tt[:, 4]
+jet_pz = tt[:, 5]
+
+energies = p_magnitude(jet_px, jet_py, jet_pz)
 print("energies", energies)
 
 centre = COM_eta_phi(jet)

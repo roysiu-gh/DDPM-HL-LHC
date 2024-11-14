@@ -1,12 +1,12 @@
 import numpy as np
 
-def p_magnitude(p):
+def p_magnitude(px, py, pz):
     """
     p is a 2D NumPy array where each element is a particle's 3-momentum
 
     This function simply calculates and returns the magnitude of the momenta of each particle and returns it as a 1D NumPy array
     """
-    return np.linalg.norm(p, axis=1)
+    return np.sqrt(px*px + py*py + pz*pz)
 
 
 def pseudorapidity(p_mag, p_z):
@@ -35,7 +35,7 @@ def to_phi(p_x, p_y):
 def calculate_four_momentum_massless(jet_ids, px, py, pz):
     """Calculate the total 4-momentum of jets. Massless limit. Natural units."""
     if not (len(jet_ids) == len(px) == len(py) == len(pz)):
-        raise ValueError("All input arrays must have same length.")
+        raise ValueError(f"All input arrays must have same length. Got {len(jet_ids)}, {len(px)}, {len(py)}, {len(pz)}.")
     
     max_jet_id = int( np.max(jet_ids) )
     total_four_momenta = np.array([np.zeros(4) for _ in range(max_jet_id + 1)])
@@ -101,7 +101,11 @@ def delta_R(centre, jet_data, boundary=1.0):
         1D dataset of particle phis, with particles whose \Delta R is greater than `boundary` removed.
     """
     # Calculate eta, phi of every particle in data
-    p_mag = p_magnitude(jet_data[:,3:])
+    jet_px = tt[:, 3]
+    jet_py = tt[:, 4]
+    jet_pz = tt[:, 5]
+
+    p_mag = p_magnitude(jet_px, jet_py, jet_pz)
     etas = pseudorapidity(p_mag, jet_data[:,5])
     phis = to_phi(jet_data[:,3], jet_data[:,4])
     # Calculate the values of Delta R for each particle

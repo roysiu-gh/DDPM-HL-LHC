@@ -29,8 +29,12 @@ tt = np.genfromtxt(
 # Get data
 num = len(tt)
 jet_ids = tt[:, 0]
-p_mag = p_magnitude(tt[:, 3:])
-px, py, pz = tt[:, 3], tt[:, 4], tt[:, 5]
+momenta = tt[:, 3:]
+px = tt[:, 3]
+py = tt[:, 4]
+pz = tt[:, 5]
+# px, py, pz = momenta[0], momenta[1], momenta[2]
+p_mag = p_magnitude(px, py, pz)
 # Basic stats
 eta = pseudorapidity(p_mag, pz)
 p_T = np.sqrt(px**2 + py**2)

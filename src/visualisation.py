@@ -78,13 +78,15 @@ def plot_detections(
         plot_data = np.concatenate((tt_bar, pile_ups), axis=0)
     else:
         plot_data = tt_bar
-    momenta = plot_data[:, 3:]
-    pmag = p_magnitude(momenta)
+    px = plot_data[:, 3]
+    py = plot_data[:, 4]
+    pz = plot_data[:, 5]
+    pmag = p_magnitude(px, py, pz)
     if verbose:
         print("Constituent momenta magnitudes:\n", pmag)
     pz = plot_data[:, 5]
     eta = pseudorapidity(pmag, pz)
-    phi = to_phi(momenta[:, 0], momenta[:, 1])
+    phi = to_phi(px, py)
     phi = wrap_phi(centre[1], phi)
 
     # Variable dot sizes, prop to pmag
