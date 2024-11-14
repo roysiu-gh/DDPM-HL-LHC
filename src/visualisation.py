@@ -39,9 +39,9 @@ GLOBAL_CMAP = {pid: cmap(i) for i, pid in enumerate(unique_abs_pdgids)}
 
 def plot_detections(
     tt_bar,
-    pile_ups,
+    pile_ups=None,
     # plot_data,
-    centre,
+    centre=(0,0),
     jet_no=0,
     filename="eta_phi",
     base_radius_size=1,
@@ -74,7 +74,10 @@ def plot_detections(
     -------
     """
     # Retrieve data for the specified jet and calculate momenta and angles
-    plot_data = np.concatenate((tt_bar, pile_ups), axis=0)
+    if pile_ups is not None:
+        plot_data = np.concatenate((tt_bar, pile_ups), axis=0)
+    else:
+        plot_data = tt_bar
     momenta = plot_data[:, 3:]
     pmag = p_magnitude(momenta)
     if verbose:
@@ -109,7 +112,7 @@ def plot_detections(
     ax.plot(centre[0], centre[1], marker="o", color="blue")
     boundary_circle = plt.Circle(centre, 1.0, fill=False)
     ax.add_patch(boundary_circle)
-
+    # ax.set_ylim(0.5 * np.pi,1.25 * np.pi)
     # Show particles up to the target proportion of total momentum
     sorted_indices = np.argsort(pmag)[::-1]
     if momentum_display_proportion != 1.0:  # Do some calculating for the cutoff idx
@@ -174,17 +177,18 @@ def plot_detections(
         ax.legend(handles=handles, loc="center left", bbox_to_anchor=(1, 0.5))
     else:
         ax.scatter(eta[0:len(tt_bar)], phi[0:len(tt_bar)], color="red", marker='.', edgecolors='none', s=0, label="Jet particles")
-        ax.scatter(eta[len(tt_bar):], phi[len(tt_bar):], color="lightblue", marker='.', edgecolors='none', s=0, label="Pile-ups")
-        ax.legend()
         for pdgid, e, p, color, radius in zip(pdgid_values, eta[:len(tt_bar)], phi[:len(tt_bar)], colours, radius_sizes):
             # linestyle = "-" if pdgid >= 0 else "--"
             circle = Circle((e, p), radius=radius/100, edgecolor="red", facecolor='none', linewidth=linewidth, fill=False)
             ax.add_patch(circle)
-        for pdgid, e, p, color, radius in zip(pdgid_values, eta[len(tt_bar):], phi[len(tt_bar):], colours, radius_sizes):
+        if pile_ups is not None:
+            ax.scatter(eta[len(tt_bar):], phi[len(tt_bar):], color="lightblue", marker='.', edgecolors='none', s=0, label="Pile-ups")
+            for pdgid, e, p, color, radius in zip(pdgid_values, eta[len(tt_bar):], phi[len(tt_bar):], colours, radius_sizes):
             # linestyle = "-" if pdgid >= 0 else "--"
-            circle = Circle((e, p), radius=radius/100, edgecolor="blue", facecolor='none', linewidth=linewidth, fill=False)
+                circle = Circle((e, p), radius=radius/100, edgecolor="blue", facecolor='none', linewidth=linewidth, fill=False)
             ax.add_patch(circle)
 
+        ax.legend()
     # plt.savefig(f"{cwd}/data/plots/test/{filename}.png", dpi=1000)
     plt.savefig(f"{cwd}/data/plots/test/{filename}.pdf",)
     plt.close()
