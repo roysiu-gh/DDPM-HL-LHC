@@ -2,7 +2,7 @@ import numpy as np
 from calculate_quantities import to_phi, pseudorapidity, p_magnitude
 from data_loading import select_event
 
-def foo_bar(jet_nos, pile_up_data, mu: int):
+def foo_bar(jet_nos, tt_data, pile_up_data, mu: int):
     """
     This function [CHANGE NAME PLEASE FFS] takes in an array of jet IDs, pile_ups and a mu-value and performs the following:
     
@@ -35,7 +35,7 @@ def foo_bar(jet_nos, pile_up_data, mu: int):
         # This means invalid pile_ups are counted and can be discarded
         for ind, pile in enumerate(selected_pile_ups):
             pile[:,0] = ind + 1
-        selected_jet = select_event(tt, jet_no, filter=False)
+        selected_jet = select_event(tt_data, jet_no, filter=False)
         selected_jet = np.delete(selected_jet, [1,2], axis=1)
         X_pmag = p_magnitude(selected_jet[:,1:])
         X_etas = pseudorapidity(X_pmag, selected_jet[:,-1])

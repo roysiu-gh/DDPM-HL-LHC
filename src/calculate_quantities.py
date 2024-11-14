@@ -93,8 +93,8 @@ def delta_R(centre, jet_data, boundary=1.0):
         The maximum \Delta R for which particles with a larger value will be cut off.
     Returns
     ----------
-    bounded_data: ndarray
-        2D dataset of particle information, with particles whose \Delta R is greater than `boundary` removed.
+    bounded_momenta: ndarray
+        2D dataset of particle momenta, with particles whose \Delta R is greater than `boundary` removed.
     etas: ndarray
         1D dataset of particle etas, with particles whose \Delta R is greater than `boundary` removed.
     phis: ndarray
