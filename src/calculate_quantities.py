@@ -56,7 +56,6 @@ def calculate_four_momentum_massless(jet_ids, px, py, pz):
         jet_py[int(jet_id)] += py_val
         jet_pz[int(jet_id)] += pz_val
 
-
     return jet_ene, jet_px, jet_py, jet_pz
 
 def contraction(vec):

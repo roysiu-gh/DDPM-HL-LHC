@@ -1,8 +1,8 @@
 import os
 
 CWD = os.getcwd()
-pileup_path = f"{CWD}/data/1-initial/pileup.csv"
-tt_path = f"{CWD}/data/1-initial/ttbar.csv"
+PILEUP_PATH = f"{CWD}/data/1-initial/pileup.csv"
+TT_PATH = f"{CWD}/data/1-initial/ttbar.csv"
 
 MAX_DATA_ROWS = None
 

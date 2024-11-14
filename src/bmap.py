@@ -56,7 +56,7 @@ def convert_to_grid(energies, x, y, N=BMAP_SQUARE_SIDE_LENGTH, verbose=False):
 ##########################################################################################
 
 tt = np.genfromtxt(
-    tt_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=1000
+    TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=1000
 )
 
 jet_no = 0
