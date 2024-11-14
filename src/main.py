@@ -102,8 +102,7 @@ def quantity_diff(jet_ids, jet_px, jet_py, jet_pz, pu_px, pu_py, pu_pz):
     # Case insensitivity
     # q = q.lower()
     # Calculate q_0^jet quantities. Here, since we are doing over a jet, we sum the 4-momenta and then do calcs
-    jet_four_momenta = calculate_four_momentum_massless(jet_ids, jet_px, jet_py, jet_pz)
-    jet_p2 = contraction(jet_four_momenta)
+    jet_p2 = contraction(calculate_four_momentum_massless(jet_ids, jet_px, jet_py, jet_pz))
     jet_mass = np.sum(np.sqrt(jet_p2))
     jet_pt = np.sum(np.sqrt(jet_px*jet_px + jet_py*jet_py))
     jet_energy = jet_four_momenta[0] # p^\nu = (E,px,py,pz) in natural units
