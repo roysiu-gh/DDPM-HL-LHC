@@ -102,10 +102,12 @@ def quantity_diff(jet_ids, jet_px, jet_py, jet_pz, pu_px, pu_py, pu_pz):
     # Case insensitivity
     # q = q.lower()
     # Calculate q_0^jet quantities. Here, since we are doing over a jet, we sum the 4-momenta and then do calcs
-    jet_p2 = contraction(calculate_four_momentum_massless(jet_ids, jet_px, jet_py, jet_pz))
-    jet_mass = np.sum(np.sqrt(jet_p2))
+    jet_enes, jet_pxs, jet_pys, jet_pzs = calculate_four_momentum_massless(jet_ids, jet_px, jet_py, jet_pz)
+    jet_p2s = contraction(jet_enes, jet_pxs, jet_pys, jet_pzs)
+    # jet_p2 = contraction(calculate_four_momentum_massless(jet_ids, jet_px, jet_py, jet_pz))
+    jet_mass = np.sum(np.sqrt(jet_p2s))
     jet_pt = np.sum(np.sqrt(jet_px*jet_px + jet_py*jet_py))
-    jet_energy = jet_four_momenta[0] # p^\nu = (E,px,py,pz) in natural units
+    # jet_energy = jet_four_momenta[0] # p^\nu = (E,px,py,pz) in natural units
     # Calculate quantities with pileup
     print("jet_px: ", jet_px)
     print("pu_px: ", pu_px)
@@ -123,7 +125,7 @@ def quantity_diff(jet_ids, jet_px, jet_py, jet_pz, pu_px, pu_py, pu_pz):
     c_m = np.sqrt(c_p2)
     c_pt = np.sqrt(total_px*total_px + total_py*total_py)
     # mass difference, energy difference, p_T difference, eta difference, phi difference
-    differences = (c_m - jet_mass, total_energy - jet_energy, c_pt - jet_pt)
+    differences = (c_m - jet_mass, total_energy - jet_enes, c_pt - jet_pt)
     return differences
  # p^\nu = (E,px,py,pz) in natural units
     # if q == "mass":

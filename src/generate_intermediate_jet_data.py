@@ -1,4 +1,4 @@
-"""1D Histograms"""
+"""Make intermediate data to avoid repeated computation."""
 
 # Import constants
 from config import *
