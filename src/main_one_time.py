@@ -30,7 +30,7 @@ tt = np.genfromtxt(
 num = len(tt)
 jet_ids = tt[:, 0]
 p_mag = p_magnitude(tt[:, 3:])
-pz, px, py = tt[:, 5], tt[:, 3], tt[:, 4]
+px, py, pz = tt[:, 3], tt[:, 4], tt[:, 5]
 # Basic stats
 eta = pseudorapidity(p_mag, pz)
 p_T = np.sqrt(px**2 + py**2)
@@ -48,7 +48,7 @@ for jet_id in range(0, len(jet_four_momenta), 132):
 # Define the save path and plot characteristics
 save_path = f"{CWD}/data/plots/1D_histograms/"
 plot_params = {
-    "bins": 5000,
+    "bins": 500,
     "color": "skyblue",
     "edgecolor": "none",
     "kde": False,
@@ -59,7 +59,7 @@ def plot_1D_hist(name, data, xscale="linear", is_jet=False, plot_params=plot_par
     parjet = "Jets'" if is_jet else "Particles'"
     num = len(data)
     plt.figure(figsize=(10, 6))
-    sb.histplot(p_mag, **plot_params)
+    sb.histplot(data, **plot_params)
     plt.title(f"Normalised Histogram of {num} {parjet} {name}")
     plt.xlabel(name)
     plt.xscale(xscale)
@@ -73,5 +73,5 @@ plot_1D_hist("Momentum Magnitudes (\si{\giga\electronvolt})",           p_mag,  
 plot_1D_hist("Pseudorapidity $\eta$",                                   eta,        save_filename="eta",                      xscale="linear")
 plot_1D_hist("Transverse Momentum $p_T$ (\si{\giga\electronvolt})",     p_T,        save_filename="p_T",                        xscale="log")
 plot_1D_hist("($p^2$) (\si{\giga\electronvolt^2})",                     jet_p2,     save_filename="jet_p2",     is_jet=True,    xscale="log")
-plot_1D_hist("Mass (\si{\giga\electronvolt})",                          jet_mass,   save_filename="jet_mass",   is_jet=True,    xscale="log")
+plot_1D_hist("Mass (\si{\giga\electronvolt})",                          jet_mass,   save_filename="jet_mass",   is_jet=True,    xscale="linear")
 print("Done.")
