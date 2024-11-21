@@ -86,9 +86,6 @@ x, y = unit_square_the_unit_circle(etas, phis)
 print("x", x)
 print("y", y)
 
-def sigmoid(z):
-    return 1/(1 + np.exp(-z))
-
 scaled_energies = scale_energy_for_visual(energies)
 scaled_energies = scale_energy_for_visual(np.log(energies))
 scaled_x, scaled_y = discretise_points(x, y)
