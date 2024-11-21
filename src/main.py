@@ -6,7 +6,7 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 import seaborn as sb
-
+import sys
 # Local imports
 from visualisation import plot_detections, count_hist, energy_hist, generate_2dhist
 from data_loading import select_event
@@ -102,30 +102,47 @@ def quantity_diff(jet_ids, jet_px, jet_py, jet_pz, pu_px, pu_py, pu_pz):
     # Case insensitivity
     # q = q.lower()
     # Calculate q_0^jet quantities. Here, since we are doing over a jet, we sum the 4-momenta and then do calcs
-    jet_enes, jet_pxs, jet_pys, jet_pzs = calculate_four_momentum_massless(jet_ids, jet_px, jet_py, jet_pz)
-    jet_p2s = contraction(jet_enes, jet_pxs, jet_pys, jet_pzs)
-    # jet_p2 = contraction(calculate_four_momentum_massless(jet_ids, jet_px, jet_py, jet_pz))
-    jet_mass = np.sum(np.sqrt(jet_p2s))
-    jet_pt = np.sum(np.sqrt(jet_px*jet_px + jet_py*jet_py))
-    # jet_energy = jet_four_momenta[0] # p^\nu = (E,px,py,pz) in natural units
+    # jet_four_momenta = calculate_four_momentum_massless(jet_ids, jet_px, jet_py, jet_pz)
+    total_jetpx = np.sum(jet_px)
+    total_jetpy = np.sum(jet_py)
+    total_jetpz = np.sum(jet_pz)
+    jet_PT2 = total_jetpx ** 2 + total_jetpy ** 2
+    # jet_mag2 = jet_PT2 + jet_pz ** 2
+    # p_jet p^jet = m_jet **2
+    # E_jet ** 2 - p.p = m_jet **2
+    # E_jet = sum(|p_i|)
+    jet_energy = np.sum(p_magnitude(jet_px, jet_py, jet_pz))
+    # TODO
+    jet_mass2 = jet_energy ** 2 - (total_jetpx **2 + total_jetpy **2 + total_jetpz**2)
+    j_m = np.sqrt(jet_mass2)
+    jet_pt = np.sqrt(jet_PT2)
+    # jet_energy = np.sum(jet_four_momenta[0]) # p^\nu = (E,px,py,pz) in natural units
+    print("jet_energy:", jet_energy)
     # Calculate quantities with pileup
-    print("jet_px: ", jet_px)
-    print("pu_px: ", pu_px)
+    # print("jet_px: ", jet_px)
+    # print("pu_px: ", pu_px)
     combined_px = np.concatenate((jet_px, pu_px), axis=0)
     combined_py = np.concatenate((jet_py, pu_py), axis=0)
     combined_pz = np.concatenate((jet_pz, pu_pz), axis=0)
-    # print(combined_px)
-    # total_four_momenta = np.array([np.zeros(4) for _ in range(len(combined_px) + 1)])
-    total_energy = np.sum(np.sqrt(combined_px*combined_px + combined_py*combined_py+combined_pz*combined_pz))
     total_px = np.sum(combined_px)
     total_py = np.sum(combined_py)
     total_pz = np.sum(combined_pz) 
+    # print(combined_px)
+    # total_four_momenta = np.array([np.zeros(4) for _ in range(len(combined_px) + 1)])
+    # print(3-mom)
+    p_mag = p_magnitude(combined_px,combined_py,combined_pz)
+    total_energy = np.sum(p_mag)
+    print("tot_eng", total_energy)
+    
     # c_four_momenta = np.array([total_energy, total_px, total_py, total_pz])
-    c_p2 = total_energy*total_energy - (total_px*total_px + total_py*total_py + total_pz*total_pz)
+    c_pt2 = total_px*total_px + total_py*total_py
+    c_pt = np.sqrt(c_pt2)
+    c_p2 = total_energy*total_energy - (c_pt2 + total_pz*total_pz)
+    # print("c_p2", c_p2)
     c_m = np.sqrt(c_p2)
-    c_pt = np.sqrt(total_px*total_px + total_py*total_py)
     # mass difference, energy difference, p_T difference, eta difference, phi difference
-    differences = (c_m - jet_mass, total_energy - jet_enes, c_pt - jet_pt)
+    differences = (c_m - j_m, total_energy - jet_energy, c_pt - jet_pt)
+    print("differences", differences)
     return differences
  # p^\nu = (E,px,py,pz) in natural units
     # if q == "mass":
@@ -137,7 +154,9 @@ def quantity_diff(jet_ids, jet_px, jet_py, jet_pz, pu_px, pu_py, pu_pz):
     # elif q == "eta":
 
     # elif q == "phi"
-def mean_quantity_diff(jet_data, pile_up_data, MUs, max_jet_no=1000):
+max_event_num = np.unique(pile_up[:,0]).astype(int)
+
+def mean_quantity_diff(jet_data, pile_up_data, MUs, max_event_num = max_event_num, max_jet_no=1000):
     """
     For a given number of pile_up events mu in MUs
 
@@ -150,12 +169,51 @@ def mean_quantity_diff(jet_data, pile_up_data, MUs, max_jet_no=1000):
     Find the average by dividing by the number of jets (not jet particles)
     """
     # max_jet_no = np.shape(np.unique(jet_data[:,0]))[0]
-    max_event_num = np.unique(pile_up_data[:,0]).astype(int)
     data_y = np.zeros((3, len(MUs)))
     for ind,mu in enumerate(MUs):
+        print("Begin mu = ", mu)
+        # print("ind", ind)
+        # sys.exit(1)
         m_total = 0
         E_total = 0
         p_T_total = 0
+        # Generate all event IDs for all jets in one step
+        all_event_IDS = np.random.choice(max_event_num, size=(max_jet_no+1, mu))
+        # print(all_event_IDS)
+        # Filter event IDs within valid range
+        # all_event_IDS = all_event_IDS[np.isin(all_event_IDS, max_event_num)]
+
+        # Select all pile-up data at once
+        # if mu == 1:
+        #     all_selected_pile_ups = [
+        #         np.vstack([select_event(pile_up_data, event_ID, filter=False) for event_ID in all_event_IDS[:,0]])[:, 3:]
+        #     ]
+        # else:
+        #     all_selected_pile_ups = [
+        #         np.vstack([select_event(pile_up_data, event_ID, filter=False) for event_ID in event_IDS])[:, 3:] for event_IDS in all_event_IDS
+        #     ]
+
+        # # Stack all pile-ups into one array
+        # all_selected_pile_ups = np.array(all_selected_pile_ups)
+
+        # # Filter jet data once for all jet numbers
+        # cd = [jet_data[jet_data[:, 0] == jet_no] for jet_no in range(max_jet_no + 1)]
+
+        # # Compute quantities for all jets
+        # quantities = [
+        #     quantity_diff(
+        #         cdi[:, 0],
+        #         cdi[:, 3], cdi[:, 4], cdi[:, 5],
+        #         selected_pile_ups[:, 0], selected_pile_ups[:, 1], selected_pile_ups[:, 2]
+        #     )
+        #     for cdi, selected_pile_ups in zip(cd, all_selected_pile_ups)
+        # ]
+
+        # Sum up results
+        # print(quantities)
+        # sys.exit(1)
+        # m_total, E_total, p_T_total = np.sum(quantities, axis=0)
+        # TODO: mask
         for jet_no in range(0, max_jet_no + 1):
             event_IDS = np.random.choice(max_event_num, size = mu)
             event_IDS = event_IDS[np.isin(event_IDS, max_event_num)]
@@ -171,14 +229,18 @@ def mean_quantity_diff(jet_data, pile_up_data, MUs, max_jet_no=1000):
         m_total /= max_jet_no
         E_total /= max_jet_no
         p_T_total /= max_jet_no
-        data_y[0][ind] = m_total
-        data_y[1][ind] = E_total
-        data_y[2][ind] = p_T_total
+        # print(m_total)
+        # print(E_total)
+        # print(p_T_total)
+        data_y[0][ind] += m_total
+        data_y[1][ind] += E_total
+        data_y[2][ind] += p_T_total
         print(f"End mu = {mu}")
     for name,data in zip(["Mass", "Energy", "pT"], data_y):
-        fig  = plt.figure((8,6))
+        fig  = plt.figure(figsize=(8,6))
         plt.plot(MUs, data)
         plt.savefig(f"{CWD}/data/plots/Mean_{name}_diff.pdf", format="pdf")
+
         plt.close()
-mean_quantity_diff(tt, pile_up, [1,5,10,15,20,25])
+mean_quantity_diff(tt, pile_up, [1,5,10], max_jet_no=3)
 

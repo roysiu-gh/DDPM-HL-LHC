@@ -110,7 +110,7 @@ def foo_bar(jet_nos, tt_data, pile_up_data, mu: int):
         combined_array.append(np.vstack((selected_jet, X)))
     # Merge all subarrays
     combined_array = np.vstack(combined_array)
-    np.savetxt("data/combined.csv.gz", combined_array, delimiter=",", header="NID,LID,px,py,pz,eta,phi", comments="", fmt="%10.10f")
+    np.savetxt("data/combined.csv.gz", combined_array, delimiter=",", header="NID,LID,px,py,pz,eta,phi", comments="", fmt="%d %d %.10f %.10f %.10f %.10f %.10f")
     return 0
 
 def wrap_phi(phi_centre, phis, R=1):
