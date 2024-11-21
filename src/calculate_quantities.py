@@ -120,7 +120,7 @@ def COM_eta_phi(p):
     phi = to_phi(total_p[0], total_p[1])
     return eta, phi
 
-def delta_R(centre, jet_data, boundary=1.0):
+def delta_R(centre, jet_px, jet_py, jet_pz, boundary=1.0):
     """
     This function takes in particle information, and removes particles whose \Delta R(eta,phi) > 1.0 and returns all the others.
 
@@ -144,16 +144,12 @@ def delta_R(centre, jet_data, boundary=1.0):
         1D dataset of particle phis, with particles whose \Delta R is greater than `boundary` removed.
     """
     # Calculate eta, phi of every particle in data
-    jet_px = tt[:, 3]
-    jet_py = tt[:, 4]
-    jet_pz = tt[:, 5]
-
     p_mag = p_magnitude(jet_px, jet_py, jet_pz)
-    etas = pseudorapidity(p_mag, jet_data[:,5])
-    phis = to_phi(jet_data[:,3], jet_data[:,4])
+    etas = pseudorapidity(p_mag, jet_pz)
+    phis = to_phi(jet_px, jet_py)
     # Calculate the values of Delta R for each particle
     delta_eta= (etas - centre[0])
     delta_phi = (phis - centre[1])
     crit_R = np.sqrt(delta_eta*delta_eta + delta_phi*delta_phi)
-    bounded_momenta = jet_data[crit_R <= boundary]
-    return bounded_momenta, etas[crit_R <= boundary], phis[crit_R <= boundary]
+    bounded_momenta = np.array([jet_px[crit_R <= boundary], jet_py[crit_R <= boundary], jet_pz[crit_R <= boundary]])
+    return bounded_momenta, crit_R, etas[crit_R <= boundary], phis[crit_R <= boundary]
