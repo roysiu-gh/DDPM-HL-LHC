@@ -10,7 +10,7 @@ def collection_crop_and_centre(momenta, centre, R=1):
     px, py, pz = momenta[:, 0], momenta[:, 1], momenta[:, 2]
     centre_eta, centre_phi = centre[0], centre[1]
 
-    p_mag = p_magnitude(momenta)
+    p_mag = p_magnitude(px, py, pz)
     etas = pseudorapidity(p_mag, pz)
     phis = to_phi(px, py)
 
@@ -64,7 +64,12 @@ def foo_bar(jet_nos, tt_data, pile_up_data, mu: int):
             pile[:,0] = ind + 1
         selected_jet = select_event(tt_data, jet_no, filter=False)
         selected_jet = np.delete(selected_jet, [1,2], axis=1)
-        X_pmag = p_magnitude(selected_jet[:,1:])
+
+        selected_jet_px = tt[:, 1]
+        selected_jet_py = tt[:, 2]
+        selected_jet_pz = tt[:, 3]
+
+        X_pmag = p_magnitude(selected_jet_px, selected_jet_py, selected_jet_pz)
         X_etas = pseudorapidity(X_pmag, selected_jet[:,-1])
         X_phis = to_phi(selected_jet[:,1], selected_jet[:,2])
         num_rows = selected_jet.shape[0]
@@ -86,7 +91,13 @@ def foo_bar(jet_nos, tt_data, pile_up_data, mu: int):
 
         # Now momenta start at 2nd column
         # Select p for calculations
-        X_pmag = p_magnitude(X[:,1:])
+        X_momenta = X[:,1:]
+        
+        X_px = X[:, 1]
+        X_py = X[:, 2]
+        X_pz = X[:, 3]
+
+        X_pmag = p_magnitude(X_px, X_py, X_pz)
         X_etas = pseudorapidity(X_pmag, X[:,-1])
         X_phis = to_phi(X[:,1], X[:,2])
         # Append etas and phis to end of column
