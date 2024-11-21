@@ -120,16 +120,9 @@ def mean_quantity_diff(jet_data, pile_up_data, MUs, max_event_num = max_event_nu
             event_IDS = np.random.choice(max_event_num, size = mu)
             event_IDS = event_IDS[np.isin(event_IDS, max_event_num)]
             # print(f"Jet_No: {jet_no}, event IDs: {event_IDS}")
-            p_mag = p_magnitude(jet_px, jet_py, jet_pz)
-            etas = pseudorapidity(p_mag, jet_pz)
-            phis = to_phi(jet_px, jet_py)
-            # Calculate the values of Delta R for each particle
-            delta_eta= (etas - centre[0])
-            delta_phi = (phis - centre[1])
-    crit_R = np.sqrt(delta_eta*delta_eta + delta_phi*delta_phi)
             selected_pile_ups = [select_event(pile_up_data, event_ID, filter=False) for event_ID in event_IDS]
             selected_pile_ups = np.vstack(selected_pile_ups)[:,3:]
-            cd = jet_data[jet_data[:,0] == jet_no]
+            cd = select_event(jet_data, jet_no)
             m, E, p_T = quantity_diff(cd[:,0], cd[:,3],cd[:,4],cd[:,5], jet_masses[jet_no], jet_pt[jet_no], selected_pile_ups[:,0], selected_pile_ups[:,1], selected_pile_ups[:,2])
             m_total += m
             E_total += E
