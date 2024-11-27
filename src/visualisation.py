@@ -13,7 +13,7 @@ from matplotlib.colors import ListedColormap
 from matplotlib.patches import Patch, Circle
 
 # Local imports
-from calculate_quantities import COM_eta_phi, delta_R, p_magnitude, pseudorapidity, to_phi
+from calculate_quantities import COM_eta_phi, delta_R, p_magnitude, pseudorapidity, to_phi,centre_on_jet
 from data_loading import select_event
 from process_data import wrap_phi
 
@@ -269,7 +269,7 @@ def energy_hist(
     None
     """
     plt.figure(figsize=(8, 6))
-    plt.hist2d(eta, phi, bins=bins, weights=energies, cmap='Greys',)
+    plt.hist2d(eta, phi, bins=bins, weights=energies, cmap='Greys_r',)
 
     # Customizing the plot
     plt.colorbar(label='Energies')  # Colorbar to show counts
@@ -311,30 +311,65 @@ def generate_2dhist(tt_data, pile_up_data, jet_no, bins, mu, hist_plot="energy",
 
     Returns: None
     """
-    chosen_pile_up = select_event(pile_up_data, mu)
+    selected_pile_ups = []
+    event_IDS = np.random.choice(pile_up_data[:,0], size = mu).astype(int)
+    # event_IDS = np.array([10, 11])
+    print(f"Jet_No: {jet_no}, event IDs: {event_IDS}")
+    selected_pile_ups = [select_event(pile_up_data, event_ID, filter=True) for event_ID in event_IDS]
+    # selected_pile_ups now contain 2D arrays
+    selected_pile_ups = np.vstack(selected_pile_ups)
+    # Remove invalid pile_ups
+    selected_pile_ups = selected_pile_ups[selected_pile_ups[:,0] != -1]
+    # print(selected_pile_ups)
+    # chosen_pile_up = select_event(pile_up_data, mu)
     plot_data = select_event(tt_data, jet_no, max_data_rows=MAX_DATA_ROWS)
-    data = np.concatenate((plot_data, chosen_pile_up), axis=1) 
+    # print(chosen_pile_up)
+    # print(plot_data)
+    # data = np.concatenate((plot_data, selected_pile_ups), axis=1) 
+    data = np.vstack((plot_data,selected_pile_ups))
+    px = data[:,3]
+    py = data[:,4]
+    pz = data[:,5]
+    pmag = p_magnitude(px, py, pz)
     # All columns are passed in, so make sure to select last 3 columns for the 3-momenta
-    jet_centre = COM_eta_phi(plot_data[:,3:])
+    jet_centre = COM_eta_phi(data[:,3:])
     # print("centre", jet_centre)
-
+    phis = to_phi(px, py)
+    phis = wrap_phi(jet_centre[1], phis)
+    etas = pseudorapidity(pmag, pz)
+    centre,etas_c, phis_c = centre_on_jet(jet_centre, etas, phis)
     # Delta R is calculated relative to the jet centre, and over all particles including pile-up
-    masked_data, etas, phis = delta_R(jet_centre, data)
+    bounded_momenta, etas2, phis2 = delta_R(centre, px, py, pz, etas_c, phis_c)
+    masked_px = bounded_momenta[0]
+    masked_py = bounded_momenta[1]
+    masked_pz = bounded_momenta[2]
     # print(len(etas) == len(phis))
     # masked_energies = np.sqrt(masked_data[:,3]*masked_data[:,3] + masked_data[:,4]*masked_data[:,4]+masked_data[:,5]*masked_data[:,5])
     # # energy_normed = normalize_data(energies, energy_norm_factor)
-    # energies = np.sqrt(combined_data[:,3]*combined_data[:,3] + combined_data[:,4]*combined_data[:,4]+combined_data[:,5]*combined_data[:,5])
-    # energy_min = np.min(energies)
+    # Unnormalised energies
+    energies = np.sqrt(masked_px*masked_px + masked_py*masked_py+masked_pz*masked_pz)
     # energy_max = np.max(energies)
     # energy_norm_denom = (energy_max - energy_min)
-
+    
+    # print("etas2", etas2)
+    # print("phis2", phis2)
+    print("Orig num of eta: ", len(etas))
+    print("Orig num of phi: ", len(phis))
+    print("New num of eta: ", len(etas2))
+    print("New num of phi: ", len(phis2))
+    print("Masked number of particles, etas: ", len(etas) - len(etas2))
+    print("Masked number of particles, etas: ", len(phis) - len(phis2))
+    print(len(etas2) == len(phis2))
+    print(np.min(etas2), np.max(etas2))
+    print(np.min(etas), np.max(etas))
+    # exit(1)
     # energy_normed = (masked_energies - energy_min) / energy_norm_denom
     # print(energy_normed)
     # Function appends "_hist" to the end
     if hist_plot == "count":
-        count_hist(etas, phis, jet_no=jet_no,bins=bins, filename=f"eta_phi_jet{jet_no}_MU{mu}")
-    # elif hist_plot == "energy": 
-    #     energy_hist(etas, phis, jet_no=jet_no,bins=bins, energies=energy_normed, filename=f"eta_phi_jet{jet_no}_MU{mu}")
+        count_hist(etas2, phis2, jet_no=jet_no,bins=bins, filename=f"eta_phi_jet{jet_no}_MU{mu}")
+    elif hist_plot == "energy": 
+        energy_hist(etas2, phis2, jet_no=jet_no,bins=bins, energies=energies, filename=f"eta_phi_jet{jet_no}_MU{mu}")
     else:
         raise ValueError("Error: hist_plot was not 'count' or 'energy'.\n")
     

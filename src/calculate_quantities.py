@@ -119,8 +119,12 @@ def COM_eta_phi(p):
     eta = pseudorapidity(jet_mag, total_p[2])
     phi = to_phi(total_p[0], total_p[1])
     return eta, phi
-
-def delta_R(centre, jet_px, jet_py, jet_pz, boundary=1.0):
+def centre_on_jet(centre, eta, phi):
+    """ 
+    Centres the jet axis on (0,0) and shifts all particles by this displacement.
+    """
+    return (0,0), eta - centre[0], phi - centre[1]
+def delta_R(centre, px, py, pz, etas, phis, boundary=1.0):
     """
     This function takes in particle information, and removes particles whose \Delta R(eta,phi) > 1.0 and returns all the others.
 
@@ -130,8 +134,10 @@ def delta_R(centre, jet_px, jet_py, jet_pz, boundary=1.0):
         The jet beam axis. 2-tuple in the form (eta,phi) used for calculating \Delta R
     jet_no : int
         Which jet to select from data
-    data: ndarray
-        2D dataset containing particle information.
+    eta: ndarray
+        1D dataset containing particle \eta s.
+    phi: ndarray
+        1D dataset containing particle \phi s.
     boundary: float, default = 1.0
         The maximum \Delta R for which particles with a larger value will be cut off.
     Returns
@@ -144,12 +150,15 @@ def delta_R(centre, jet_px, jet_py, jet_pz, boundary=1.0):
         1D dataset of particle phis, with particles whose \Delta R is greater than `boundary` removed.
     """
     # Calculate eta, phi of every particle in data
-    p_mag = p_magnitude(jet_px, jet_py, jet_pz)
-    etas = pseudorapidity(p_mag, jet_pz)
-    phis = to_phi(jet_px, jet_py)
+    # p_mag = p_magnitude(jet_px, jet_py, jet_pz)
+    # etas = pseudorapidity(p_mag, jet_pz)
+    # phis = to_phi(jet_px, jet_py)
+    # phis = wrap_phi(centre[1], phis)
     # Calculate the values of Delta R for each particle
+    # If jet axis centred on (0,0), this just evaluates to the etas, phis. See
+    # centre_on_axis(centre)
     delta_eta= (etas - centre[0])
     delta_phi = (phis - centre[1])
     crit_R = np.sqrt(delta_eta*delta_eta + delta_phi*delta_phi)
-    bounded_momenta = np.array([jet_px[crit_R <= boundary], jet_py[crit_R <= boundary], jet_pz[crit_R <= boundary]])
-    return bounded_momenta, crit_R, etas[crit_R <= boundary], phis[crit_R <= boundary]
+    bounded_momenta = np.array([px[crit_R <= boundary], py[crit_R <= boundary], pz[crit_R <= boundary]])
+    return bounded_momenta, etas[crit_R <= boundary], phis[crit_R <= boundary]

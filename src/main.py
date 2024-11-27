@@ -71,13 +71,14 @@ tt = np.genfromtxt(
 
 # === 2D Histograms ===
 # BINS = (16,16)
-# jet_no = 0
+jet_no = 493
 # === EXAMPLE USAGE OF GENERATING IMAGES ===
-# BINS = [(8,8), (16,16),(32,32), (64,64)]
-# for bin in BINS:
-#     generate_2dhist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=bin, mu=10000)
-#     generate_2dhist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=bin, mu=10000, hist_plot="count")
+BINS = [(32,32)]
+for BIN in BINS:
+    generate_2dhist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BIN, mu=1100)
+    # generate_2dhist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BIN, mu=10000)
+    # generate_2dhist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BIN, mu=50, hist_plot="count")
 #  Use new visualisaton to just distinguish pile up and jet
 
-#====== END 2D HIST ====
+# ====== END 2D HIST ====
 
