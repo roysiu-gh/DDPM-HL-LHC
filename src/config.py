@@ -14,7 +14,7 @@ tick_fontsize = 24
 MPL_GLOBAL_PARAMS = {
     'text.usetex' : True, # use latex text
     'text.latex.preamble' : r'\usepackage{type1cm}\usepackage{braket}\usepackage{amssymb}\usepackage{txfonts}', # latex packages
-    'font.family' : r'Times New Roman',
+    'font.family' : r'Computer Modern Roman',
     'font.size' : 24,
     'figure.dpi' : 600,
     'figure.figsize' : (3.375, 3),

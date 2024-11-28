@@ -6,19 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
-mpl.rcParams['axes.linewidth'] = 1.0 # set the value globally
-mpl.rcParams['grid.linewidth'] = 1.0
-mpl.rcParams['xtick.labelsize'] = 14
-mpl.rcParams['ytick.labelsize'] = 14
-mpl.rcParams['axes.edgecolor'] = 'black'
-mpl.rcParams['axes.labelsize'] = '14'     # fontsize of the x and y labels
-mpl.rcParams['axes.labelcolor'] = 'black'
-mpl.rcParams['axes.axisbelow'] = 'True'   # whether axis gridlines and ticks are below
-                                        # the axes elements (lines, text, etc)
-mpl.rcParams['legend.fontsize'] = 25
-plt.rcParams['xtick.major.pad'] = 5
-plt.rcParams['ytick.major.pad'] = 5
-
+mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 pile_up = np.genfromtxt(
     PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
 )
@@ -78,7 +66,7 @@ def quantity_diff(jet_ids, jet_px, jet_py, jet_pz, jet_mass, jet_pt, pu_px, pu_p
     c_m = np.sqrt(c_p2)
     # mass difference, energy difference, p_T difference, eta difference, phi difference
     differences = (c_m - jet_mass, total_energy - jet_energy, c_pt - jet_pt)
-    print("differences", differences)
+    # print("differences", differences)
     return differences
  # p^\nu = (E,px,py,pz) in natural units
     # if q == "mass":
@@ -93,6 +81,11 @@ def quantity_diff(jet_ids, jet_px, jet_py, jet_pz, jet_mass, jet_pt, pu_px, pu_p
 max_event_num = np.unique(pile_up[:,0]).astype(int)
 jet_masses = tt_int[:,6]
 jet_pt = tt_int[:,7]
+y_qlabel = {
+    "mass": "$\\braket{m_{\mu}^{\\text{jet}} - m_{0}^{\\text{jet}}}",
+    "energy": "$\\braket{E_{\mu}^{\\text{jet}} - E_{0}^{\\text{jet}}}",
+    "pt": "$\\braket{p_{T,\mu}^{\\text{jet}} - p_{T,0}^{\\text{jet}}}"
+}
 def mean_quantity_diff(jet_data, pile_up_data, MUs, max_event_num = max_event_num, max_jet_no=1000):
     """
     For a given number of pile_up events mu in MUs
@@ -138,15 +131,18 @@ def mean_quantity_diff(jet_data, pile_up_data, MUs, max_event_num = max_event_nu
         data_y[1][ind] += E_total
         data_y[2][ind] += p_T_total
         print(f"End mu = {mu}")
-    for name,data in zip(["Mass", "Energy", "pT"], data_y):
+    for name,data in zip(["Mass ", "Energy", "pT"], data_y):
         fig  = plt.figure(figsize=(8,6))
         plt.plot(MUs, data)
         plt.savefig(f"{CWD}/data/plots/Mean_{name}_diff.pdf", format="pdf")
         plt.xlabel("$\mu$")
+        plt.ylabel(y_qlabel[lower(name)])
+        plt.xlim(0, np.max(MUs))
+        plt.ylim(0 if 0 < np.min(data) else np.min(data), np.max(data))
         plt.ylabel(f"{name}")
         plt.close()
 # Array of jet etas and phis
 # jet_centres = tt_int[:,4:6]
 # tt_masked = [delta_R(jet_centre, tt)]
-mus = np.linspace(1,100,5).astype(int)
-mean_quantity_diff(tt, pile_up, mus, max_jet_no=10)
+mus = np.linspace(1,20,10).astype(int)
+mean_quantity_diff(tt, pile_up, mus, max_jet_no=100)
