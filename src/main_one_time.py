@@ -48,7 +48,7 @@ eta = pseudorapidity(p_mag, pz)
 p_T = np.sqrt(px**2 + py**2)
 # Stats for jets
 jet_enes, jet_pxs, jet_pys, jet_pzs = calculate_four_momentum_massless(jet_ids, px, py, pz)
-jet_p2s = contraction2(jet_enes, jet_pxs, jet_pys, jet_pzs)
+jet_p2s = contraction(jet_enes, jet_pxs, jet_pys, jet_pzs)
 jet_masses = np.sqrt(jet_p2s)
 
 # Kinda fun to print

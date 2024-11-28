@@ -49,7 +49,7 @@ def quantity_diff(jet_ids, jet_px, jet_py, jet_pz, jet_mass, jet_pt, pu_px, pu_p
     # TODO
     jet_4mmtm = calculate_four_momentum_massless(jet_ids, jet_px, jet_py, jet_pz)
     summed_jet_4mmtm = np.sum(jet_4mmtm, axis = 1)
-    # j_m = contraction2(summed_jet_4mmtm[0], summed_jet_4mmtm[1], summed_jet_4mmtm[2], summed_jet_4mmtm[3])
+    # j_m = contraction(summed_jet_4mmtm[0], summed_jet_4mmtm[1], summed_jet_4mmtm[2], summed_jet_4mmtm[3])
     jet_energy = summed_jet_4mmtm[0]
     # jet_pt = np.sqrt(summed_jet_4mmtm[1] +  summed_jet_4mmtm[2])
     # jet_energy = np.sum(jet_four_momenta[0]) # p^\nu = (E,px,py,pz) in natural units

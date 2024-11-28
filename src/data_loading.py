@@ -20,21 +20,3 @@ def select_event(data, num, filter=False, max_data_rows=MAX_DATA_ROWS):
     return data[data[:, 0] == num]
 
 
-def merge_data(tt_data, pile_up_data):
-    """
-    Wrapper function to vertically  stack 2D NumPy array data of the same shape, each arranged so that the same ordered information is contained in each one.
-
-    Parameters
-    ----------
-    tt_data: ndarray
-        2D array of particle information about t-tbar decays
-    pile_up_data: ndarray
-        2D array of pile up event information
-
-    Returns
-    -------
-    data: ndarray
-        V-stacked 2D array (same number of columns) containing both input tt_data and pile_up data
-    """
-    return np.concatenate((tt_data, pile_up_data), axis=0)
-
