@@ -82,9 +82,9 @@ max_event_num = np.unique(pile_up[:,0]).astype(int)
 jet_masses = tt_int[:,6]
 jet_pt = tt_int[:,7]
 y_qlabel = {
-    "mass": "$\\braket{m_{\mu}^{\\text{jet}} - m_{0}^{\\text{jet}}}",
-    "energy": "$\\braket{E_{\mu}^{\\text{jet}} - E_{0}^{\\text{jet}}}",
-    "pt": "$\\braket{p_{T,\mu}^{\\text{jet}} - p_{T,0}^{\\text{jet}}}"
+    "mass": "$\\braket{m_{\mu}^{\\text{jet}} - m_{0}^{\\text{jet}}}$ [GeV]",
+    "energy": "$\\braket{E_{\mu}^{\\text{jet}} - E_{0}^{\\text{jet}}}$ [GeV]",
+    "pt": "$\\braket{p_{T,\mu}^{\\text{jet}} - p_{T,0}^{\\text{jet}}}$ [GeV]"
 }
 def mean_quantity_diff(jet_data, pile_up_data, MUs, max_event_num = max_event_num, max_jet_no=1000):
     """
@@ -131,12 +131,12 @@ def mean_quantity_diff(jet_data, pile_up_data, MUs, max_event_num = max_event_nu
         data_y[1][ind] += E_total
         data_y[2][ind] += p_T_total
         print(f"End mu = {mu}")
-    for name,data in zip(["Mass ", "Energy", "pT"], data_y):
+    for name,data in zip(["Mass", "Energy", "pT"], data_y):
         fig  = plt.figure(figsize=(8,6))
         plt.plot(MUs, data)
         plt.savefig(f"{CWD}/data/plots/Mean_{name}_diff.pdf", format="pdf")
         plt.xlabel("$\mu$")
-        plt.ylabel(y_qlabel[lower(name)])
+        plt.ylabel(y_qlabel[name.lower()])
         plt.xlim(0, np.max(MUs))
         plt.ylim(0 if 0 < np.min(data) else np.min(data), np.max(data))
         plt.ylabel(f"{name}")
@@ -144,5 +144,5 @@ def mean_quantity_diff(jet_data, pile_up_data, MUs, max_event_num = max_event_nu
 # Array of jet etas and phis
 # jet_centres = tt_int[:,4:6]
 # tt_masked = [delta_R(jet_centre, tt)]
-mus = np.linspace(1,20,10).astype(int)
+mus = np.linspace(1,20,20).astype(int)
 mean_quantity_diff(tt, pile_up, mus, max_jet_no=100)
