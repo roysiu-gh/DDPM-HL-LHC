@@ -17,6 +17,8 @@ from calculate_quantities import COM_eta_phi, delta_R, p_magnitude, pseudorapidi
 from data_loading import select_event
 from process_data import wrap_phi
 
+mpl.rcParams.update(MPL_GLOBAL_PARAMS)
+
 PDG_IDS = {
     0: r"$\gamma$ (Photon)",
     11: r"$e^-$ (Electron)",
@@ -40,7 +42,7 @@ GLOBAL_CMAP = {pid: cmap(i) for i, pid in enumerate(unique_abs_pdgids)}
 def plot_detections(
     tt_bar,
     pile_ups=None,
-    # plot_data,
+    # jet_data,
     centre=(0,0),
     jet_no=0,
     filename="eta_phi",
@@ -75,16 +77,16 @@ def plot_detections(
     """
     # Retrieve data for the specified jet and calculate momenta and angles
     if pile_ups is not None:
-        plot_data = np.concatenate((tt_bar, pile_ups), axis=0)
+        jet_data = np.concatenate((tt_bar, pile_ups), axis=0)
     else:
-        plot_data = tt_bar
-    px = plot_data[:, 3]
-    py = plot_data[:, 4]
-    pz = plot_data[:, 5]
+        jet_data = tt_bar
+    px = jet_data[:, 3]
+    py = jet_data[:, 4]
+    pz = jet_data[:, 5]
     pmag = p_magnitude(px, py, pz)
     if verbose:
         print("Constituent momenta magnitudes:\n", pmag)
-    pz = plot_data[:, 5]
+    pz = jet_data[:, 5]
     eta = pseudorapidity(pmag, pz)
     phi = to_phi(px, py)
     phi = wrap_phi(centre[1], phi)
@@ -93,12 +95,12 @@ def plot_detections(
     radius_sizes = 0.1 * base_radius_size * (pmag / np.max(pmag))
 
     # Get colours from global cmap based on PDG IDs
-    pdgid_values = plot_data[:, 1]
+    pdgid_values = jet_data[:, 1]
     colours = [GLOBAL_CMAP.get(abs(pid), "black") for pid in pdgid_values]
 
     fig, ax = plt.subplots(figsize=(8, 6))
     ax.set_title(
-        f"$\phi$ vs $\eta$ of jet {jet_no}, tot_num_parts={len(plot_data)}, mmtm_crop={momentum_display_proportion}"
+        f"$\phi$ vs $\eta$ of jet {jet_no}, tot_num_parts={len(jet_data)}, mmtm_crop={momentum_display_proportion}"
     )
     ax.set_xlabel("$\eta$")
     ax.set_ylabel("$\phi$")
@@ -151,7 +153,7 @@ def plot_detections(
         # Add legend for pdgid values and particle names
         # NB this will show all particles in the collision in the legend, even if cropped out (is desired behaviour)
         handles = []
-        pdgid_values = plot_data[:, 1]  # Reset toget all PDG IDs again, in case some lost from the crop
+        pdgid_values = jet_data[:, 1]  # Reset toget all PDG IDs again, in case some lost from the crop
         unique_detected_pdgids = sorted(set(pdgid_values))
         unique_abs_detected_pdgids = sorted(set(abs(i) for i in pdgid_values))
 
@@ -195,96 +197,10 @@ def plot_detections(
     plt.savefig(f"{cwd}/data/plots/test/{filename}.pdf",)
     plt.close()
 
-def count_hist(
-    eta,
-    phi,
-    jet_no,
-    bins=(10,10),
-    filename="eta_phi",
-    cwd=".",
-) -> None:
+
+def generate_2dhist(tt_data, pile_up_data, jet_no,mu, bins=32, boundary = 1.0, hist_plot="energy", energies = None, cwd = ".", filename = "eta_phi") -> None:
     """
-    Plots a 2D histogram of particle counts (colour map) against eta and phi bins.
-
-    Parameters
-    ----------
-    eta: ndarray
-        1D dataset containing particle etas
-    phi: ndarray
-        1D dataset containing particle phis
-    jet_no: int,
-        Select jet to plot (only useful for the title)
-    bins: (int, int)
-        Number of (eta,phi) bins to use. Default: (10,10).
-    filename: str
-        The name to save the file as (PNG & PDF)
-
-    Returns
-    ---------
-    None
-    """
-    plt.figure(figsize=(8, 6))
-    plt.hist2d(eta, phi, bins=bins, cmap='Greys')  # Use grayscale colormap
-
-    # Customizing the plot
-    plt.colorbar(label='Number of Particles')  # Colorbar to show counts
-    plt.xlabel(r'$\eta$')
-    plt.ylabel(r'$\phi$')
-    plt.title(
-        f"$\phi$ vs $\eta$ of jet {jet_no}, tot_num_parts={len(eta)}, bins={bins}"
-    )
-    plt.savefig(f"{cwd}/data/hist/{filename}_bins_{bins}_hist.png", dpi=600)
-    plt.savefig(f"{cwd}/data/hist/{filename}_bins_{bins}_hist.pdf",)
-    plt.close()
-
-def energy_hist(
-    eta,
-    phi,
-    energies,
-    jet_no,
-    bins=(10,10),
-    filename="eta_phi",
-    cwd=".",
-) -> None:
-    """
-    Plots a 2D histogram of particle counts (colour map) against eta and phi bins.
-
-    Parameters
-    ----------
-    eta: ndarray
-        1D dataset containing particle etas
-    phi: ndarray
-        1D dataset containing particle phis
-    energies: ndarray
-        1D dataset containing particle energies (to use for histogram)
-    jet_no: int,
-        Select jet to plot (only useful for the title)
-    bins: (int, int)
-        Number of (eta,phi) bins to use. Default: (10,10).
-    filename: str
-        The name to save the file as (PNG & PDF)
-
-    Returns
-    ---------
-    None
-    """
-    plt.figure(figsize=(8, 6))
-    plt.hist2d(eta, phi, bins=bins, weights=energies, cmap='Greys_r',)
-
-    # Customizing the plot
-    plt.colorbar(label='Energies')  # Colorbar to show counts
-    plt.xlabel(r'$\eta$')
-    plt.ylabel(r'$\phi$')
-    plt.title(
-        f"$\phi$ vs $\eta$ of jet {jet_no}, tot_num_parts={len(eta)}, bins={bins}"
-    )
-    plt.savefig(f"{cwd}/data/hist/{filename}_bins_{bins}_energies.png", dpi=600)
-    plt.savefig(f"{cwd}/data/hist/{filename}_bins_{bins}_energies.pdf",)
-    plt.close()
-
-def generate_2dhist(tt_data, pile_up_data, jet_no, bins, mu, hist_plot="energy", energies = None) -> None:
-    """
-    This functions wraps all routines needed to generate a 2D histogram of particle counts.
+    This functions wraps all routines needed to generate a 2D histogram of particle counts or energies.
 
     This allows looping over mu, the number of pile ups, which allows us to generate a sequence of noisier images.
 
@@ -313,30 +229,35 @@ def generate_2dhist(tt_data, pile_up_data, jet_no, bins, mu, hist_plot="energy",
     """
     selected_pile_ups = []
     event_IDS = np.random.choice(pile_up_data[:,0], size = mu).astype(int)
-    # event_IDS = np.array([10, 11])
-    print(f"Jet_No: {jet_no}, event IDs: {event_IDS}")
+    # 10: no exist, 11 exist
+    # event_IDS = np.array([10])
+    # print(f"Jet_No: {jet_no}, event IDs: {event_IDS}")
     selected_pile_ups = [select_event(pile_up_data, event_ID, filter=True) for event_ID in event_IDS]
     # selected_pile_ups now contain 2D arrays
     selected_pile_ups = np.vstack(selected_pile_ups)
     # Remove invalid pile_ups
     selected_pile_ups = selected_pile_ups[selected_pile_ups[:,0] != -1]
-    # print(selected_pile_ups)
-    # chosen_pile_up = select_event(pile_up_data, mu)
-    plot_data = select_event(tt_data, jet_no, max_data_rows=MAX_DATA_ROWS)
-    # print(chosen_pile_up)
-    # print(plot_data)
-    # data = np.concatenate((plot_data, selected_pile_ups), axis=1) 
-    data = np.vstack((plot_data,selected_pile_ups))
+    jet_data = select_event(tt_data, jet_no, max_data_rows=MAX_DATA_ROWS)
+    data = np.vstack((jet_data,selected_pile_ups))
+    # data = selected_pile_ups
+    print(len(data))
+    # data = jet_data
     px = data[:,3]
     py = data[:,4]
     pz = data[:,5]
     pmag = p_magnitude(px, py, pz)
     # All columns are passed in, so make sure to select last 3 columns for the 3-momenta
-    jet_centre = COM_eta_phi(data[:,3:])
-    # print("centre", jet_centre)
+    # Find jet axis
+    jet_centre = COM_eta_phi(jet_data[:,3:])
+    # Wrap jet axis phi between -1, 1
+    print("centre", jet_centre)
     phis = to_phi(px, py)
+    # Wrap particles w.r.t unwrapped jet axis
     phis = wrap_phi(jet_centre[1], phis)
+    # jet_centre_wrapped = wrap_phi(jet_centre[1], jet_centre[1])
+    # print("wrapped centre", jet_centre_wrapped)
     etas = pseudorapidity(pmag, pz)
+    #shift particles so wrapped jet_axis is centred at (0,0)
     centre,etas_c, phis_c = centre_on_jet(jet_centre, etas, phis)
     # Delta R is calculated relative to the jet centre, and over all particles including pile-up
     bounded_momenta, etas2, phis2 = delta_R(centre, px, py, pz, etas_c, phis_c)
@@ -347,9 +268,6 @@ def generate_2dhist(tt_data, pile_up_data, jet_no, bins, mu, hist_plot="energy",
     # masked_energies = np.sqrt(masked_data[:,3]*masked_data[:,3] + masked_data[:,4]*masked_data[:,4]+masked_data[:,5]*masked_data[:,5])
     # # energy_normed = normalize_data(energies, energy_norm_factor)
     # Unnormalised energies
-    energies = np.sqrt(masked_px*masked_px + masked_py*masked_py+masked_pz*masked_pz)
-    # energy_max = np.max(energies)
-    # energy_norm_denom = (energy_max - energy_min)
     
     # print("etas2", etas2)
     # print("phis2", phis2)
@@ -366,10 +284,37 @@ def generate_2dhist(tt_data, pile_up_data, jet_no, bins, mu, hist_plot="energy",
     # energy_normed = (masked_energies - energy_min) / energy_norm_denom
     # print(energy_normed)
     # Function appends "_hist" to the end
+    plt.figure(figsize=(8, 6))
+    plt.xlabel(r'$\Delta\eta$')
+    plt.ylabel(r'$\Delta\phi$')
+    plt.title(
+        f"$\Delta\phi$ vs $\Delta\eta$ of jet {jet_no}, tot_num_parts={len(etas2)}, bins={bins}"
+    )
+    created_bins = np.mgrid[-boundary:boundary:bins*1j]
+    save_str = f"{cwd}/data/hist/{filename}_jet{jet_no}_MU{mu}_bins_{bins}"
     if hist_plot == "count":
-        count_hist(etas2, phis2, jet_no=jet_no,bins=bins, filename=f"eta_phi_jet{jet_no}_MU{mu}")
-    elif hist_plot == "energy": 
-        energy_hist(etas2, phis2, jet_no=jet_no,bins=bins, energies=energies, filename=f"eta_phi_jet{jet_no}_MU{mu}")
+        plt.hist2d(etas2, phis2, bins=(created_bins, created_bins), cmap='Greys_r',)
+        plt.colorbar(label='Count') 
+        plt.savefig(f"{save_str}_count.png", dpi=600)
+        plt.savefig(f"{save_str}_count.pdf",)
+        # count_hist(etas2, phis2, jet_no=jet_no,bins=bins, filename=f"eta_phi_jet{jet_no}_MU{mu}")
+        plt.close()
+    elif hist_plot == "energy" and energies is not None:
+        # energies = np.sqrt(masked_px*masked_px + masked_py*masked_py+masked_pz*masked_pz)
+        plt.hist2d(etas2, phis2, bins=(created_bins, created_bins), weights=energies, cmap='Greys_r',)
+        plt.colorbar(label='Energies') 
+        plt.savefig(f"{save_str}_energies.png", dpi=600)
+        plt.savefig(f"{save_str}_energies.pdf",)
+        plt.close()
+    elif hist_plot == "energy" and energies is None:
+        energies = np.sqrt(masked_px*masked_px + masked_py*masked_py+masked_pz*masked_pz)
+        plt.hist2d(etas2, phis2, bins=(created_bins, created_bins), weights=energies, cmap='Greys_r',)
+        plt.colorbar(label='Energies') 
+        plt.savefig(f"{save_str}_energies.png", dpi=600)
+        plt.savefig(f"{save_str}_energies.pdf",)
+        plt.close()
     else:
+        plt.clf()
+        plt.close()
         raise ValueError("Error: hist_plot was not 'count' or 'energy'.\n")
     

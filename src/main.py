@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sb
 import sys
 # Local imports
-from visualisation import plot_detections, count_hist, energy_hist, generate_2dhist
+from visualisation import plot_detections, generate_2dhist
 from data_loading import select_event
 from calculate_quantities import *
 from process_data import foo_bar
@@ -52,7 +52,7 @@ tt = np.genfromtxt(
 #     tt_bar=delta_R(jet_centre, plot_data)[0],
 #     centre = jet_centre,
 #     pile_ups=selected_pile_ups,
-#     jet_no=jet_no,
+#     jet_no=493,
 #     filename=f"eta_phi_jet{jet_no}_deltaR_Mu = {mu}",
 #     base_radius_size=100,
 #     momentum_display_proportion=1,
@@ -73,9 +73,10 @@ tt = np.genfromtxt(
 # BINS = (16,16)
 jet_no = 493
 # === EXAMPLE USAGE OF GENERATING IMAGES ===
-BINS = [(32,32)]
+
+BINS = [32]
 for BIN in BINS:
-    generate_2dhist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BIN, mu=1100)
+    generate_2dhist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BIN, mu=200)
     # generate_2dhist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BIN, mu=10000)
     # generate_2dhist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BIN, mu=50, hist_plot="count")
 #  Use new visualisaton to just distinguish pile up and jet

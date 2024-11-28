@@ -2,9 +2,16 @@ import numpy as np
 
 def p_magnitude(px, py, pz):
     """
-    p is a 2D NumPy array where each element is a particle's 3-momentum
-
     This function simply calculates and returns the magnitude of the momenta of each particle and returns it as a 1D NumPy array
+    Parameters
+    ----------
+    px,py,pz: ndarray
+        1D arrays of x-momentum, y-momentum and z-momentum of particles.
+         
+    Returns
+    ------
+    p_mag: ndarray
+        1D array of same shape containing 3-momentum magnitude 
     """
     return np.sqrt(px*px + py*py + pz*pz)
 
@@ -149,14 +156,9 @@ def delta_R(centre, px, py, pz, etas, phis, boundary=1.0):
     phis: ndarray
         1D dataset of particle phis, with particles whose \Delta R is greater than `boundary` removed.
     """
-    # Calculate eta, phi of every particle in data
-    # p_mag = p_magnitude(jet_px, jet_py, jet_pz)
-    # etas = pseudorapidity(p_mag, jet_pz)
-    # phis = to_phi(jet_px, jet_py)
-    # phis = wrap_phi(centre[1], phis)
     # Calculate the values of Delta R for each particle
     # If jet axis centred on (0,0), this just evaluates to the etas, phis. See
-    # centre_on_axis(centre)
+    # centre_on_jet(centre, eta, phi)
     delta_eta= (etas - centre[0])
     delta_phi = (phis - centre[1])
     crit_R = np.sqrt(delta_eta*delta_eta + delta_phi*delta_phi)
