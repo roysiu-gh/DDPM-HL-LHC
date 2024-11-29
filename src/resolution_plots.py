@@ -6,7 +6,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import time
+import multiprocessing
+start_time_global = time.time()
+
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
+
 pile_up = np.genfromtxt(
     PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
 )
@@ -83,11 +87,11 @@ max_event_num = np.unique(pile_up_indices).astype(int)
 jet_masses = tt_int[:,6]
 jet_pt = tt_int[:,7]
 y_qlabel = {
-    "mass": "$\\braket{m_{\mu}^{\\text{jet}} - m_{0}^{\\text{jet}}}$ [GeV]",
-    "energy": "$\\braket{E_{\mu}^{\\text{jet}} - E_{0}^{\\text{jet}}}$ [GeV]",
-    "pt": "$\\braket{p_{T,\mu}^{\\text{jet}} - p_{T,0}^{\\text{jet}}}$ [GeV]"
+    "mass": r'$\braket{m_{\mu}^{\text{jet}} - m_{0}^{\text{jet}}}$ [GeV]',
+    "energy": r"$\braket{E_{\mu}^{\text{jet}} - E_{0}^{\text{jet}}}$ [GeV]",
+    "pt": r"$\braket{p_{T,\mu}^{\text{jet}} - p_{T,0}^{\text{jet}}}$ [GeV]"
 }
-def mean_quantity_diff(jet_data, pile_up_data, MUs, max_event_num = max_event_num, max_jet_no=1000):
+def mean_quantity_diff(params):
     """
     For a given number of pile_up events mu in MUs
 
@@ -100,56 +104,79 @@ def mean_quantity_diff(jet_data, pile_up_data, MUs, max_event_num = max_event_nu
     Find the average by dividing by the number of jets (not jet particles)
     """
     # max_jet_no = np.shape(np.unique(jet_data[:,0]))[0]
-    data_y = np.zeros((3, len(MUs)))
     # Store jet COMS
-    for ind,mu in enumerate(MUs):
-        print("Begin mu = ", mu)
-        m_total = 0
-        E_total = 0
-        p_T_total = 0
-        start_time = time.time()
-        # print("ind", ind)
-        # sys.exit(1)
-        
-        # TODO: mask
-        event_IDS = np.random.choice(max_event_num, size = (max_jet_no, mu))
-        # valid_event_IDS = event_IDS[np.isin(event_IDS, max_event_num)]        print(event_IDS)
-        for jet_no in range(0, max_jet_no):
-            selected_events = event_IDS[jet_no]
-            # print(f"Jet_No: {jet_no}, event IDs: {event_IDS}")
-            # selected_pile_ups = [select_event(pile_up_data, event_ID, filter=False) for event_ID in event_IDS]
-            # selected_pile_ups = np.vstack(selected_pile_ups)
-            # exit(1)
-            selected_pile_ups = pile_up_data[np.isin(pile_up_indices, selected_events)]
-            cd = select_event(jet_data, jet_no)
-            m, E, p_T = quantity_diff(cd[:,0], cd[:,3],cd[:,4],cd[:,5], jet_masses[jet_no], jet_pt[jet_no], selected_pile_ups[:,3], selected_pile_ups[:,4], selected_pile_ups[:,5])
-            m_total += m
-            E_total += E
-            p_T_total += p_T
-        # Mean over number of jets
-        end_time = time.time()
-        print(f"Loop mu = {mu}: {end_time - start_time} seconds")
-        m_total /= max_jet_no
-        E_total /= max_jet_no
-        p_T_total /= max_jet_no
-        # print(m_total)
-        # print(E_total)
-        # print(p_T_total)
-        data_y[0][ind] += m_total
-        data_y[1][ind] += E_total
-        data_y[2][ind] += p_T_total
-        print(f"End mu = {mu}")
-    for name,data in zip(["Mass", "Energy", "pT"], data_y):
-        fig  = plt.figure(figsize=(8,6))
-        plt.plot(MUs, data)
-        plt.savefig(f"{CWD}/data/plots/Mean_{name}_diff.pdf", format="pdf")
-        plt.xlabel("$\mu$")
-        plt.ylabel(y_qlabel[name.lower()])
-        plt.xlim(0, np.max(MUs))
-        plt.ylim(0 if 0 < np.min(data) else np.min(data), np.max(data))
-        plt.close()
+    jet_data, pile_up_data, mu, max_event_num, max_jet_no, jet_masses, jet_pt = params
+    # for ind,mu in enumerate(MUs):
+    print("Begin mu = ", mu)
+    m_total = 0
+    E_total = 0
+    p_T_total = 0
+    start_time = time.time()
+    # print("ind", ind)
+    # sys.exit(1)
+    
+    # TODO: mask
+    event_IDS = np.random.choice(max_event_num, size = (max_jet_no, mu))
+    # valid_event_IDS = event_IDS[np.isin(event_IDS, max_event_num)]        print(event_IDS)
+    for jet_no in range(0, max_jet_no):
+        selected_events = event_IDS[jet_no]
+        # print(f"Jet_No: {jet_no}, event IDs: {event_IDS}")
+        # selected_pile_ups = [select_event(pile_up_data, event_ID, filter=False) for event_ID in event_IDS]
+        # selected_pile_ups = np.vstack(selected_pile_ups)
+        # exit(1)
+        selected_pile_ups = pile_up_data[np.isin(pile_up_indices, selected_events)]
+        cd = select_event(jet_data, jet_no)
+        m, E, p_T = quantity_diff(cd[:,0], cd[:,3],cd[:,4],cd[:,5], jet_masses[jet_no], jet_pt[jet_no], selected_pile_ups[:,3], selected_pile_ups[:,4], selected_pile_ups[:,5])
+        m_total += m
+        E_total += E
+        p_T_total += p_T
+    # Mean over number of jets
+    end_time = time.time()
+    print(f"Loop mu = {mu}: {end_time - start_time} seconds")
+    m_total /= max_jet_no
+    E_total /= max_jet_no
+    p_T_total /= max_jet_no
+    # print(m_total)
+    # print(E_total)
+    # print(p_T_total)
+    print(f"End mu = {mu}")
+    return m_total, E_total, p_T_total
+
 # Array of jet etas and phis
 # jet_centres = tt_int[:,4:6]
 # tt_masked = [delta_R(jet_centre, tt)]
-mus = np.linspace(1,50,3).astype(int)
-mean_quantity_diff(tt, pile_up, mus, max_jet_no=100)
+rlim = 50
+MUs = np.linspace(0,rlim,rlim+1, dtype=np.int64)
+max_jet_no = 1000
+data_y = np.zeros((3, len(MUs)))
+
+tasks = [
+        (tt, pile_up, mu, pile_up_indices, max_jet_no, jet_masses, jet_pt) 
+        for mu in MUs
+    ]
+
+with multiprocessing.Pool() as pool:
+    results = pool.map(mean_quantity_diff, tasks)
+pool.close()
+pool.join()
+
+for ind, (m_total, E_total, p_T_total) in enumerate(results):
+    data_y[0][ind] += m_total
+    data_y[1][ind] += E_total
+    data_y[2][ind] += p_T_total
+
+for name,data in zip(["Mass", "Energy", "pT"], data_y):
+    fig  = plt.figure(figsize=(8,6))
+    plt.tight_layout()
+    plt.plot(MUs, data)
+    plt.xlabel("$\mu$")
+    plt.ylabel(y_qlabel[name.lower()])
+    plt.xlim(0, np.max(MUs))
+    plt.ylim(0 if 0 < np.min(data) else np.min(data), np.max(data))
+    plt.savefig(f"{CWD}/data/plots/Mean_{name}_diff.pdf", format="pdf")
+    plt.close()
+
+end_time_global = time.time()
+print(f"Globaal runtime: {end_time_global - start_time_global} seconds")
+
+# mean_quantity_diff(tt, pile_up, mus, max_jet_no=1000)
