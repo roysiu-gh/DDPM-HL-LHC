@@ -5,7 +5,7 @@ from calculate_quantities import *
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-
+import time
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 pile_up = np.genfromtxt(
     PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
@@ -78,7 +78,8 @@ def quantity_diff(jet_ids, jet_px, jet_py, jet_pz, jet_mass, jet_pt, pu_px, pu_p
     # elif q == "eta":
 
     # elif q == "phi"
-max_event_num = np.unique(pile_up[:,0]).astype(int)
+pile_up_indices = pile_up[:,0]
+max_event_num = np.unique(pile_up_indices).astype(int)
 jet_masses = tt_int[:,6]
 jet_pt = tt_int[:,7]
 y_qlabel = {
@@ -103,24 +104,31 @@ def mean_quantity_diff(jet_data, pile_up_data, MUs, max_event_num = max_event_nu
     # Store jet COMS
     for ind,mu in enumerate(MUs):
         print("Begin mu = ", mu)
-        # print("ind", ind)
-        # sys.exit(1)
         m_total = 0
         E_total = 0
         p_T_total = 0
+        start_time = time.time()
+        # print("ind", ind)
+        # sys.exit(1)
+        
         # TODO: mask
-        for jet_no in range(0, max_jet_no + 1):
-            event_IDS = np.random.choice(max_event_num, size = mu)
-            event_IDS = event_IDS[np.isin(event_IDS, max_event_num)]
+        event_IDS = np.random.choice(max_event_num, size = (max_jet_no, mu))
+        # valid_event_IDS = event_IDS[np.isin(event_IDS, max_event_num)]        print(event_IDS)
+        for jet_no in range(0, max_jet_no):
+            selected_events = event_IDS[jet_no]
             # print(f"Jet_No: {jet_no}, event IDs: {event_IDS}")
-            selected_pile_ups = [select_event(pile_up_data, event_ID, filter=False) for event_ID in event_IDS]
-            selected_pile_ups = np.vstack(selected_pile_ups)[:,3:]
+            # selected_pile_ups = [select_event(pile_up_data, event_ID, filter=False) for event_ID in event_IDS]
+            # selected_pile_ups = np.vstack(selected_pile_ups)
+            # exit(1)
+            selected_pile_ups = pile_up_data[np.isin(pile_up_indices, selected_events)]
             cd = select_event(jet_data, jet_no)
-            m, E, p_T = quantity_diff(cd[:,0], cd[:,3],cd[:,4],cd[:,5], jet_masses[jet_no], jet_pt[jet_no], selected_pile_ups[:,0], selected_pile_ups[:,1], selected_pile_ups[:,2])
+            m, E, p_T = quantity_diff(cd[:,0], cd[:,3],cd[:,4],cd[:,5], jet_masses[jet_no], jet_pt[jet_no], selected_pile_ups[:,3], selected_pile_ups[:,4], selected_pile_ups[:,5])
             m_total += m
             E_total += E
             p_T_total += p_T
         # Mean over number of jets
+        end_time = time.time()
+        print(f"Loop mu = {mu}: {end_time - start_time} seconds")
         m_total /= max_jet_no
         E_total /= max_jet_no
         p_T_total /= max_jet_no
@@ -139,10 +147,9 @@ def mean_quantity_diff(jet_data, pile_up_data, MUs, max_event_num = max_event_nu
         plt.ylabel(y_qlabel[name.lower()])
         plt.xlim(0, np.max(MUs))
         plt.ylim(0 if 0 < np.min(data) else np.min(data), np.max(data))
-        plt.ylabel(f"{name}")
         plt.close()
 # Array of jet etas and phis
 # jet_centres = tt_int[:,4:6]
 # tt_masked = [delta_R(jet_centre, tt)]
-mus = np.linspace(1,20,20).astype(int)
+mus = np.linspace(1,50,3).astype(int)
 mean_quantity_diff(tt, pile_up, mus, max_jet_no=100)
