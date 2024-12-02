@@ -7,7 +7,7 @@ from PIL import Image
 
 # Local imports
 from data_loading import select_event
-from calculate_quantities import COM_eta_phi, p_magnitude, delta_R
+from calculate_quantities import get_axis_eta_phi, p_magnitude, delta_R
 from process_data import collection_crop_and_centre, unit_square_the_unit_circle
 
 SAVE_PATH = f"{CWD}/data/plots/bmaps/"
@@ -72,7 +72,7 @@ jet_pz = tt[:, 5]
 energies = p_magnitude(jet_px, jet_py, jet_pz)
 print("energies", energies)
 
-centre = COM_eta_phi(jet)
+centre = get_axis_eta_phi(jet)
 print("centre", centre)
 p_mag = p_magnitude(jet_px, jet_py, jet_pz)
 etas = pseudorapidity(p_mag, jet_pz)

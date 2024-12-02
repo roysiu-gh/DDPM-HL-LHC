@@ -73,7 +73,7 @@ def plot_1D_hist(name, data, xlog=False, is_jet=False, plot_params=plot_params, 
     if xlog:
         plt.xscale("log")
         plot_params = plot_params.copy()
-        plot_params["bins"] = np.logspace(np.log10(0.1),np.log10(3.0), 50)
+        # plot_params["bins"] = np.logspace(np.log10(0.1),np.log10(3.0), 50)
     sb.histplot(data, **plot_params)
     # plt.title(f"Normalised Histogram of {num} {parjet} {name}")
     plt.xlabel(name, fontsize=label_fontsize)

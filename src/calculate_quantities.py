@@ -73,7 +73,7 @@ def contraction(time_like_0, space_like_1, space_like_2, space_like_3):
     """Calculate the contractions."""
     return time_like_0**2 - (space_like_1**2 + space_like_2**2 + space_like_3**2)
 
-def COM_eta_phi(p):
+def get_axis_eta_phi(p):
     """Find COM of a collection of particles.
     Uses the massless limit (m << E).
 
@@ -93,11 +93,13 @@ def COM_eta_phi(p):
     eta = pseudorapidity(jet_mag, total_p[2])
     phi = to_phi(total_p[0], total_p[1])
     return eta, phi
+
 def centre_on_jet(centre, eta, phi):
     """ 
     Centres the jet axis on (0,0) and shifts all particles by this displacement.
     """
     return (0,0), eta - centre[0], phi - centre[1]
+
 def delta_R(centre, px, py, pz, etas, phis, boundary=1.0):
     """
     This function takes in particle information, and removes particles whose \Delta R(eta,phi) > 1.0 and returns all the others.

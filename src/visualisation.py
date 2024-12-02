@@ -13,7 +13,7 @@ from matplotlib.colors import ListedColormap
 from matplotlib.patches import Patch, Circle
 
 # Local imports
-from calculate_quantities import COM_eta_phi, delta_R, p_magnitude, pseudorapidity, to_phi,centre_on_jet
+from calculate_quantities import get_axis_eta_phi, delta_R, p_magnitude, pseudorapidity, to_phi,centre_on_jet
 from data_loading import select_event
 from process_data import wrap_phi
 
@@ -248,7 +248,7 @@ def generate_2dhist(tt_data, pile_up_data, jet_no,mu, bins=32, boundary = 1.0, h
     pmag = p_magnitude(px, py, pz)
     # All columns are passed in, so make sure to select last 3 columns for the 3-momenta
     # Find jet axis
-    jet_centre = COM_eta_phi(jet_data[:,3:])
+    jet_centre = get_axis_eta_phi(jet_data[:,3:])
     # Wrap jet axis phi between -1, 1
     print("centre", jet_centre)
     phis = to_phi(px, py)
