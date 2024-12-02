@@ -28,7 +28,7 @@ pTs = np.sqrt(pxs**2 + pys**2)
 phis = to_phi(pxs, pys)
 pTs = to_pT(pxs, pys)
 
-p2s = contraction2(energies, pxs, pys, pzs)
+p2s = contraction(energies, pxs, pys, pzs)
 masses = np.sqrt(p2s)
 
 # Save to CSV
@@ -39,7 +39,7 @@ np.savetxt(f"{save_path}/ttbar_extended.csv", combined_array, delimiter=",", hea
 
 jet_ids_unique = np.unique(jet_ids)
 jet_enes, jet_pxs, jet_pys, jet_pzs = get_jet_four_momentum(jet_ids, pxs, pys, pzs)
-jet_p2s = contraction2(jet_enes, jet_pxs, jet_pys, jet_pzs)
+jet_p2s = contraction(jet_enes, jet_pxs, jet_pys, jet_pzs)
 jet_masses = np.sqrt(jet_p2s)
 jet_etas = pseudorapidity(jet_enes, jet_pzs)
 jet_phis = to_phi(jet_pxs, jet_pys)
@@ -72,7 +72,7 @@ pTs = np.sqrt(pxs**2 + pys**2)
 phis = to_phi(pxs, pys)
 pTs = to_pT(pxs, pys)
 
-p2s = contraction2(energies, pxs, pys, pzs)
+p2s = contraction(energies, pxs, pys, pzs)
 masses = np.sqrt(p2s)
 
 # Save to CSV

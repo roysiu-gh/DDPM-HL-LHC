@@ -2,9 +2,16 @@ import numpy as np
 
 def p_magnitude(px, py, pz):
     """
-    p is a 2D NumPy array where each element is a particle's 3-momentum
-
     This function simply calculates and returns the magnitude of the momenta of each particle and returns it as a 1D NumPy array
+    Parameters
+    ----------
+    px,py,pz: ndarray
+        1D arrays of x-momentum, y-momentum and z-momentum of particles.
+         
+    Returns
+    ------
+    p_mag: ndarray
+        1D array of same shape containing 3-momentum magnitude 
     """
     return np.sqrt(px*px + py*py + pz*pz)
 
@@ -62,40 +69,7 @@ def calculate_four_momentum_massless(jet_ids, px, py, pz):
 
     return jet_ene, jet_px, jet_py, jet_pz
 
-def get_jet_four_momentum(jet_ids, px, py, pz):
-    """Calculate the total 4-momentum of jets. Massless limit. Natural units."""
-    if not (len(jet_ids) == len(px) == len(py) == len(pz)):
-        raise ValueError(f"All input arrays must have same length. Got {len(jet_ids)}, {len(px)}, {len(py)}, {len(pz)}.")
-    
-    max_jet_id = int( np.max(jet_ids) )
-    total_four_momenta = np.array([np.zeros(4) for _ in range(max_jet_id + 1)])
-
-    jet_ene = np.zeros(max_jet_id + 1)
-    jet_px = np.zeros(max_jet_id + 1)
-    jet_py = np.zeros(max_jet_id + 1)
-    jet_pz = np.zeros(max_jet_id + 1)
-
-    # Calculate total 4mmtm for each jet
-    for jet_id, px_val, py_val, pz_val in zip(jet_ids, px, py, pz):
-        energy = np.linalg.norm([px_val, py_val, pz_val])
-        four_mmtm = np.array([energy, px_val, py_val, pz_val])
-        total_four_momenta[int(jet_id)] += four_mmtm
-
-        jet_ene[int(jet_id)] += energy
-        jet_px[int(jet_id)] += px_val
-        jet_py[int(jet_id)] += py_val
-        jet_pz[int(jet_id)] += pz_val
-    return jet_ene, jet_px, jet_py, jet_pz
-
-def contraction(vec):
-    """Calculate the contractions of an array of 4vecs."""
-    time_like_0 = vec[:, 0]
-    space_like_1 = vec[:, 1]
-    space_like_2 = vec[:, 2]
-    space_like_3 = vec[:, 3]
-    return time_like_0**2 - (space_like_1**2 + space_like_2**2 + space_like_3**2)
-
-def contraction2(time_like_0, space_like_1, space_like_2, space_like_3):
+def contraction(time_like_0, space_like_1, space_like_2, space_like_3):
     """Calculate the contractions."""
     return time_like_0**2 - (space_like_1**2 + space_like_2**2 + space_like_3**2)
 
@@ -119,8 +93,12 @@ def COM_eta_phi(p):
     eta = pseudorapidity(jet_mag, total_p[2])
     phi = to_phi(total_p[0], total_p[1])
     return eta, phi
-
-def delta_R(centre, jet_data, boundary=1.0):
+def centre_on_jet(centre, eta, phi):
+    """ 
+    Centres the jet axis on (0,0) and shifts all particles by this displacement.
+    """
+    return (0,0), eta - centre[0], phi - centre[1]
+def delta_R(centre, px, py, pz, etas, phis, boundary=1.0):
     """
     This function takes in particle information, and removes particles whose \Delta R(eta,phi) > 1.0 and returns all the others.
 
@@ -130,8 +108,10 @@ def delta_R(centre, jet_data, boundary=1.0):
         The jet beam axis. 2-tuple in the form (eta,phi) used for calculating \Delta R
     jet_no : int
         Which jet to select from data
-    data: ndarray
-        2D dataset containing particle information.
+    eta: ndarray
+        1D dataset containing particle \eta s.
+    phi: ndarray
+        1D dataset containing particle \phi s.
     boundary: float, default = 1.0
         The maximum \Delta R for which particles with a larger value will be cut off.
     Returns
@@ -143,17 +123,11 @@ def delta_R(centre, jet_data, boundary=1.0):
     phis: ndarray
         1D dataset of particle phis, with particles whose \Delta R is greater than `boundary` removed.
     """
-    # Calculate eta, phi of every particle in data
-    jet_px = tt[:, 3]
-    jet_py = tt[:, 4]
-    jet_pz = tt[:, 5]
-
-    p_mag = p_magnitude(jet_px, jet_py, jet_pz)
-    etas = pseudorapidity(p_mag, jet_data[:,5])
-    phis = to_phi(jet_data[:,3], jet_data[:,4])
     # Calculate the values of Delta R for each particle
+    # If jet axis centred on (0,0), this just evaluates to the etas, phis. See
+    # centre_on_jet(centre, eta, phi)
     delta_eta= (etas - centre[0])
     delta_phi = (phis - centre[1])
     crit_R = np.sqrt(delta_eta*delta_eta + delta_phi*delta_phi)
-    bounded_momenta = jet_data[crit_R <= boundary]
+    bounded_momenta = np.array([px[crit_R <= boundary], py[crit_R <= boundary], pz[crit_R <= boundary]])
     return bounded_momenta, etas[crit_R <= boundary], phis[crit_R <= boundary]
