@@ -38,7 +38,7 @@ np.savetxt(f"{save_path}/ttbar_extended.csv", combined_array, delimiter=",", hea
 # ===== Create Jet Data (t-tbar) ===== #
 
 jet_ids_unique = np.unique(jet_ids)
-jet_enes, jet_pxs, jet_pys, jet_pzs = get_jet_four_momentum(jet_ids, pxs, pys, pzs)
+jet_enes, jet_pxs, jet_pys, jet_pzs = calculate_four_momentum_massless(jet_ids, pxs, pys, pzs)
 jet_p2s = contraction(jet_enes, jet_pxs, jet_pys, jet_pzs)
 jet_masses = np.sqrt(jet_p2s)
 jet_etas = pseudorapidity(jet_enes, jet_pzs)
