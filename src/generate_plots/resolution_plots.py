@@ -1,6 +1,6 @@
 # from visualisation import plot_detections, count_hist, energy_hist, generate_2dhist
 from config import *
-from data_loading import select_event
+from dataset_ops.data_loading import select_event
 from calculate_quantities import *
 import numpy as np
 import matplotlib.pyplot as plt

@@ -6,9 +6,9 @@ import numpy as np
 from PIL import Image
 
 # Local imports
-from data_loading import select_event
-from calculate_quantities import get_axis_eta_phi, p_magnitude, delta_R
-from process_data import collection_crop_and_centre, unit_square_the_unit_circle
+from dataset_ops.data_loading import select_event
+from calculate_quantities import *
+from dataset_ops.process_data import unit_square_the_unit_circle, wrap_phi
 
 SAVE_PATH = f"{CWD}/data/plots/bmaps/"
 

@@ -1,6 +1,6 @@
 import numpy as np
 from calculate_quantities import to_phi, pseudorapidity, p_magnitude
-from data_loading import select_event
+from dataset_ops.data_loading import select_event
 
 def unit_square_the_unit_circle(etas, phis):
     """Squeezes unit circle (eta^2 + phi^2 = 1) into unit square [0,1]x[0,1]."""
@@ -59,9 +59,9 @@ def foo_bar(jet_nos, tt_data, pile_up_data, mu: int):
         selected_jet = select_event(tt_data, jet_no, filter=False)
         selected_jet = np.delete(selected_jet, [1,2], axis=1)
 
-        selected_jet_px = tt[:, 1]
-        selected_jet_py = tt[:, 2]
-        selected_jet_pz = tt[:, 3]
+        selected_jet_px = tt_data[:, 1]
+        selected_jet_py = tt_data[:, 2]
+        selected_jet_pz = tt_data[:, 3]
 
         X_pmag = p_magnitude(selected_jet_px, selected_jet_py, selected_jet_pz)
         X_etas = pseudorapidity(X_pmag, selected_jet[:,-1])

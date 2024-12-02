@@ -8,10 +8,10 @@ import matplotlib.pyplot as plt
 import seaborn as sb
 import sys
 # Local imports
-from visualisation import plot_detections, generate_2dhist
-from data_loading import select_event
+from generate_plots.visualisation import plot_detections, generate_2dhist
+from dataset_ops.data_loading import select_event
 from calculate_quantities import *
-from process_data import foo_bar
+from dataset_ops.process_data import foo_bar
 # ======= global matplotlib params =====
 plt.rcParams["text.usetex"] = False  # Use LaTeX for rendering text
 plt.rcParams["font.size"] = 12  # Set default font size (optional)

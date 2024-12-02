@@ -14,8 +14,8 @@ from matplotlib.patches import Patch, Circle
 
 # Local imports
 from calculate_quantities import get_axis_eta_phi, delta_R, p_magnitude, pseudorapidity, to_phi,centre_on_jet
-from data_loading import select_event
-from process_data import wrap_phi
+from dataset_ops.data_loading import select_event
+from dataset_ops.process_data import wrap_phi
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
