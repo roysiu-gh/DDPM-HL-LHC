@@ -45,7 +45,7 @@ jet_mass = jets[:, 6]
 jet_pT = jets[:, 7]
 
 # Define the save path and plot characteristics
-save_path = f"{CWD}/data/plots/1D_histograms/"
+save_path = f"{CWD}/data/plots/1D_histograms/mu0/"
 DEFAULT_PLOT_PARAMS = {
     "bins": 100,
     "color": "skyblue",
