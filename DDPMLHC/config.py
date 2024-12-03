@@ -1,9 +1,15 @@
 import os
 from cycler import cycler
 CWD = os.getcwd()
+
+# 1 initial paths
 PILEUP_PATH = f"{CWD}/data/1-initial/pileup.csv"
 TT_PATH = f"{CWD}/data/1-initial/ttbar.csv"
-TT_INTER_PATH = f"{CWD}/data/2-intermediate/ttbar_jets.csv"
+
+# 2 intermediate paths
+PILEUP_EXT_PATH = f"{CWD}/data/2-intermediate/pileup_extended.csv"
+TT_EXT_PATH = f"{CWD}/data/2-intermediate/ttbar_extended.csv"
+JET_PATH = f"{CWD}/data/2-intermediate/ttbar_jets.csv"
 
 MAX_DATA_ROWS = None
 
