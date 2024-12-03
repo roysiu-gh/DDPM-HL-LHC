@@ -1,6 +1,6 @@
 import numpy as np
-from calculate_quantities import to_phi, pseudorapidity, p_magnitude
-from dataset_ops.data_loading import select_event
+from DDPMLHC.calculate_quantities import to_phi, pseudorapidity, p_magnitude
+from DDPMLHC.dataset_ops.data_loading import select_event
 
 def unit_square_the_unit_circle(etas, phis):
     """Squeezes unit circle (eta^2 + phi^2 = 1) into unit square [0,1]x[0,1]."""

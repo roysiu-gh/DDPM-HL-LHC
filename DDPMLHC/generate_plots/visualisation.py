@@ -3,7 +3,7 @@ Contains all plotting and visualisation tools.
 """
 
 # Import constants
-from config import *
+from DDPMLHC.config import *
 
 # Package imports
 import numpy as np
@@ -13,9 +13,9 @@ from matplotlib.colors import ListedColormap
 from matplotlib.patches import Patch, Circle
 
 # Local imports
-from calculate_quantities import get_axis_eta_phi, delta_R, p_magnitude, pseudorapidity, to_phi,centre_on_jet
-from dataset_ops.data_loading import select_event
-from dataset_ops.process_data import wrap_phi
+from DDPMLHC.calculate_quantities import get_axis_eta_phi, delta_R, p_magnitude, pseudorapidity, to_phi,centre_on_jet
+from DDPMLHC.dataset_ops.data_loading import select_event
+from DDPMLHC.dataset_ops.process_data import wrap_phi
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 

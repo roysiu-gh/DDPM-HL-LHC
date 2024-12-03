@@ -1,7 +1,7 @@
 """1D Histograms"""
 
 # Import constants
-from config import *
+from DDPMLHC.config import *
 
 # Package imports
 import numpy as np
@@ -11,11 +11,10 @@ import seaborn as sb
 from cycler import cycler
 
 # Local imports
-from calculate_quantities import *
+from DDPMLHC.calculate_quantities import *
 line_thickness = 3.0
 axes_thickness = 4.0
 leg_size = 30
-
 
 # ======= global matplotlib params =====
 custom_params ={'axes.grid' : False}

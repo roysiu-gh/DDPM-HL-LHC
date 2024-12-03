@@ -1,13 +1,13 @@
 """Make intermediate data to avoid repeated computation."""
 
 # Import constants
-from config import *
+from DDPMLHC.config import *
 
 # Package imports
 import numpy as np
 
 # Local imports
-from calculate_quantities import *
+from DDPMLHC.calculate_quantities import *
 
 save_path = f"{CWD}/data/2-intermediate/"
 

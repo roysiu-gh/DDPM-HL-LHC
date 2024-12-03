@@ -1,5 +1,5 @@
 # Import constants
-from config import *
+from DDPMLHC.config import *
 
 # Package imports
 import numpy as np

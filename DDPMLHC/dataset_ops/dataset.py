@@ -1,5 +1,5 @@
 # Import constants
-from src.config import *
+from DDPMLHC.config import *
 
 # Package imports
 import csv
@@ -8,7 +8,7 @@ import numpy as np
 from pprint import pprint
 
 # Local imports
-from src.calculate_quantities import p_magnitude
+from DDPMLHC.calculate_quantities import p_magnitude
 
 CSV_FILE = ""
 ETA_IDX = 5
