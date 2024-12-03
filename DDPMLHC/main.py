@@ -8,10 +8,11 @@ import matplotlib.pyplot as plt
 import seaborn as sb
 import sys
 # Local imports
-from generate_plots.visualisation import plot_detections, generate_2dhist
-from dataset_ops.data_loading import select_event
-from calculate_quantities import *
-from dataset_ops.process_data import foo_bar
+from DDPMLHC.config import *
+from DDPMLHC.generate_plots.visualisation import plot_detections, generate_2dhist
+from DDPMLHC.dataset_ops.data_loading import select_event
+from DDPMLHC.calculate_quantities import *
+from DDPMLHC.dataset_ops.process_data import write_combined_csv
 # ======= global matplotlib params =====
 plt.rcParams["text.usetex"] = False  # Use LaTeX for rendering text
 plt.rcParams["font.size"] = 12  # Set default font size (optional)
@@ -25,7 +26,7 @@ tt = np.genfromtxt(
 )
 
 # === Example Usage of foo_bar ===
-# foo_bar([0,1], pile_up, 2)
+# write_combined_csv([0,1], tt, pile_up, 300)
 
 #################################################################################
 # jet_no = 10
