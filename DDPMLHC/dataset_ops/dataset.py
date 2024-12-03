@@ -93,18 +93,10 @@ class SingleNIDFromCSV(SingleNID):
 
         self._LID_ptr += 1
         return out
-    
-# csv_file_pathf"{CWD}/data/plots/bmaps/"
 
-# with SingleNIDFromCSV(csv_file_path=f"{CWD}/data/test_combined.csv") as dataset:
-#     print("Opened")
-#     for i in dataset:
-#         pprint(i)
-#         print()
-#         time.sleep(1)
-#     print("Closed")
 
-with SingleNIDFromCSV(csv_file_path=f"{CWD}/data/combined.csv") as dataset:
+
+with SingleNIDFromCSV(csv_file_path=f"{CWD}/data/2-intermediate/noisy_mu3.csv") as dataset:
     print("Opened")
     for i in dataset:
         pprint(i)
