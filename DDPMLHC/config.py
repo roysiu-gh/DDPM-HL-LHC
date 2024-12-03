@@ -19,14 +19,14 @@ MPL_GLOBAL_PARAMS = {
     'figure.dpi' : 600,
     'figure.figsize' : (3.375, 3),
     'figure.autolayout' : True, # tight layout (True) or not (False)
-    'axes.labelpad' : 1,
+    'axes.labelpad' : 5,
     'axes.xmargin' : 0,
     'axes.ymargin' : 0,
     'axes.grid' : False,
     # 'axes.autolimit_mode' : round_numbers, # set axis limits by rounding min/max values
     'axes.autolimit_mode' : 'data', # set axis limits as min/max values
-    'xtick.major.pad' : 3,
-    'ytick.major.pad' : 3,
+    'xtick.major.pad' : 5,
+    'ytick.major.pad' : 5,
     'xtick.labelsize': label_fontsize,
     'ytick.labelsize': label_fontsize,
     'lines.linewidth' : 1.3,

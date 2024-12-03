@@ -58,35 +58,89 @@ for jet_id in range(0, len(jet_enes), 132):
 
 # Define the save path and plot characteristics
 save_path = f"{CWD}/data/plots/1D_histograms/"
-plot_params = {
+DEFAULT_PLOT_PARAMS = {
     "bins": 100,
     "color": "skyblue",
     "edgecolor": "none",
     "kde": False,
     "stat": "density",  # Equivalent to `density=True` in plt.hist
 }
-def plot_1D_hist(name, data, xlog=False, is_jet=False, plot_params=plot_params, save_path=save_path, save_filename="out", x_min=0, x_max=None):
-    parjet = "Jets'" if is_jet else "Particles'"
-    num = len(data)
-    plt.figure(figsize=(10, 6))
-    if xlog:
-        plt.xscale("log")
-        plot_params = plot_params.copy()
-        # plot_params["bins"] = np.logspace(np.log10(0.1),np.log10(3.0), 50)
-    sb.histplot(data, **plot_params)
-    # plt.title(f"Normalised Histogram of {num} {parjet} {name}")
-    plt.xlabel(name, fontsize=label_fontsize)
-    plt.xlim(left=x_min, right=x_max)
-    plt.ylabel("Frequency Density", fontsize=label_fontsize)
-    # plt.grid(axis="y", alpha=0.75)
-    plt.tight_layout()
-    plt.savefig(f"{save_path}/{save_filename}.png", dpi=600)
+
+def plot_1D_hist(name, data, xlog=False, plot_params=DEFAULT_PLOT_PARAMS, save_path=save_path, save_filename="out", x_min=None, x_max=None, ax=None):
+    """Plot a 1D histogram. Optionally plot on a provided axis."""
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(10, 6))  # Create a new figure if no axes provided
+    else:
+        fig = None  # If ax provided, do not create a new figure
+    
+    # Copy default params if not already assigned
+    plot_params.update({ k:v for k, v in DEFAULT_PLOT_PARAMS.items() if k not in plot_params})
+
+    sb.histplot(data, ax=ax,log_scale=(xlog, False), **plot_params)
+
+    ax.set_xlabel(name, fontsize=16)
+    ax.set_ylabel("Frequency Density", fontsize=16)
+    ax.set_xlim(left=x_min, right=x_max)
+
+    if save_path and fig:
+        fig.savefig(f"{save_path}/{save_filename}.png", dpi=600)
+
+    return fig, ax
+
+# Plot singles
 
 print("Plotting histograms...")
-plot_1D_hist("Momentum Magnitudes [GeV]",           p_mag,      save_filename="p_mag",                      xlog=True)
-plot_1D_hist("Pseudorapidity $\eta$",                                   eta,        save_filename="eta",                      x_min=None)
-plot_1D_hist("Transverse Momentum $p_T$ [GeV]",     p_T,        save_filename="p_T",                        xlog=True)
+plot_1D_hist("Momentum Magnitudes [GeV]",
+             p_mag,         save_filename="p_mag",      xlog=True)
+plot_1D_hist("Pseudorapidity $\eta$",
+             eta,           save_filename="eta",)
+plot_1D_hist("Transverse Momentum $p_T$ [GeV]",
+             p_T,           save_filename="p_T",        xlog=True)
 
-plot_1D_hist("($p^2$) [GeV$^2$]",                     jet_p2s,     save_filename="jet_p2",     is_jet=True,    xlog=True)
-plot_1D_hist("Mass [GeV]",                          jet_masses,   save_filename="jet_mass",   is_jet=True,    x_max=250)
+plot_1D_hist("JetMass [GeV]",
+             jet_masses,    save_filename="jet_mass",   x_max=250)
+
+
+# Plot multiplot
+
+print("Plotting multiplot...")
+fig, ax = plot_1D_hist(
+    name="Momentum Magnitudes [GeV]",
+    data=p_mag,
+    xlog=True,
+    save_filename="p_mag",
+)
+plt.show()
+
+hist_data = [
+    ("Momentum Magnitudes [GeV]", p_mag, {"xlog": True}),
+    ("Pseudorapidity $\eta$", eta, {}),
+    ("Transverse Momentum $p_T$ [GeV]", p_T, {"xlog": True}),
+
+    ("Jet Mass [GeV]", jet_masses, {"x_max": 250}),
+]
+
+num_rows, num_cols = 2, 3
+fig, axes = plt.subplots(num_rows, num_cols, figsize=(15, 10))
+axes = axes.flatten()  # Flatten to iterate over axes
+
+for ax, (name, data, params) in zip(axes, hist_data):
+    xlog = params.pop("xlog", False)  # Extract xlog parameter
+    x_max = params.pop("x_max", None)  # Extract x_max parameter
+    params["color"] = "skyblue"
+    params["stat"] = "density"  # Equivalent to `density=True` in plt.hist
+    plot_1D_hist(
+        name=name,
+        data=data,
+        xlog=xlog,
+        x_max=x_max,
+        ax=ax,
+        plot_params=params,
+    )
+
+# Remove unused subplots
+for i in range(len(hist_data), len(axes)): fig.delaxes(axes[i])
+plt.tight_layout()
+plt.savefig(f"{save_path}/grid_histograms.png", dpi=600)
+
 print("Done.")
