@@ -54,7 +54,7 @@ DEFAULT_PLOT_PARAMS = {
     "stat": "density",  # Equivalent to `density=True` in plt.hist
 }
 
-def plot_1D_hist(name, data, xlog=False, plot_params=DEFAULT_PLOT_PARAMS, save_path=save_path, save_filename="out", x_min=None, x_max=None, ax=None):
+def plot_1D_hist(name, data, xlog=False, plot_params=DEFAULT_PLOT_PARAMS, save_path=save_path, save_filename="out", x_min=None, x_max=None, ax=None, plot_ylabel=True):
     """Plot a 1D histogram. Optionally plot on a provided axis."""
     if ax is None:
         fig, ax = plt.subplots(figsize=(10, 6))  # Create a new figure if no axes provided
@@ -67,8 +67,11 @@ def plot_1D_hist(name, data, xlog=False, plot_params=DEFAULT_PLOT_PARAMS, save_p
     sb.histplot(data, ax=ax,log_scale=(xlog, False), **plot_params)
 
     ax.set_xlabel(name, fontsize=16)
-    ax.set_ylabel("Frequency Density", fontsize=16)
     ax.set_xlim(left=x_min, right=x_max)
+    if plot_ylabel:  # Show y-label only for leftmost plots
+        ax.set_ylabel("Frequency Density", fontsize=16)
+    else:  # No ylabel for other plots
+        ax.set_ylabel("")
 
     if save_path and fig:
         fig.savefig(f"{save_path}/{save_filename}.png", dpi=600)
@@ -105,17 +108,19 @@ num_rows, num_cols = 2, 3
 fig, axes = plt.subplots(num_rows, num_cols, figsize=(15, 10))
 axes = axes.flatten()  # Flatten to iterate over axes
 
-for ax, (name, data, params) in zip(axes, hist_data):
+for idx, (ax, (name, data, params)) in enumerate(zip(axes, hist_data)):
     xlog = params.pop("xlog", False)  # Extract xlog parameter
     x_max = params.pop("x_max", None)  # Extract x_max parameter
     params["color"] = "skyblue"
     params["stat"] = "density"  # Equivalent to `density=True` in plt.hist
+    plot_ylabel = True if idx % num_cols == 0 else False  # Show y-label only for leftmost plots
     plot_1D_hist(
         name=name,
         data=data,
         xlog=xlog,
         x_max=x_max,
         ax=ax,
+        plot_ylabel=plot_ylabel,
         plot_params=params,
     )
 
