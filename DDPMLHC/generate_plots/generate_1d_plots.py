@@ -36,7 +36,7 @@ pz = tt[:, 3]
 eta = tt[:, 4]
 phi = tt[:, 5]
 p_T = tt[:, 6]
-p_mag = p_magnitude(px, py, pz)
+p = p_magnitude(px, py, pz)
 
 # Jets
 jet_eta = jets[:, 4]
@@ -77,35 +77,28 @@ def plot_1D_hist(name, data, xlog=False, plot_params=DEFAULT_PLOT_PARAMS, save_p
 
 # Plot singles
 
-print("Plotting histograms...")
-plot_1D_hist("Momentum Magnitudes [GeV]",
-             p_mag,         save_filename="p_mag",      xlog=True)
-plot_1D_hist("Pseudorapidity $\eta$",
-             eta,           save_filename="eta",)
-plot_1D_hist("Transverse Momentum $p_T$ [GeV]",
-             p_T,           save_filename="p_T",        xlog=True)
+print("Plotting single histograms...")
 
-plot_1D_hist("JetMass [GeV]",
-             jet_mass,    save_filename="jet_mass",   x_max=250)
+plot_1D_hist("Momentum $p$ [GeV]", p, save_filename="p", xlog=True)
+plot_1D_hist("Pseudorapidity $\eta$", eta, save_filename="eta", )
+plot_1D_hist("Transverse Momentum $p_T$ [GeV]", p_T, save_filename="pT", xlog=True)
 
+plot_1D_hist("Jet Mass [GeV]", jet_mass, save_filename="jet_mass", x_max=250)
+plot_1D_hist("Jet Pseudorapidity $\eta$", jet_eta, save_filename="jet_eta", plot_params={"bins": 50})
+plot_1D_hist("Jet Transverse Momentum $p_T$ [GeV]", jet_pT, save_filename="jet_pT", xlog=True, plot_params={"bins": 50})
 
 # Plot multiplot
 
-print("Plotting multiplot...")
-fig, ax = plot_1D_hist(
-    name="Momentum Magnitudes [GeV]",
-    data=p_mag,
-    xlog=True,
-    save_filename="p_mag",
-)
-plt.show()
+print("Plotting combined histogram...")
 
 hist_data = [
-    ("Momentum Magnitudes [GeV]", p_mag, {"xlog": True}),
+    ("Momentum $p$ [GeV]", p, {"xlog": True}),
     ("Pseudorapidity $\eta$", eta, {}),
     ("Transverse Momentum $p_T$ [GeV]", p_T, {"xlog": True}),
 
     ("Jet Mass [GeV]", jet_mass, {"x_max": 250}),
+    ("Jet Pseudorapidity $\eta$", jet_eta, {"bins": 50}),
+    ("Jet Transverse Momentum $p_T$ [GeV]", jet_pT, {"xlog": True, "bins": 50})
 ]
 
 num_rows, num_cols = 2, 3
