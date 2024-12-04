@@ -17,10 +17,10 @@ BMAP_SQUARE_SIDE_LENGTH = 64
 label_fontsize = 16
 tick_fontsize = 24
 
+    # 'font.family' : r'Computer Modern Roman',
 MPL_GLOBAL_PARAMS = {
     'text.usetex' : True, # use latex text
     'text.latex.preamble' : r'\usepackage{type1cm}\usepackage{braket}\usepackage{amssymb}\usepackage{amsmath}\usepackage{txfonts}', # latex packages
-    'font.family' : r'Computer Modern Roman',
     'font.size' : 24,
     'figure.dpi' : 600,
     'figure.figsize' : (3.375, 3),

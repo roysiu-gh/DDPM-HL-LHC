@@ -80,17 +80,19 @@ def plot_detections(
         jet_data = np.concatenate((tt_bar, pile_ups), axis=0)
     else:
         jet_data = tt_bar
+    
+    print("Len jet: ", len(tt_bar))
+    print("Len pileup: ", len(pile_ups))
     px = jet_data[:, 3]
     py = jet_data[:, 4]
     pz = jet_data[:, 5]
     pmag = p_magnitude(px, py, pz)
     if verbose:
         print("Constituent momenta magnitudes:\n", pmag)
-    pz = jet_data[:, 5]
     eta = pseudorapidity(pmag, pz)
     phi = to_phi(px, py)
     phi = wrap_phi(centre[1], phi)
-
+    centre,eta, phi= centre_on_jet(centre, eta, phi)
     # Variable dot sizes, prop to pmag
     radius_sizes = 0.1 * base_radius_size * (pmag / np.max(pmag))
 
@@ -99,9 +101,7 @@ def plot_detections(
     colours = [GLOBAL_CMAP.get(abs(pid), "black") for pid in pdgid_values]
 
     fig, ax = plt.subplots(figsize=(8, 6))
-    ax.set_title(
-        f"$\phi$ vs $\eta$ of jet {jet_no}, tot_num_parts={len(jet_data)}, mmtm_crop={momentum_display_proportion}"
-    )
+    
     ax.set_xlabel("$\eta$")
     ax.set_ylabel("$\phi$")
     # Set phi range to +/-pi and adjust tick marks
@@ -140,7 +140,8 @@ def plot_detections(
     # Plot centres
     # FIX THIS FOR CROPS
     # dot_sizes = radius_sizes*radius_sizes  # Dots sizes based on area so scale as square
-
+    # [px, py, pz], eta, phi = delta_R(centre, px, py, pz, eta, phi)
+    bound = len(tt_bar)
     if pdgids:
         # Plot circles prop to width
         ax.scatter(eta, phi, color=colours, marker='.', edgecolors='none', s=0)
@@ -180,25 +181,28 @@ def plot_detections(
         ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
         ax.legend(handles=handles, loc="center left", bbox_to_anchor=(1, 0.5))
     else:
-        ax.scatter(eta[0:len(tt_bar)], phi[0:len(tt_bar)], color="red", marker='.', edgecolors='none', s=0, label="Jet particles")
-        for pdgid, e, p, color, radius in zip(pdgid_values, eta[:len(tt_bar)], phi[:len(tt_bar)], colours, radius_sizes):
+        ax.scatter(eta[0:bound], phi[0:bound], color="red", marker='.', edgecolors='none', s=0, label="Jet particles")
+        for pdgid, e, p, color, radius in zip(pdgid_values, eta[0:bound], phi[0:bound], colours, radius_sizes):
             # linestyle = "-" if pdgid >= 0 else "--"
             circle = Circle((e, p), radius=radius/100, edgecolor="red", facecolor='none', linewidth=linewidth, fill=False)
             ax.add_patch(circle)
-        if pile_ups is not None:
-            ax.scatter(eta[len(tt_bar):], phi[len(tt_bar):], color="lightblue", marker='.', edgecolors='none', s=0, label="Pile-ups")
-            for pdgid, e, p, color, radius in zip(pdgid_values, eta[len(tt_bar):], phi[len(tt_bar):], colours, radius_sizes):
-            # linestyle = "-" if pdgid >= 0 else "--"
-                circle = Circle((e, p), radius=radius/100, edgecolor="blue", facecolor='none', linewidth=linewidth, fill=False)
+        # if pile_ups is not None:
+        ax.scatter(eta[bound:], phi[bound:], color="lightblue", marker='.', edgecolors='none', s=0, label="Pile-ups")
+        for pdgid, e, p, color, radius in zip(pdgid_values, eta[bound:], phi[bound:], colours, radius_sizes):
+        # linestyle = "-" if pdgid >= 0 else "--"
+            circle = Circle((e, p), radius=radius/100, edgecolor="blue", facecolor='none', linewidth=linewidth, fill=False)
             ax.add_patch(circle)
 
         ax.legend()
     # plt.savefig(f"{cwd}/data/plots/test/{filename}.png", dpi=1000)
+    ax.set_title(
+        f"$\phi$ vs $\eta$ of jet {jet_no}, tot_num_parts={len(eta)}, mmtm_crop={momentum_display_proportion}"
+    )
     plt.savefig(f"{cwd}/data/plots/test/{filename}.pdf",)
     plt.close()
 
 
-def generate_2dhist(tt_data, pile_up_data, jet_no,mu, bins=32, boundary = 1.0, hist_plot="energy", energies = None, cwd = ".", filename = "eta_phi") -> None:
+def generate_2dhist(tt_data, pile_up_data, jet_no,mu, max_event_id, bins=32, boundary = 1.0, hist_plot="energy", energies = None, cwd = ".", filename = "eta_phi") -> None:
     """
     This functions wraps all routines needed to generate a 2D histogram of particle counts or energies.
 
@@ -227,20 +231,24 @@ def generate_2dhist(tt_data, pile_up_data, jet_no,mu, bins=32, boundary = 1.0, h
 
     Returns: None
     """
-    selected_pile_ups = []
     event_IDS = np.random.choice(pile_up_data[:,0], size = mu).astype(int)
-    # 10: no exist, 11 exist
-    # event_IDS = np.array([10])
+    # max_event_id = np.max(pile_up_data[:,0])
+    
+    # for jet_no in jet_nos:
+    # event_IDS = np.random.randint(low = 0, high = max_event_id, size = mu, dtype=np.int32)
+    # event_IDS = np.mgrid[0:(mu-1):(mu)*1j]
     # print(f"Jet_No: {jet_no}, event IDs: {event_IDS}")
-    selected_pile_ups = [select_event(pile_up_data, event_ID, filter=True) for event_ID in event_IDS]
+    selected_pile_ups2 = [select_event(pile_up_data, event_ID, filter=True) for event_ID in event_IDS]
     # selected_pile_ups now contain 2D arrays
-    selected_pile_ups = np.vstack(selected_pile_ups)
+    selected_pile_ups2 = np.vstack(selected_pile_ups2)
     # Remove invalid pile_ups
-    selected_pile_ups = selected_pile_ups[selected_pile_ups[:,0] != -1]
+    selected_pile_ups = selected_pile_ups2[selected_pile_ups2[:,0] != -1]
+    false_ids = np.size(selected_pile_ups2, axis=0) - np.size(selected_pile_ups, axis=0)
+    print("Number of false Pile-up IDs: ",false_ids)
     jet_data = select_event(tt_data, jet_no, max_data_rows=MAX_DATA_ROWS)
     data = np.vstack((jet_data,selected_pile_ups))
     # data = selected_pile_ups
-    print(len(data))
+    # print(len(data))
     # data = jet_data
     px = data[:,3]
     py = data[:,4]
@@ -261,6 +269,7 @@ def generate_2dhist(tt_data, pile_up_data, jet_no,mu, bins=32, boundary = 1.0, h
     centre,etas_c, phis_c = centre_on_jet(jet_centre, etas, phis)
     # Delta R is calculated relative to the jet centre, and over all particles including pile-up
     bounded_momenta, etas2, phis2 = delta_R(centre, px, py, pz, etas_c, phis_c)
+    # bounded_momenta, etas2, phis2 = [px,py,pz], etas_c, phis_c
     masked_px = bounded_momenta[0]
     masked_py = bounded_momenta[1]
     masked_pz = bounded_momenta[2]
@@ -288,7 +297,7 @@ def generate_2dhist(tt_data, pile_up_data, jet_no,mu, bins=32, boundary = 1.0, h
     plt.xlabel(r'$\Delta\eta$')
     plt.ylabel(r'$\Delta\phi$')
     plt.title(
-        f"$\Delta\phi$ vs $\Delta\eta$ of jet {jet_no}, tot_num_parts={len(etas2)}, bins={bins}"
+        f"$\Delta\phi$ vs $\Delta\eta$ of jet {jet_no}, real_parts={len(etas2)}+false_pileup={false_ids}, bins={bins}"
     )
     created_bins = np.mgrid[-boundary:boundary:bins*1j]
     save_str = f"{cwd}/data/hist/{filename}_jet{jet_no}_MU{mu}_bins_{bins}"
