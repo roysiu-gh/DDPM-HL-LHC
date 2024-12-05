@@ -96,13 +96,6 @@ hist_data = [
     ("Jet Transverse Momentum $p_T$ [GeV]", jet_pT, True, {"bins": 50}, save_path, "jet_pT", None, 1000)
 ]
 
-# plot_1D_hist("Momentum $p$ [GeV]", p, save_filename="p", xlog=True)
-# plot_1D_hist("Pseudorapidity $\eta$", eta, save_filename="eta", )
-# plot_1D_hist("Transverse Momentum $p_T$ [GeV]", p_T, save_filename="pT", xlog=True)
-
-# plot_1D_hist("Jet Mass [GeV]", jet_mass, save_filename="jet_mass", x_max=250)
-# plot_1D_hist("Jet Pseudorapidity $\eta$", jet_eta, save_filename="jet_eta", plot_params={"bins": 50})
-# plot_1D_hist("Jet Transverse Momentum $p_T$ [GeV]", jet_pT, save_filename="jet_pT", xlog=True, plot_params={"bins": 50})
 print("Plotting single histograms...")
 
 with multiprocessing.Pool(processes=len(hist_data)) as pool:

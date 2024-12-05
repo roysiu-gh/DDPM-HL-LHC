@@ -137,5 +137,5 @@ def write_combined_csv(jet_nos, tt_data, pile_up_data, mu):
     pool.close()
     pool.join()
     combined_array = np.vstack(results)
-    np.savetxt(f"data/noisy_mu{mu}.csv.gz", combined_array, delimiter=",", header="NID,LID,px,py,pz,d_eta,d_phi,pmag", comments="", fmt="%d,%d,%.10f,%.10f,%.10f,%.10f,%.10f,%.10f")
+    np.savetxt(f"data/noisy_mu{mu}.csv", combined_array, delimiter=",", header="NID,LID,px,py,pz,d_eta,d_phi,pmag", comments="", fmt="%d,%d,%.10f,%.10f,%.10f,%.10f,%.10f,%.10f")
 

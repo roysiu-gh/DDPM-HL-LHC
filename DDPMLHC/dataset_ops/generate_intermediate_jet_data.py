@@ -24,7 +24,6 @@ pxs, pys, pzs = tt[:, 3], tt[:, 4], tt[:, 5]
 
 energies = p_magnitude(pxs, pys, pzs)
 etas = pseudorapidity(energies, pzs)
-pTs = np.sqrt(pxs**2 + pys**2)
 phis = to_phi(pxs, pys)
 pTs = to_pT(pxs, pys)
 
