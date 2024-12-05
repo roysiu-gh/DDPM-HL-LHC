@@ -96,6 +96,8 @@ def plot_wrapper(entry):
         x_min=x_min,
         x_max=x_max,
         plot_params=plot_params,
+        save_path=entry["save_path"],
+        save_filename=entry["save_filename"],
     )
 
 # Single plot function
@@ -123,6 +125,7 @@ def plot_combined_histograms(hist_data, save_path):
         plot_1D_hist(
             name=entry["name"],
             data=entry["data"],
+            save_filename=entry["save_filename"],
             xlog=xlog,
             x_min=x_min,
             x_max=x_max,
@@ -138,49 +141,103 @@ def plot_combined_histograms(hist_data, save_path):
     plt.savefig(f"{save_path}/grid_histograms.png", dpi=600)
 
 
-
-# Define hist_data once with unified structure
-hist_data = [
+hist_data_cleanjets = [
     {
         "name": "Momentum $p$ [GeV]",
         "data": p,
         "plot_params": {"xlog": True},
-        "save_filename": "p"
+        "save_filename": "p",
+        "save_path": save_path,
     },
     {
         "name": "Pseudorapidity $\eta$",
         "data": eta,
         "plot_params": {},
-        "save_filename": "eta"
+        "save_filename": "eta",
+        "save_path": save_path,
     },
     {
         "name": "Transverse Momentum $p_T$ [GeV]",
         "data": p_T,
         "plot_params": {"xlog": True},
-        "save_filename": "pT"
+        "save_filename": "pT",
+        "save_path": save_path,
     },
     {
         "name": "Jet Mass [GeV]",
         "data": jet_mass,
         "plot_params": {"x_max": 250},
-        "save_filename": "jet_mass"
+        "save_filename": "jet_mass",
+        "save_path": save_path,
     },
     {
         "name": "Jet Pseudorapidity $\eta$",
         "data": jet_eta,
         "plot_params": {"bins": 50},
-        "save_filename": "jet_eta"
+        "save_filename": "jet_eta",
+        "save_path": save_path,
     },
     {
         "name": "Jet Transverse Momentum $p_T$ [GeV]",
         "data": jet_pT,
         "plot_params": {"xlog": True, "bins": 50, "x_max": 1000},
-        "save_filename": "jet_pT"
+        "save_filename": "jet_pT",
+        "save_path": save_path,
     }
 ]
 
-print("-- Plot clean jets")
-plot_single_histograms(hist_data, save_path)
-plot_combined_histograms(hist_data, save_path)
+for i in range(len(hist_data_cleanjets)):
+    hist_data_cleanjets[i]["save_path"] = save_path
+
+# print("-- Plot clean jets")
+# plot_single_histograms(hist_data_cleanjets, save_path)
+# plot_combined_histograms(hist_data_cleanjets, save_path)
+
+##############################################################################
+
+mu300_event_stats_path = f"{CWD}/data/2-intermediate/noisy_event_stats_mu300.csv"
+
+jets_mu300 = np.genfromtxt(
+    mu300_event_stats_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+)
+
+save_path = f"{CWD}/data/plots/1D_histograms/mu300/"
+
+# Jets
+jet_eta = jets_mu300[:, 4]
+jet_phi = jets_mu300[:, 5]
+jet_mass = jets_mu300[:, 6]
+jet_pT = jets_mu300[:, 7]
+
+hist_data_noisyjets_mu300 = [
+    {
+        "name": "Jet Mass [GeV]",
+        "data": jet_mass,
+        "plot_params": {},
+        "save_filename": "jet_mass",
+        "save_path": save_path,
+    },
+    {
+        "name": "Jet Pseudorapidity $\eta$",
+        "data": jet_eta,
+        "plot_params": {"bins": 50},
+        "save_filename": "jet_eta",
+        "save_path": save_path,
+    },
+    {
+        "name": "Jet Transverse Momentum $p_T$ [GeV]",
+        "data": jet_pT,
+        "plot_params": {"xlog": True, "bins": 50, "x_max": 1000},
+        "save_filename": "jet_pT",
+        "save_path": save_path,
+    }
+]
+
+for i in range(len(hist_data_noisyjets_mu300)):
+    hist_data_noisyjets_mu300[i]["save_path"] = save_path
+
+print("-- Plot noisy jets, mu=300")
+plot_single_histograms(hist_data_noisyjets_mu300, save_path)
+plot_combined_histograms(hist_data_noisyjets_mu300, save_path)
 
 print("Done.")
