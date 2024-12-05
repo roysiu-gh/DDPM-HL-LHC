@@ -115,6 +115,48 @@ def plot_combined_histograms(hist_data, save_path):
     plt.tight_layout()
     plt.savefig(f"{save_path}/multiple.png", dpi=600)
 
+def foobah(mu, event_stats_path=None):
+    if event_stats_path is None:
+        event_stats_path = f"{CWD}/data/2-intermediate/noisy_event_stats_mu{mu}.csv"
+    print(f"Doing mu = {mu}...")
+    events_dat = np.genfromtxt(
+        event_stats_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+    )
+    save_path = f"{CWD}/data/plots/1D_histograms/mu{mu}/"
+    event_eta = events_dat[:, 4]
+    event_mass = events_dat[:, 6]
+    event_pT = events_dat[:, 7]
+    
+    print("Final idx (#events - 1): ", events_dat[-1, 0])
+
+    list_of_params_foobar = [
+        {
+            "name": "Mass [GeV]",
+            "data": event_mass,
+            "plot_params": {"x_max": 250},
+            "save_filename": "event_mass",
+            "save_path": save_path,
+        },
+        {
+            "name": "Pseudorapidity $\eta$",
+            "data": event_eta,
+            "plot_params": {"bins": 50},
+            "save_filename": "event_eta",
+            "save_path": save_path,
+        },
+        {
+            "name": "Transverse Momentum $p_T$ [GeV]",
+            "data": event_pT,
+            "plot_params": {"xlog": True, "bins": 50, "x_max": 1000},
+            "save_filename": "event_pT",
+            "save_path": save_path,
+        }
+    ]
+
+    plot_single_histograms(list_of_params_foobar, save_path)
+    plot_combined_histograms(list_of_params_foobar, save_path)
+    print("Done mu = {mu}.\n")
+
 ##############################################################################
 
 # Load intermediate data
@@ -127,10 +169,8 @@ px = tt[:, 1]
 py = tt[:, 2]
 pz = tt[:, 3]
 eta = tt[:, 4]
-phi = tt[:, 5]
 p_T = tt[:, 6]
 p = p_magnitude(px, py, pz)
-
 
 # Define the save path and plot characteristics
 save_path = f"{CWD}/data/plots/1D_histograms/particles/"
@@ -159,156 +199,15 @@ hist_data_particles = [
     },
 ]
 
-for i in range(len(hist_data_particles)):
-    hist_data_particles[i]["save_path"] = save_path
-
-print("-- Plot clean jets")
+print("-- Plot particles")
 plot_single_histograms(hist_data_particles, save_path)
 plot_combined_histograms(hist_data_particles, save_path)
+print()
 
-##############################################################################
 
-jets = np.genfromtxt(
-    JET_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-jet_eta = jets[:, 4]
-jet_phi = jets[:, 5]
-jet_mass = jets[:, 6]
-jet_pT = jets[:, 7]
 
-save_path = f"{CWD}/data/plots/1D_histograms/mu0/"
-
-hist_data_cleanjets = [
-    {
-        "name": "Mass [GeV]",
-        "data": jet_mass,
-        "plot_params": {"x_max": 250},
-        "save_filename": "event_mass",
-        "save_path": save_path,
-    },
-    {
-        "name": "Pseudorapidity $\eta$",
-        "data": jet_eta,
-        "plot_params": {"bins": 50},
-        "save_filename": "event_eta",
-        "save_path": save_path,
-    },
-    {
-        "name": "Transverse Momentum $p_T$ [GeV]",
-        "data": jet_pT,
-        "plot_params": {"xlog": True, "bins": 50, "x_max": 1000},
-        "save_filename": "event_pT",
-        "save_path": save_path,
-    }
-]
-
-for i in range(len(hist_data_cleanjets)):
-    hist_data_cleanjets[i]["save_path"] = save_path
-
-print("-- Plot clean jets")
-plot_single_histograms(hist_data_cleanjets, save_path)
-plot_combined_histograms(hist_data_cleanjets, save_path)
-
-##############################################################################
-
-mu300_event_stats_path = f"{CWD}/data/2-intermediate/noisy_event_stats_mu300.csv"
-
-jets_mu300 = np.genfromtxt(
-    mu300_event_stats_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-
-save_path = f"{CWD}/data/plots/1D_histograms/mu300/"
-
-# Jets
-jet_eta = jets_mu300[:, 4]
-jet_phi = jets_mu300[:, 5]
-jet_mass = jets_mu300[:, 6]
-jet_pT = jets_mu300[:, 7]
-
-print("Final idx: ", jets_mu300[-1, 0])
-
-hist_data_noisyjets_mu300 = [
-    {
-        "name": "Mass [GeV]",
-        "data": jet_mass,
-        "plot_params": {},
-        "save_filename": "event_mass",
-        "save_path": save_path,
-    },
-    {
-        "name": "Pseudorapidity $\eta$",
-        "data": jet_eta,
-        "plot_params": {"bins": 50},
-        "save_filename": "event_eta",
-        "save_path": save_path,
-    },
-    {
-        "name": "Transverse Momentum $p_T$ [GeV]",
-        "data": jet_pT,
-        "plot_params": {"xlog": True, "bins": 50, "x_max": 1000},
-        "save_filename": "event_pT",
-        "save_path": save_path,
-    }
-]
-
-for i in range(len(hist_data_noisyjets_mu300)):
-    hist_data_noisyjets_mu300[i]["save_path"] = save_path
-
-print("-- Plot noisy jets, mu=300")
-plot_single_histograms(hist_data_noisyjets_mu300, save_path)
-plot_combined_histograms(hist_data_noisyjets_mu300, save_path)
-
-##############################################################################
-
-mu10_event_stats_path = f"{CWD}/data/2-intermediate/noisy_event_stats_mu10.csv"
-
-jets_mu10 = np.genfromtxt(
-    mu10_event_stats_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-
-save_path = f"{CWD}/data/plots/1D_histograms/mu10/"
-
-# Jets
-jet_eta = jets_mu10[:, 4]
-jet_phi = jets_mu10[:, 5]
-jet_mass = jets_mu10[:, 6]
-jet_pT = jets_mu10[:, 7]
-
-print("Final idx: ", jets_mu10[-1, 0])
-
-hist_data_noisyjets_mu10 = [
-    {
-        "name": "Mass [GeV]",
-        "data": jet_mass,
-        # "data": jet_pT,
-        "plot_params": {"xlog": True, "x_min": 1, "x_max": 300},
-        "save_filename": "event_mass",
-        "save_path": save_path,
-    },
-    {
-        "name": "Pseudorapidity $\eta$",
-        "data": jet_eta,
-        "plot_params": {"bins": 50},
-        "save_filename": "event_eta",
-        "save_path": save_path,
-    },
-    {
-        "name": "Transverse Momentum $p_T$ [GeV]",
-        "data": jet_pT,
-        # "data": jet_mass,
-        "plot_params": {"xlog": True, "bins": 50, "x_max": 1000},
-        "save_filename": "event_pT",
-        "save_path": save_path,
-    }
-]
-
-for i in range(len(hist_data_noisyjets_mu10)):
-    hist_data_noisyjets_mu10[i]["save_path"] = save_path
-
-print("-- Plot noisy jets, mu=10")
-plot_single_histograms(hist_data_noisyjets_mu10, save_path)
-plot_combined_histograms(hist_data_noisyjets_mu10, save_path)
-
-##############################################################################
+foobah(mu=0, event_stats_path=JET_PATH)
+foobah(mu=10)
+foobah(mu=300)
 
 print("Done.")
