@@ -4,7 +4,6 @@
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib.ticker import LogLocator
 import seaborn as sb
 import multiprocessing
 
@@ -83,63 +82,105 @@ def plot_1D_hist(name, data, xlog=False, plot_params=DEFAULT_PLOT_PARAMS, save_p
 
     return fig, ax
 
-# Plot singles
+def plot_wrapper(entry):
+    # Unpack the dictionary and pass as arguments
+    plot_params = entry.get("plot_params", {}).copy()  # Copy to avoid mutation
+    xlog = plot_params.pop("xlog", False)
+    x_min = plot_params.pop("x_min", None)
+    x_max = plot_params.pop("x_max", None)
 
-# print("Plotting single histograms...")
-hist_data = [
-    ("Momentum $p$ [GeV]", p, True, {}, save_path, "p"),
-    ("Pseudorapidity $\eta$", eta, False, {}, save_path, "eta"),
-    ("Transverse Momentum $p_T$ [GeV]", p_T, True, {}, save_path, "pT"),
-
-    ("Jet Mass [GeV]", jet_mass, False, {}, save_path, "jet_mass", None, 250),
-    ("Jet Pseudorapidity $\eta$", jet_eta, False, {"bins": 50}, save_path, "jet_eta"),
-    ("Jet Transverse Momentum $p_T$ [GeV]", jet_pT, True, {"bins": 50}, save_path, "jet_pT", None, 1000)
-]
-
-print("Plotting single histograms...")
-
-with multiprocessing.Pool(processes=len(hist_data)) as pool:
-    results = pool.starmap(plot_1D_hist, hist_data)
-pool.close()
-pool.join()
-
-# Plot multiplot
-
-hist_data = [
-    ("Momentum $p$ [GeV]", p, {"xlog": True}),
-    ("Pseudorapidity $\eta$", eta, {}),
-    ("Transverse Momentum $p_T$ [GeV]", p_T, {"xlog": True}),
-
-    ("Jet Mass [GeV]", jet_mass, {"x_max": 250}),
-    ("Jet Pseudorapidity $\eta$", jet_eta, {"bins": 30}),
-    ("Jet Transverse Momentum $p_T$ [GeV]", jet_pT, {"xlog": True, "bins": 50, "x_max": 1000},)
-]
-print("Plotting combined histogram...")
-
-num_rows, num_cols = 2, 3
-fig, axes = plt.subplots(num_rows, num_cols, figsize=(15, 10))
-plt.tight_layout()
-axes = axes.flatten()  # Flatten to iterate over axes
-
-for idx, (ax, (name, data, params)) in enumerate(zip(axes, hist_data)):
-    xlog = params.pop("xlog", False)  # Extract xlog parameter
-    x_max = params.pop("x_max", None)  # Extract x_max parameter
-    params["color"] = "skyblue"
-    params["stat"] = "density"  # Equivalent to `density=True` in plt.hist
-    plot_ylabel = True if idx % num_cols == 0 else False  # Show y-label only for leftmost plots
-    plot_1D_hist(
-        name=name,
-        data=data,
+    return plot_1D_hist(
+        name=entry["name"],
+        data=entry["data"],
         xlog=xlog,
+        x_min=x_min,
         x_max=x_max,
-        ax=ax,
-        plot_ylabel=plot_ylabel,
-        plot_params=params,
+        plot_params=plot_params,
     )
 
-# Remove unused subplots
-for i in range(len(hist_data), len(axes)): fig.delaxes(axes[i])
-plt.tight_layout()
-plt.savefig(f"{save_path}/grid_histograms.png", dpi=600)
+# Single plot function
+def plot_single_histograms(hist_data, save_path):
+    print("Plotting single histograms...")
+    with multiprocessing.Pool(processes=len(hist_data)) as pool:
+        pool.map(plot_wrapper, hist_data)
+    pool.close()
+    pool.join()
+
+# Multi-plot function
+def plot_combined_histograms(hist_data, save_path):
+    print("Plotting combined histogram...")
+    num_rows, num_cols = 2, 3
+    fig, axes = plt.subplots(num_rows, num_cols, figsize=(15, 10))
+    axes = axes.flatten()  # Flatten to iterate over axes
+
+    for idx, (ax, entry) in enumerate(zip(axes, hist_data)):
+        plot_params = entry.get("plot_params", {}).copy()  # Copy to avoid mutation
+        xlog = plot_params.pop("xlog", False)
+        x_min = plot_params.pop("x_min", None)
+        x_max = plot_params.pop("x_max", None)
+        plot_ylabel = True if idx % num_cols == 0 else False  # Show y-label for leftmost plots
+
+        plot_1D_hist(
+            name=entry["name"],
+            data=entry["data"],
+            xlog=xlog,
+            x_min=x_min,
+            x_max=x_max,
+            ax=ax,
+            plot_ylabel=plot_ylabel,
+            plot_params=plot_params,
+        )
+
+    # Remove unused subplots
+    for i in range(len(hist_data), len(axes)):
+        fig.delaxes(axes[i])
+    plt.tight_layout()
+    plt.savefig(f"{save_path}/grid_histograms.png", dpi=600)
+
+
+
+# Define hist_data once with unified structure
+hist_data = [
+    {
+        "name": "Momentum $p$ [GeV]",
+        "data": p,
+        "plot_params": {"xlog": True},
+        "save_filename": "p"
+    },
+    {
+        "name": "Pseudorapidity $\eta$",
+        "data": eta,
+        "plot_params": {},
+        "save_filename": "eta"
+    },
+    {
+        "name": "Transverse Momentum $p_T$ [GeV]",
+        "data": p_T,
+        "plot_params": {"xlog": True},
+        "save_filename": "pT"
+    },
+    {
+        "name": "Jet Mass [GeV]",
+        "data": jet_mass,
+        "plot_params": {"x_max": 250},
+        "save_filename": "jet_mass"
+    },
+    {
+        "name": "Jet Pseudorapidity $\eta$",
+        "data": jet_eta,
+        "plot_params": {"bins": 50},
+        "save_filename": "jet_eta"
+    },
+    {
+        "name": "Jet Transverse Momentum $p_T$ [GeV]",
+        "data": jet_pT,
+        "plot_params": {"xlog": True, "bins": 50, "x_max": 1000},
+        "save_filename": "jet_pT"
+    }
+]
+
+print("-- Plot clean jets")
+plot_single_histograms(hist_data, save_path)
+plot_combined_histograms(hist_data, save_path)
 
 print("Done.")
