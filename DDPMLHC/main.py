@@ -23,7 +23,7 @@ tt = np.genfromtxt(
 )
 
 # === Example Usage of foo_bar ===
-write_combined_csv(range(100), tt, pile_up, 300)
+write_combined_csv(range(10000), tt, pile_up, 10)
 
 #################################################################################
 # jet_no = 493
