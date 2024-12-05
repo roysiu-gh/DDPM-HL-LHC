@@ -46,20 +46,36 @@ def to_pT(p_x, p_y):
     return np.sqrt(p_x**2 + p_y**2)
 
 
-def calculate_four_momentum_massless(jet_ids, px, py, pz):
+def calculate_four_momentum_massless(event_ids, px, py, pz, mask=True):
     """Calculate the total 4-momentum of jets. Massless limit. Natural units."""
-    if not (len(jet_ids) == len(px) == len(py) == len(pz)):
-        raise ValueError(f"All input arrays must have same length. Got {len(jet_ids)}, {len(px)}, {len(py)}, {len(pz)}.")
+    if not (len(event_ids) == len(px) == len(py) == len(pz)):
+        raise ValueError(f"All input arrays must have same length. Got {len(event_ids)}, {len(px)}, {len(py)}, {len(pz)}.")
     
-    max_jet_id = int( np.max(jet_ids) )
+    max_jet_id = int( np.max(event_ids) )
 
     jet_ene = np.zeros(max_jet_id + 1)
     jet_px = np.zeros(max_jet_id + 1)
     jet_py = np.zeros(max_jet_id + 1)
     jet_pz = np.zeros(max_jet_id + 1)
+    jet_eta = np.zeros(max_jet_id + 1)
+    jet_phi = np.zeros(max_jet_id + 1)
 
     # Calculate total 4mmtm for each jet
-    for jet_id, px_val, py_val, pz_val in zip(jet_ids, px, py, pz):
+    for jet_id, px_val, py_val, pz_val in zip(event_ids, px, py, pz):
+        pmag = p_magnitude(px_val, py_val, pz_val)
+        phi_val = pseudorapidity(pmag, pz_val)
+        eta_val = to_phi(px_val, py_val)
+
+        # Bodge! calculate jet axis and save
+        if (jet_eta[jet_id] == 0) and (jet_phi[jet_id] == 0):
+            jet_eta[jet_id] = phi_val
+            jet_phi[jet_id] = eta_val
+        
+        # Skip PU more than rad 1 away from jet axis
+        delta_R = np.sqrt(phi_val**2 + eta_val**2)
+        if delta_R > 1:
+            continue
+
         ene_val = np.linalg.norm([px_val, py_val, pz_val])
 
         jet_ene[int(jet_id)] += ene_val
@@ -88,7 +104,7 @@ def get_axis_eta_phi(p):
         Location of jet axis in eta-phi space.
     """
     total_p = np.sum(p, axis=0)
-    print("total_p", total_p)
+    # print("total_p", total_p)
     jet_mag = np.linalg.norm(total_p)
     eta = pseudorapidity(jet_mag, total_p[2])
     phi = to_phi(total_p[0], total_p[1])
