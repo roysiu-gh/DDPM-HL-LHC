@@ -113,7 +113,7 @@ def plot_combined_histograms(hist_data, save_path):
     for i in range(len(hist_data), len(axes)):
         fig.delaxes(axes[i])
     plt.tight_layout()
-    plt.savefig(f"{save_path}/grid_histograms.png", dpi=600)
+    plt.savefig(f"{save_path}/multiple.png", dpi=600)
 
 ##############################################################################
 
@@ -183,21 +183,21 @@ hist_data_cleanjets = [
         "name": "Mass [GeV]",
         "data": jet_mass,
         "plot_params": {"x_max": 250},
-        "save_filename": "jet_mass",
+        "save_filename": "event_mass",
         "save_path": save_path,
     },
     {
         "name": "Pseudorapidity $\eta$",
         "data": jet_eta,
         "plot_params": {"bins": 50},
-        "save_filename": "jet_eta",
+        "save_filename": "event_eta",
         "save_path": save_path,
     },
     {
         "name": "Transverse Momentum $p_T$ [GeV]",
         "data": jet_pT,
         "plot_params": {"xlog": True, "bins": 50, "x_max": 1000},
-        "save_filename": "jet_pT",
+        "save_filename": "event_pT",
         "save_path": save_path,
     }
 ]
@@ -232,21 +232,21 @@ hist_data_noisyjets_mu300 = [
         "name": "Mass [GeV]",
         "data": jet_mass,
         "plot_params": {},
-        "save_filename": "jet_mass",
+        "save_filename": "event_mass",
         "save_path": save_path,
     },
     {
         "name": "Pseudorapidity $\eta$",
         "data": jet_eta,
         "plot_params": {"bins": 50},
-        "save_filename": "jet_eta",
+        "save_filename": "event_eta",
         "save_path": save_path,
     },
     {
         "name": "Transverse Momentum $p_T$ [GeV]",
         "data": jet_pT,
         "plot_params": {"xlog": True, "bins": 50, "x_max": 1000},
-        "save_filename": "jet_pT",
+        "save_filename": "event_pT",
         "save_path": save_path,
     }
 ]
@@ -282,14 +282,14 @@ hist_data_noisyjets_mu10 = [
         "data": jet_mass,
         # "data": jet_pT,
         "plot_params": {"xlog": True, "x_min": 1, "x_max": 300},
-        "save_filename": "jet_mass",
+        "save_filename": "event_mass",
         "save_path": save_path,
     },
     {
         "name": "Pseudorapidity $\eta$",
         "data": jet_eta,
         "plot_params": {"bins": 50},
-        "save_filename": "jet_eta",
+        "save_filename": "event_eta",
         "save_path": save_path,
     },
     {
@@ -297,7 +297,7 @@ hist_data_noisyjets_mu10 = [
         "data": jet_pT,
         # "data": jet_mass,
         "plot_params": {"xlog": True, "bins": 50, "x_max": 1000},
-        "save_filename": "jet_pT",
+        "save_filename": "event_pT",
         "save_path": save_path,
     }
 ]
