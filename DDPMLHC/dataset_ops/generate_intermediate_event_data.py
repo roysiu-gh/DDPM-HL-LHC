@@ -1,51 +1,66 @@
-"""Docstring here"""
-
-# Package imports
 import numpy as np
-
-# Local imports
 from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import *
 
-# MU300_PATH = f"{CWD}/data/2-intermediate/noisy_mu300.csv"
-# mu = 300
-MU10_PATH = f"{CWD}/data/2-intermediate/noisy_mu10.csv"
-mu = 10
-save_path = f"{CWD}/data/2-intermediate/"
+def process_noisy_data(mu, save_path):
+    """
+    Process noisy data for a given mu value.
 
-noisy_data = np.genfromtxt(
-    MU10_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
+    Parameters:
+    mu (int): The mu value used for the computation and file naming.
+    file_path (str): The path to the noisy data file.
+    save_path (str): The directory where the results will be saved.
 
-NIDs = noisy_data[:, 0].astype(int)
-LIDs = noisy_data[:, 1].astype(int)
-pxs, pys, pzs = noisy_data[:, 2], noisy_data[:, 3], noisy_data[:, 4]
-etas = noisy_data[:, 5]
-phis = noisy_data[:, 6]
-enes = noisy_data[:, 7]
-pTs = to_pT(pxs, pys)
+    Returns:
+    None
+    """
+    # Load noisy data
+    pileup_path = f"{CWD}/data/2-intermediate/noisy_mu{mu}.csv"
+    noisy_data = np.genfromtxt(
+        pileup_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+    )
 
-p2s = contraction(enes, pxs, pys, pzs)
-masses = np.sqrt(p2s)
+    # Extract relevant columns
+    NIDs = noisy_data[:, 0].astype(int)
+    LIDs = noisy_data[:, 1].astype(int)
+    pxs, pys, pzs = noisy_data[:, 2], noisy_data[:, 3], noisy_data[:, 4]
+    etas = noisy_data[:, 5]
+    phis = noisy_data[:, 6]
+    enes = noisy_data[:, 7]
+    pTs = to_pT(pxs, pys)
 
-# ===== Create Noisy Event Data ===== #
+    p2s = contraction(enes, pxs, pys, pzs)
+    masses = np.sqrt(p2s)
 
-NIDs_unique = np.unique(NIDs)
-event_enes, event_pxs, event_pys, event_pzs = calculate_four_momentum_massless(NIDs, pxs, pys, pzs)
-event_p2s = contraction(event_enes, event_pxs, event_pys, event_pzs)
-event_masses = np.sqrt(event_p2s)
-event_etas = pseudorapidity(event_enes, event_pzs)
-event_phis = to_phi(event_pxs, event_pys)
-event_pTs = to_pT(event_pxs, event_pys)
+    # ===== Create Noisy Event Data ===== #
 
-# Kinda fun to print
-for event_id in range(0, len(NIDs_unique), 1):
-    four_mmtm = NIDs[event_id]
-    p2 = event_p2s[event_id]
-    print(f"NID: {event_id}, Total 4-Momenta: [{event_enes[event_id]:.3f}, {event_pxs[event_id]:.3f}, {event_pys[event_id]:.3f}, {event_pzs[event_id]:.3f}], Mass: {event_masses[event_id]:.3f}")
+    NIDs_unique = np.unique(NIDs)
+    event_enes, event_pxs, event_pys, event_pzs = calculate_four_momentum_massless(NIDs, pxs, pys, pzs)
+    event_p2s = contraction(event_enes, event_pxs, event_pys, event_pzs)
+    event_masses = np.sqrt(event_p2s)
+    event_etas = pseudorapidity(event_enes, event_pzs)
+    event_phis = to_phi(event_pxs, event_pys)
+    event_pTs = to_pT(event_pxs, event_pys)
 
-# Save to CSV
-combined_array = np.array([NIDs_unique, event_pxs, event_pys, event_pzs, event_etas, event_phis, event_masses, event_pTs]).T
-# np.savetxt(f"{save_path}/noisy_event_stats_mu300.csv", combined_array, delimiter=",", header="event_id, px, py, pz, eta, phi, mass, p_T", comments="", fmt="%i, %10.10f,  %10.10f,  %10.10f,  %10.10f,  %10.10f,  %10.10f,  %10.10f")
-np.savetxt(f"{save_path}/noisy_event_stats_mu{mu}.csv", combined_array, delimiter=",", header="event_id, px, py, pz, eta, phi, mass, p_T", comments="", fmt="%i, %10.10f,  %10.10f,  %10.10f,  %10.10f,  %10.10f,  %10.10f,  %10.10f")
-print("Saved.")
+    # Print results for each event
+    for event_id in range(len(NIDs_unique)):
+        print(f"NID: {event_id}, Total 4-Momenta: ["
+              f"{event_enes[event_id]:.3f}, {event_pxs[event_id]:.3f}, "
+              f"{event_pys[event_id]:.3f}, {event_pzs[event_id]:.3f}], "
+              f"Mass: {event_masses[event_id]:.3f}")
+
+    # Save results to CSV
+    combined_array = np.array([
+        NIDs_unique, event_pxs, event_pys, event_pzs, event_etas, event_phis, event_masses, event_pTs
+    ]).T
+
+    output_file = f"{save_path}/noisy_event_stats_mu{mu}.csv"
+    np.savetxt(
+        output_file,
+        combined_array,
+        delimiter=",",
+        header="event_id, px, py, pz, eta, phi, mass, p_T",
+        comments="",
+        fmt="%i, %10.10f,  %10.10f,  %10.10f,  %10.10f,  %10.10f,  %10.10f,  %10.10f"
+    )
+    print(f"Saved to {output_file}.")
