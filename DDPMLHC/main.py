@@ -84,25 +84,21 @@ tt = np.genfromtxt(
 
 #################################################################################
 
+INTERMEDIATE_PATH = f"{CWD}/data/2-intermediate/try/"
+OUT_PATH_1D_HIST = f"{CWD}/data/plots/1D_histograms/particles/"
+
 # === Create noisy events
-# print("1 :: Creating noisy events")
-# # write_combined_csv(range(10000), tt, pile_up, 10)
-# # print("Done mu = 10")
-# write_combined_csv(range(1000), tt, pile_up, 100)
-# print("Done mu = 100")
-# write_combined_csv(range(1000), tt, pile_up, 200)
-# print("Done mu = 200")
-# print("FINISHED creating noisy events\n")
+print("1 :: Creating noisy events")
+write_combined_csv(range(10000), tt, pile_up, 10, save_path=INTERMEDIATE_PATH)
+write_combined_csv(range(10000), tt, pile_up, 100, save_path=INTERMEDIATE_PATH)
+write_combined_csv(range(10000), tt, pile_up, 200, save_path=INTERMEDIATE_PATH)
+print("FINISHED creating noisy events\n")
 
 # === Make noisy events with extra data (e.g. transverse mmtm)
 print("2 :: Making noisy events with extra data")
-SAVE_PATH = f"{CWD}/data/2-intermediate/"
-# process_noisy_data(10, SAVE_PATH)
-# print("Done mu = 10")
-process_noisy_data(100, SAVE_PATH)
-print("Done mu = 100")
-process_noisy_data(200, SAVE_PATH)
-print("Done mu = 200")
+process_noisy_data(10, INTERMEDIATE_PATH)
+process_noisy_data(100, INTERMEDIATE_PATH)
+process_noisy_data(200, INTERMEDIATE_PATH)
 print("FINISHED making noisy events with extra data\n")
 
 # === Draw 1D histograms
@@ -110,7 +106,6 @@ print("3 :: Drawing 1D histograms")
 
 print("Loading intermediate data...")
 # Load intermediate data
-# Indiv parts
 tt = np.genfromtxt(
     TT_EXT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
 )
@@ -120,39 +115,30 @@ pz = tt[:, 3]
 eta = tt[:, 4]
 p_T = tt[:, 6]
 p = p_magnitude(px, py, pz)
-# Define the save path and plot characteristics
-save_path = f"{CWD}/data/plots/1D_histograms/particles/"
 hist_data_particles = [
     {
         "name": "Momentum $p$ [GeV]",
         "data": p,
         "plot_params": {"xlog": True},
         "save_filename": "p",
-        "save_path": save_path,
+        "save_path": OUT_PATH_1D_HIST,
     },
     {
         "name": "Pseudorapidity $\eta$",
         "data": eta,
         "plot_params": {},
         "save_filename": "eta",
-        "save_path": save_path,
+        "save_path": OUT_PATH_1D_HIST,
     },
     {
         "name": "Transverse Momentum $p_T$ [GeV]",
         "data": p_T,
         "plot_params": {"xlog": True},
         "save_filename": "pT",
-        "save_path": save_path,
+        "save_path": OUT_PATH_1D_HIST,
     },
 ]
-print("...done")
 
-# print("-- Plot particles")
-# plot_single_histograms(hist_data_particles, save_path)
-# plot_combined_histograms(hist_data_particles, save_path)
-# print()
-
-# Done prints embedded
 foobah(mu=0, event_stats_path=JET_PATH)
 foobah(mu=10)
 foobah(mu=100)
@@ -160,4 +146,4 @@ foobah(mu=200)
 foobah(mu=300)
 print("FINISHED drawing 1D histograms\n")
 
-print("Done.")
+print("DONE ALL.")

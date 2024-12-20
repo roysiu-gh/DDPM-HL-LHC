@@ -85,6 +85,7 @@ def plot_single_histograms(hist_data, save_path):
 
 # Multi-plot function
 def plot_combined_histograms(hist_data, save_path):
+    """Plot mass, eta, p_T, 3 cols 1 row."""
     print("Plotting combined histogram...")
     num_rows, num_cols = 1, 3
     fig, axes = plt.subplots(num_rows, num_cols, figsize=(16, 5))

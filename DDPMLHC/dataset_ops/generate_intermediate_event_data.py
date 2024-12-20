@@ -2,7 +2,7 @@ import numpy as np
 from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import *
 
-def process_noisy_data(mu, save_path):
+def process_noisy_data(mu, save_path, verbose=False):
     """
     Process noisy data for a given mu value.
 
@@ -42,12 +42,13 @@ def process_noisy_data(mu, save_path):
     event_phis = to_phi(event_pxs, event_pys)
     event_pTs = to_pT(event_pxs, event_pys)
 
-    # Print results for each event
-    for event_id in range(len(NIDs_unique)):
-        print(f"NID: {event_id}, Total 4-Momenta: ["
-              f"{event_enes[event_id]:.3f}, {event_pxs[event_id]:.3f}, "
-              f"{event_pys[event_id]:.3f}, {event_pzs[event_id]:.3f}], "
-              f"Mass: {event_masses[event_id]:.3f}")
+    # Print results for each event if verbose
+    if verbose:
+        for event_id in range(len(NIDs_unique)):
+            print(f"NID: {event_id}, Total 4-Momenta: ["
+                f"{event_enes[event_id]:.3f}, {event_pxs[event_id]:.3f}, "
+                f"{event_pys[event_id]:.3f}, {event_pzs[event_id]:.3f}], "
+                f"Mass: {event_masses[event_id]:.3f}")
 
     # Save results to CSV
     combined_array = np.array([
@@ -63,4 +64,4 @@ def process_noisy_data(mu, save_path):
         comments="",
         fmt="%i, %10.10f,  %10.10f,  %10.10f,  %10.10f,  %10.10f,  %10.10f,  %10.10f"
     )
-    print(f"Saved to {output_file}.")
+    print(f"Done making extended noisy data with mu = {mu}. Saved to {output_file}.")

@@ -127,7 +127,7 @@ def combined_jet(args):
 
     return combined_array
 
-def write_combined_csv(jet_nos, tt_data, pile_up_data, mu):
+def write_combined_csv(jet_nos, tt_data, pile_up_data, mu, save_path="data"):
     tasks = [
         (jet_no, tt_data, pile_up_data, mu) 
         for jet_no in jet_nos
@@ -137,5 +137,8 @@ def write_combined_csv(jet_nos, tt_data, pile_up_data, mu):
     pool.close()
     pool.join()
     combined_array = np.vstack(results)
-    np.savetxt(f"data/noisy_mu{mu}.csv", combined_array, delimiter=",", header="NID,LID,px,py,pz,d_eta,d_phi,pmag", comments="", fmt="%d,%d,%.10f,%.10f,%.10f,%.10f,%.10f,%.10f")
+    output_file = f"{save_path}/noisy_mu{mu}.csv"
+    np.savetxt(output_file, combined_array, delimiter=",", header="NID,LID,px,py,pz,d_eta,d_phi,pmag", comments="", fmt="%d,%d,%.10f,%.10f,%.10f,%.10f,%.10f,%.10f")
+    print(f"Done writing noisy events for mu = {mu}. Saved to {output_file}.")
+
 
