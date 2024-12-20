@@ -62,7 +62,7 @@ def plot_combined_histograms_with_overlay(hist_data_mu0, hist_data_mu100, hist_d
             **plot_params_mu200,
             color="green",
             label="mu=200",
-            alpha=0.5,
+            alpha=0.3,
         )
 
         # Configure axis labels and scaling
@@ -81,7 +81,8 @@ def plot_combined_histograms_with_overlay(hist_data_mu0, hist_data_mu100, hist_d
 
 
 
-# MAX_DATA_ROWS = 100_000
+# MAX_DATA_ROWS = 10_000
+
 
 
 # Define paths for the datasets
@@ -125,7 +126,7 @@ list_of_params_mu0 = [
     {
         "name": "Pseudorapidity $\\eta$",
         "data": event_eta_mu0,
-        "plot_params": {"bins": 50},
+        "plot_params": {"bins": 50, "x_min": -1, "x_max": 1},
         "save_filename": "event_eta_mu0",
     },
     {

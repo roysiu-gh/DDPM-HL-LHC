@@ -3,21 +3,11 @@ from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import *
 
 def process_noisy_data(mu, save_path, verbose=False):
-    """
-    Process noisy data for a given mu value.
-
-    Parameters:
-    mu (int): The mu value used for the computation and file naming.
-    file_path (str): The path to the noisy data file.
-    save_path (str): The directory where the results will be saved.
-
-    Returns:
-    None
-    """
+    """Add more attributes to noisy data for given mu."""
     # Load noisy data
-    pileup_path = f"{CWD}/data/2-intermediate/noisy_mu{mu}.csv"
+    load_path = f"{CWD}/data/2-intermediate/noisy_mu{mu}.csv"
     noisy_data = np.genfromtxt(
-        pileup_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+        load_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
     )
 
     # Extract relevant columns
