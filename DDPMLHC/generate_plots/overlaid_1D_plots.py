@@ -120,7 +120,7 @@ list_of_params_mu0 = [
     {
         "name": "Mass [GeV]",
         "data": event_mass_mu0,
-        "plot_params": {"x_max": 250},
+        "plot_params": {"x_min": 0, "x_max": 250},
         "save_filename": "event_mass_mu0",
     },
     {

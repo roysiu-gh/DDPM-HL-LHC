@@ -87,19 +87,19 @@ tt = np.genfromtxt(
 INTERMEDIATE_PATH = f"{CWD}/data/2-intermediate/try/"
 OUT_PATH_1D_HIST = f"{CWD}/data/plots/1D_histograms/particles/"
 
-# === Create noisy events
-print("1 :: Creating noisy events")
-write_combined_csv(range(10000), tt, pile_up, 10, save_path=INTERMEDIATE_PATH)
-write_combined_csv(range(10000), tt, pile_up, 100, save_path=INTERMEDIATE_PATH)
-write_combined_csv(range(10000), tt, pile_up, 200, save_path=INTERMEDIATE_PATH)
-print("FINISHED creating noisy events\n")
+# # === Create noisy events
+# print("1 :: Creating noisy events")
+# write_combined_csv(range(10000), tt, pile_up, 10, save_path=INTERMEDIATE_PATH)
+# write_combined_csv(range(10000), tt, pile_up, 100, save_path=INTERMEDIATE_PATH)
+# write_combined_csv(range(10000), tt, pile_up, 200, save_path=INTERMEDIATE_PATH)
+# print("FINISHED creating noisy events\n")
 
-# === Make noisy events with extra data (e.g. transverse mmtm)
-print("2 :: Making noisy events with extra data")
-process_noisy_data(10, INTERMEDIATE_PATH)
-process_noisy_data(100, INTERMEDIATE_PATH)
-process_noisy_data(200, INTERMEDIATE_PATH)
-print("FINISHED making noisy events with extra data\n")
+# # === Make noisy events with extra data (e.g. transverse mmtm)
+# print("2 :: Making noisy events with extra data")
+# process_noisy_data(10, INTERMEDIATE_PATH)
+# process_noisy_data(100, INTERMEDIATE_PATH)
+# process_noisy_data(200, INTERMEDIATE_PATH)
+# print("FINISHED making noisy events with extra data\n")
 
 # === Draw 1D histograms
 print("3 :: Drawing 1D histograms")
