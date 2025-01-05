@@ -2,11 +2,14 @@
 
 # Package imports
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sb
 
 # Local imports
 from DDPMLHC.config import *
+
+mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 def plot_combined_histograms_with_overlay(hist_data_mu0, hist_data_mu100, hist_data_mu200, save_path):
     """Plot mass, eta, p_T for mu=0, mu=100, and mu=200 on the same plot for 3 variables."""
@@ -39,7 +42,7 @@ def plot_combined_histograms_with_overlay(hist_data_mu0, hist_data_mu100, hist_d
             stat="density",  # Normalize to density
             **plot_params_mu0,
             color="blue",
-            label="mu=0",
+            label="$\mu=0$",
             alpha=0.7,
         )
 
@@ -50,7 +53,7 @@ def plot_combined_histograms_with_overlay(hist_data_mu0, hist_data_mu100, hist_d
             stat="density",  # Normalize to density
             **plot_params_mu100,
             color="orange",
-            label="mu=100",
+            label="$\mu=100$",
             alpha=0.5,
         )
 
@@ -61,7 +64,7 @@ def plot_combined_histograms_with_overlay(hist_data_mu0, hist_data_mu100, hist_d
             stat="density",  # Normalize to density
             **plot_params_mu200,
             color="green",
-            label="mu=200",
+            label="$\mu=200$",
             alpha=0.3,
         )
 
@@ -69,10 +72,16 @@ def plot_combined_histograms_with_overlay(hist_data_mu0, hist_data_mu100, hist_d
         if xlog:
             ax.set_xscale("log")
         ax.set_xlim(left=x_min, right=x_max)
+        ax.ticklabel_format(axis="y", style="sci", scilimits=(0,0))  # Put in scale multiplier at top
 
         # Set titles and legends
-        ax.set_title(entry_mu0["name"], fontsize=14)
-        ax.legend(fontsize=12)
+        ax.set_xlabel(entry_mu0["name"], fontsize=14)
+        if idx == 0:
+            ax.set(ylabel="Frequency Density")
+            ax.yaxis.label.set_size(12)
+        else:
+            ax.set(ylabel="")
+        ax.legend(fontsize=12, frameon=False)
 
     # Adjust layout and save the figure
     plt.tight_layout()
