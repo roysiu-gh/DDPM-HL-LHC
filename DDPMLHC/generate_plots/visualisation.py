@@ -17,7 +17,6 @@ from DDPMLHC.calculate_quantities import get_axis_eta_phi, delta_R, p_magnitude,
 from DDPMLHC.dataset_ops.data_loading import select_event
 from DDPMLHC.dataset_ops.process_data import wrap_phi
 
-mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 PDG_IDS = {
     0: r"$\gamma$ (Photon)",
@@ -97,25 +96,25 @@ def plot_detections(
     radius_sizes = 0.1 * base_radius_size * (pmag / np.max(pmag))
 
     # Get colours from global cmap based on PDG IDs
+
     pdgid_values = jet_data[:, 1]
     colours = [GLOBAL_CMAP.get(abs(pid), "black") for pid in pdgid_values]
 
     fig, ax = plt.subplots(figsize=(8, 6))
     
-    ax.set_xlabel("$\eta$")
-    ax.set_ylabel("$\phi$")
+    ax.set_xlabel("$\Delta\eta$",fontsize=16)
+    ax.set_ylabel("$\Delta\phi$", fontsize=16)
     # Set phi range to +/-pi and adjust tick marks
     ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(base=np.pi / 4))
     ax.yaxis.set_major_formatter(
         mpl.ticker.FuncFormatter(
-            lambda val, pos: f"{(val / np.pi)}$\pi$" if val != 0 else "0"
+            lambda val, pos: f"${(val / np.pi)}\pi$" if val != 0 else "$0$"
         )
     )
     ax.grid(axis="y", linestyle="--", color="gray", alpha=0.7)
         # Add circle to visualise boundary and jet centre
-    ax.plot(centre[0], centre[1], marker="o", color="blue")
-    boundary_circle = plt.Circle(centre, 1.0, fill=False)
-    ax.add_patch(boundary_circle)
+    ax.plot(centre[0], centre[1], marker="x", color="blue")
+    
     # ax.set_ylim(0.5 * np.pi,1.25 * np.pi)
     # Show particles up to the target proportion of total momentum
     sorted_indices = np.argsort(pmag)[::-1]
@@ -132,24 +131,30 @@ def plot_detections(
         colours = [colours[i] for i in sorted_indices[:cutoff_index]]
         radius_sizes = radius_sizes[sorted_indices[:cutoff_index]]
         radius_sizes *= 5  # Make larger radius for cropped plots, consider making this variable in future
-        linewidth = 1
+        linewidth = 2
     else:  # Show all particles
         cutoff_index = None
         linewidth = 0.1
-
+    # print(len(colours[0:len(eta)]))
+    # print(colours[0:len(eta)])
     # Plot centres
     # FIX THIS FOR CROPS
     # dot_sizes = radius_sizes*radius_sizes  # Dots sizes based on area so scale as square
-    # [px, py, pz], eta, phi = delta_R(centre, px, py, pz, eta, phi)
+    [px, py, pz], eta, phi = delta_R(centre, px, py, pz, eta, phi)
+
     bound = len(tt_bar)
+    boundary_circle = plt.Circle((0,0), 1.0, color="black",linewidth=1,fill=False)
+    ax.add_patch(boundary_circle)
+    # Get correct number of colours for plotting
+    colours = colours[0:len(eta)]
     if pdgids:
         # Plot circles prop to width
         ax.scatter(eta, phi, color=colours, marker='.', edgecolors='none', s=0)
         for pdgid, e, p, color, radius in zip(pdgid_values, eta, phi, colours, radius_sizes):
-            linestyle = "-" if pdgid >= 0 else "--"
-            circle = Circle((e, p), radius=radius/100, edgecolor=color, facecolor='none', linewidth=linewidth, linestyle=linestyle, fill=False)
+            linestyle = "-" if pdgid >= 0 else ":"
+            circle = Circle((e, p), radius=radius/100, edgecolor=color, facecolor='none', linewidth=1, linestyle=linestyle, fill=False)
             ax.add_patch(circle)
-    
+            
 
         # Add legend for pdgid values and particle names
         # NB this will show all particles in the collision in the legend, even if cropped out (is desired behaviour)
@@ -165,14 +170,14 @@ def plot_detections(
                 pid = abs_pid
                 particle_name = PDG_IDS.get(pid, "Not in PDGID dict")
                 handles.append( Patch(
-                    label=f"PDG ID: {int(pid)}, \n{particle_name}",
+                    label=f"{particle_name}",
                     color=colour
                 ) )
             if -abs_pid in unique_detected_pdgids:
                 pid = -abs_pid
                 particle_name = PDG_IDS.get(pid, "Not in PDGID dict")
                 handles.append( Patch(
-                    label=f"PDG ID: {int(pid)}, \n{particle_name}",
+                    label=f"{particle_name}",
                     edgecolor=colour, facecolor="none"
                 ) )
         
@@ -184,21 +189,21 @@ def plot_detections(
         ax.scatter(eta[0:bound], phi[0:bound], color="red", marker='.', edgecolors='none', s=0, label="Jet particles")
         for pdgid, e, p, color, radius in zip(pdgid_values, eta[0:bound], phi[0:bound], colours, radius_sizes):
             # linestyle = "-" if pdgid >= 0 else "--"
-            circle = Circle((e, p), radius=radius/100, edgecolor="red", facecolor='none', linewidth=linewidth, fill=False)
+            circle = Circle((e, p), radius=radius/100, edgecolor="red", facecolor='none', linewidth=1.1, fill=False)
             ax.add_patch(circle)
         # if pile_ups is not None:
         ax.scatter(eta[bound:], phi[bound:], color="lightblue", marker='.', edgecolors='none', s=0, label="Pile-ups")
         for pdgid, e, p, color, radius in zip(pdgid_values, eta[bound:], phi[bound:], colours, radius_sizes):
         # linestyle = "-" if pdgid >= 0 else "--"
-            circle = Circle((e, p), radius=radius/100, edgecolor="blue", facecolor='none', linewidth=linewidth, fill=False)
+            circle = Circle((e, p), radius=radius/100, edgecolor="blue", facecolor='none', linewidth=1.1, fill=False)
             ax.add_patch(circle)
 
-        ax.legend()
+        # ax.legend()
     # plt.savefig(f"{cwd}/data/plots/test/{filename}.png", dpi=1000)
-    ax.set_title(
-        f"$\phi$ vs $\eta$ of jet {jet_no}, tot_num_parts={len(eta)}, mmtm_crop={momentum_display_proportion}"
-    )
-    plt.savefig(f"{cwd}/data/plots/test/{filename}.pdf",)
+    # ax.set_title( 
+        # f"$\phi$ vs $\eta$ of jet {jet_no}, tot_num_parts={len(eta)}, mmtm_crop={momentum_display_proportion}"
+    # )
+    plt.savefig(f"{cwd}/data/plots/test/{filename}.pdf",bbox_inches = 'tight')
     plt.close()
 
 
@@ -280,25 +285,25 @@ def generate_2dhist(tt_data, pile_up_data, jet_no,mu, max_event_id, bins=32, bou
     
     # print("etas2", etas2)
     # print("phis2", phis2)
-    print("Orig num of eta: ", len(etas))
-    print("Orig num of phi: ", len(phis))
-    print("New num of eta: ", len(etas2))
-    print("New num of phi: ", len(phis2))
-    print("Masked number of particles, etas: ", len(etas) - len(etas2))
-    print("Masked number of particles, etas: ", len(phis) - len(phis2))
-    print(len(etas2) == len(phis2))
-    print(np.min(etas2), np.max(etas2))
-    print(np.min(etas), np.max(etas))
+    # print("Orig num of eta: ", len(etas))
+    # print("Orig num of phi: ", len(phis))
+    # print("New num of eta: ", len(etas2))
+    # print("New num of phi: ", len(phis2))
+    # print("Masked number of particles, etas: ", len(etas) - len(etas2))
+    # print("Masked number of particles, etas: ", len(phis) - len(phis2))
+    # print(len(etas2) == len(phis2))
+    # print(np.min(etas2), np.max(etas2))
+    # print(np.min(etas), np.max(etas))
     # exit(1)
     # energy_normed = (masked_energies - energy_min) / energy_norm_denom
     # print(energy_normed)
     # Function appends "_hist" to the end
     plt.figure(figsize=(8, 6))
-    plt.xlabel(r'$\Delta\eta$')
-    plt.ylabel(r'$\Delta\phi$')
-    plt.title(
-        f"$\Delta\phi$ vs $\Delta\eta$ of jet {jet_no}, real_parts={len(etas2)}+false_pileup={false_ids}, bins={bins}"
-    )
+    plt.xlabel(r'$\Delta\eta$', fontsize=16)
+    plt.ylabel(r'$\Delta\phi$', fontsize=16)
+    # plt.title(
+    #     f"$\Delta\phi$ vs $\Delta\eta$ of jet {jet_no}, real_parts={len(etas2)}+false_pileup={false_ids}, bins={bins}"
+    # )
     created_bins = np.mgrid[-boundary:boundary:bins*1j]
     save_str = f"{cwd}/data/hist/{filename}_jet{jet_no}_MU{mu}_bins_{bins}"
     if hist_plot == "count":

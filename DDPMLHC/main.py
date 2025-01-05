@@ -1,17 +1,21 @@
 # Package imports
 import numpy as np
 import matplotlib.pyplot as plt
-
+import matplotlib as mpl
 # Local imports
 from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import *
 from DDPMLHC.dataset_ops.process_data import write_combined_csv
 from DDPMLHC.dataset_ops.generate_intermediate_event_data import process_noisy_data
 from DDPMLHC.generate_plots.generate_1d_plots import foobah
+from DDPMLHC.generate_plots.visualisation import plot_detections
+from DDPMLHC.dataset_ops.data_loading import select_event
+
+mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 # ======= global matplotlib params =====
-plt.rcParams["text.usetex"] = False  # Use LaTeX for rendering text
-plt.rcParams["font.size"] = 12  # Set default font size (optional)
+# plt.rcParams["text.usetex"] = False  # Use LaTeX for rendering text
+# plt.rcParams["font.size"] = 12  # Set default font size (optional)
 
 # === Read in data
 print("0 :: Loading original data")
@@ -26,8 +30,8 @@ tt = np.genfromtxt(
 # jet_no = 493
 # plot_data = select_event(tt, jet_no)
 # jet_centre = get_axis_eta_phi(plot_data[:,3:])
-# mu = 200
-# # event_IDS = np.random.choice(pile_up[:,0], size = mu).astype(int)
+# mu = 100
+# # # event_IDS = np.random.choice(pile_up[:,0], size = mu).astype(int)
 # event_IDS = np.random.randint(0, np.max(pile_up[:,0]), size = mu).astype(int)
 # selected_pile_ups = [select_event(pile_up,event_ID, filter=True) for event_ID in event_IDS]
 # selected_pile_ups = np.vstack(selected_pile_ups)
@@ -68,14 +72,14 @@ tt = np.genfromtxt(
 #################################################################################
 
 # # === 2D Histograms ===
-# # BINS = (16,16)
-# # # === EXAMPLE USAGE OF GENERATING IMAGES ===
-# max_pileup_id = np.max(pile_up[:,0])
-# # # max_event_ids = np.linspace(0, max_pileup_id, num=max_pileup_id+1)
-# jet_no = 493
-# BINS = [256]
-# for BIN in BINS:
-#     generate_2dhist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BIN, mu=1000, max_event_id=max_pileup_id, energies=None, )
+# BINS = (16,16)
+# # === EXAMPLE USAGE OF GENERATING IMAGES ===
+max_pileup_id = np.max(pile_up[:,0])
+# # max_event_ids = np.linspace(0, max_pileup_id, num=max_pileup_id+1)
+jet_no = 493
+BINS = [32]
+for BIN in BINS:
+    generate_2dhist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BIN, mu=0, max_event_id=max_pileup_id, energies=None)
 #     # generate_2dhist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BIN, mu=10000)
 #     # generate_2dhist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BIN, mu=50, hist_plot="count")
 # #  Use new visualisaton to just distinguish pile up and jet
@@ -102,48 +106,48 @@ OUT_PATH_1D_HIST = f"{CWD}/data/plots/1D_histograms/particles/"
 # print("FINISHED making noisy events with extra data\n")
 
 # === Draw 1D histograms
-print("3 :: Drawing 1D histograms")
+# print("3 :: Drawing 1D histograms")
 
-print("Loading intermediate data...")
-# Load intermediate data
-tt = np.genfromtxt(
-    TT_EXT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-px = tt[:, 1]
-py = tt[:, 2]
-pz = tt[:, 3]
-eta = tt[:, 4]
-p_T = tt[:, 6]
-p = p_magnitude(px, py, pz)
-hist_data_particles = [
-    {
-        "name": "Momentum $p$ [GeV]",
-        "data": p,
-        "plot_params": {"xlog": True},
-        "save_filename": "p",
-        "save_path": OUT_PATH_1D_HIST,
-    },
-    {
-        "name": "Pseudorapidity $\eta$",
-        "data": eta,
-        "plot_params": {},
-        "save_filename": "eta",
-        "save_path": OUT_PATH_1D_HIST,
-    },
-    {
-        "name": "Transverse Momentum $p_T$ [GeV]",
-        "data": p_T,
-        "plot_params": {"xlog": True},
-        "save_filename": "pT",
-        "save_path": OUT_PATH_1D_HIST,
-    },
-]
+# print("Loading intermediate data...")
+# # Load intermediate data
+# tt = np.genfromtxt(
+#     TT_EXT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+# )
+# px = tt[:, 1]
+# py = tt[:, 2]
+# pz = tt[:, 3]
+# eta = tt[:, 4]
+# p_T = tt[:, 6]
+# p = p_magnitude(px, py, pz)
+# hist_data_particles = [
+#     {
+#         "name": "Momentum $p$ [GeV]",
+#         "data": p,
+#         "plot_params": {"xlog": True},
+#         "save_filename": "p",
+#         "save_path": OUT_PATH_1D_HIST,
+#     },
+#     {
+#         "name": "Pseudorapidity $\eta$",
+#         "data": eta,
+#         "plot_params": {},
+#         "save_filename": "eta",
+#         "save_path": OUT_PATH_1D_HIST,
+#     },
+#     {
+#         "name": "Transverse Momentum $p_T$ [GeV]",
+#         "data": p_T,
+#         "plot_params": {"xlog": True},
+#         "save_filename": "pT",
+#         "save_path": OUT_PATH_1D_HIST,
+#     },
+# ]
 
-foobah(mu=0, event_stats_path=JET_PATH)
-foobah(mu=10)
-foobah(mu=100)
-foobah(mu=200)
-foobah(mu=300)
-print("FINISHED drawing 1D histograms\n")
+# foobah(mu=0, event_stats_path=JET_PATH)
+# foobah(mu=10)
+# foobah(mu=100)
+# foobah(mu=200)
+# foobah(mu=300)
+# print("FINISHED drawing 1D histograms\n")
 
-print("DONE ALL.")
+# print("DONE ALL.")
