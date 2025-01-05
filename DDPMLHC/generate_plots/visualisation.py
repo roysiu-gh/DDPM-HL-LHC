@@ -206,8 +206,22 @@ def plot_detections(
     plt.savefig(f"{cwd}/data/plots/test/{filename}.pdf",bbox_inches = 'tight')
     plt.close()
 
+def scale_energy_for_visual(energies, verbose=False):
+    """For the purpose of visualisation.
+    Scales energies to 256 bits for printing to grayscale, up to a specified std dev.
+    Assumes non-negative input.
+    """
+    # Calculate energy scale and scale values to 256
+    SD = np.std(energies)
+    scale = 256 / (3 * SD)  # Value above which we represent as full brightness (256)
+    print(scale)
+    print("std dev", SD)
+    scaled_energies = np.floor(energies * scale)
+    scaled_energies[scaled_energies > 256] = 256  # Maximise at 256
+    scaled_energies = scaled_energies.astype(int)
+    return scaled_energies
 
-def generate_2dhist(tt_data, pile_up_data, jet_no,mu, max_event_id, bins=32, boundary = 1.0, hist_plot="energy", energies = None, cwd = ".", filename = "eta_phi") -> None:
+def generate_2dhist(tt_data, pile_up_data, jet_no,mu, max_event_id, bins=32, boundary = 1.0, hist_plot="energy", energies = None, energy_norm_factor = None, cwd = ".", filename = "eta_phi") -> None:
     """
     This functions wraps all routines needed to generate a 2D histogram of particle counts or energies.
 
@@ -243,11 +257,14 @@ def generate_2dhist(tt_data, pile_up_data, jet_no,mu, max_event_id, bins=32, bou
     # event_IDS = np.random.randint(low = 0, high = max_event_id, size = mu, dtype=np.int32)
     # event_IDS = np.mgrid[0:(mu-1):(mu)*1j]
     # print(f"Jet_No: {jet_no}, event IDs: {event_IDS}")
-    selected_pile_ups2 = [select_event(pile_up_data, event_ID, filter=True) for event_ID in event_IDS]
     # selected_pile_ups now contain 2D arrays
-    selected_pile_ups2 = np.vstack(selected_pile_ups2)
+    if mu != 0:
+        selected_pile_ups2 = [select_event(pile_up_data, event_ID, filter=True) for event_ID in event_IDS] 
+        selected_pile_ups2 = np.vstack(selected_pile_ups2)
+        selected_pile_ups = selected_pile_ups2[selected_pile_ups2[:,0] != -1]
+    else:
+        selected_pile_ups = np.array([])
     # Remove invalid pile_ups
-    selected_pile_ups = selected_pile_ups2[selected_pile_ups2[:,0] != -1]
     false_ids = np.size(selected_pile_ups2, axis=0) - np.size(selected_pile_ups, axis=0)
     print("Number of false Pile-up IDs: ",false_ids)
     jet_data = select_event(tt_data, jet_no, max_data_rows=MAX_DATA_ROWS)
@@ -298,7 +315,8 @@ def generate_2dhist(tt_data, pile_up_data, jet_no,mu, max_event_id, bins=32, bou
     # energy_normed = (masked_energies - energy_min) / energy_norm_denom
     # print(energy_normed)
     # Function appends "_hist" to the end
-    plt.figure(figsize=(8, 6))
+    fig, ax = plt.subplots(1,1,figsize=(8, 6))
+    # plt.subplots
     plt.xlabel(r'$\Delta\eta$', fontsize=16)
     plt.ylabel(r'$\Delta\phi$', fontsize=16)
     # plt.title(
@@ -317,18 +335,22 @@ def generate_2dhist(tt_data, pile_up_data, jet_no,mu, max_event_id, bins=32, bou
         # energies = np.sqrt(masked_px*masked_px + masked_py*masked_py+masked_pz*masked_pz)
         plt.hist2d(etas2, phis2, bins=(created_bins, created_bins), weights=energies, cmap='Greys_r',)
         plt.colorbar(label='Energies') 
-        plt.savefig(f"{save_str}_energies.png", dpi=600)
-        plt.savefig(f"{save_str}_energies.pdf",)
+        plt.savefig(f"{save_str}_energies.png", dpi=600,bbox_inches="tight")
+        plt.savefig(f"{save_str}_energies.pdf",bbox_inches="tight")
         plt.close()
     elif hist_plot == "energy" and energies is None:
         energies = np.sqrt(masked_px*masked_px + masked_py*masked_py+masked_pz*masked_pz)
-        plt.hist2d(etas2, phis2, bins=(created_bins, created_bins), weights=energies, cmap='Greys_r',)
+        print(energies)
+        energies2 = scale_energy_for_visual(energies)
+        print(energies2)
+        ax.hist2d(etas2, phis2, bins=(created_bins, created_bins), weights=np.log(energies2), cmap='Greys',)
         plt.colorbar(label='Energies') 
-        plt.savefig(f"{save_str}_energies.png", dpi=600)
-        plt.savefig(f"{save_str}_energies.pdf",)
+        plt.savefig(f"{save_str}_energies.png", dpi=600,bbox_inches="tight")
+        plt.savefig(f"{save_str}_energies.pdf",bbox_inches="tight")
         plt.close()
     else:
         plt.clf()
         plt.close()
         raise ValueError("Error: hist_plot was not 'count' or 'energy'.\n")
     
+# def generate_multiple2d()

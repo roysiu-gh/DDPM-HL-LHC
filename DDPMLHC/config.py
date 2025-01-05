@@ -23,7 +23,7 @@ MPL_GLOBAL_PARAMS = {
     'text.latex.preamble' : r'\usepackage{type1cm}\usepackage{braket}\usepackage{amssymb}\usepackage{amsmath}\usepackage{txfonts}', # latex packages
     'font.size' : 24,
     'figure.dpi' : 600,
-    'figure.figsize' : (3.375, 3),
+    'figure.figsize' : (8, 6),
     'figure.autolayout' : True, # tight layout (True) or not (False)
     'axes.labelpad' : 5,
     'axes.xmargin' : 0,
@@ -31,8 +31,8 @@ MPL_GLOBAL_PARAMS = {
     'axes.grid' : False,
     # 'axes.autolimit_mode' : round_numbers, # set axis limits by rounding min/max values
     'axes.autolimit_mode' : 'data', # set axis limits as min/max values
-    'xtick.major.pad' : 5,
-    'ytick.major.pad' : 5,
+    'xtick.major.pad' : 10,
+    'ytick.major.pad' : 10,
     'xtick.labelsize': label_fontsize,
     'ytick.labelsize': label_fontsize,
     'lines.linewidth' : 1.3,
