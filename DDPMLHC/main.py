@@ -13,6 +13,8 @@ from DDPMLHC.dataset_ops.data_loading import select_event
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
+MAX_DATA_ROWS = 100000
+
 # ======= global matplotlib params =====
 # plt.rcParams["text.usetex"] = False  # Use LaTeX for rendering text
 # plt.rcParams["font.size"] = 12  # Set default font size (optional)
@@ -287,7 +289,7 @@ energies_100 = np.sqrt(masked_px1*masked_px1 + masked_py1*masked_py1+masked_pz1*
 energies_200 = np.sqrt(masked_px2*masked_px2 + masked_py2*masked_py2+masked_pz2*masked_pz2)
 energies_jet = np.sqrt(masked_pxj*masked_pxj + masked_pyj*masked_pyj+masked_pzj*masked_pzj)
 SD = np.std(energies_200)
-scale = 256 / (3 * SD)  # Value above which we represent as full brightness (256)
+scale = 256 / (0.001 * SD)  # Value above which we represent as full brightness (256)
 print(scale)
 print("std dev", SD)
 scaled_energies_200 = np.floor(energies_200 * scale)
@@ -305,7 +307,28 @@ hist1 = ax1.hist2d(etas_j, phis_j, bins=(created_bins, created_bins), weights=np
 hist2 = ax2.hist2d(etas_100, phis_100, bins=(created_bins, created_bins), weights=np.log(scaled_energies_100,where=scaled_energies_100 > 0), cmap='Greys_r',)
 hist3 = ax3.hist2d(etas_200, phis_200, bins=(created_bins, created_bins), weights=np.log(scaled_energies_200, where=scaled_energies_200 > 0), cmap='Greys_r',)
 # cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
-fig.colorbar(hist3[3], cax=cax,label='Energies') 
+cbar = fig.colorbar(hist3[3], cax=cax,label='Scaled Energies')
+cbar.set_ticks([0, 16, 32, 48, 64])
+
+# Calculate bin indices
+bin_indices = np.arange(len(created_bins))  # Bin numbers start at 0
+
+# Use bin numbers as axis labels
+ax1.set_xlim(left=-1, right=1.001)
+bin_ticks_foo = created_bins[:-1] + np.diff(created_bins) / 2
+print(bin_ticks_foo)
+print(bin_indices)
+ax1.set_xticks(np.append(bin_ticks_foo[::8], bin_ticks_foo[-1]))
+ax2.set_xticks(np.append(bin_ticks_foo[::8], bin_ticks_foo[-1]))
+ax3.set_xticks(np.append(bin_ticks_foo[::8], bin_ticks_foo[-1]))
+ax1.set_yticks(np.append(bin_ticks_foo[::8], bin_ticks_foo[-1]))
+ax1.set_xticklabels(np.append(bin_indices[::8], [32]))
+ax2.set_xticklabels(np.append(bin_indices[::8], [32]))
+ax3.set_xticklabels(np.append(bin_indices[::8], [32]))
+ax1.set_yticklabels(np.append(bin_indices[::8], [32]))
+ax2.set_yticklabels([])
+ax3.set_yticklabels([])
+
 plt.tight_layout()
 plt.savefig(f"{save_str}_energies.png", dpi=600)
 # plt.savefig(f"{save_str}_energies.pdf",bbox_inches="tight")
