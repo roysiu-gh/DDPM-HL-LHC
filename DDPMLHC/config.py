@@ -11,6 +11,9 @@ PILEUP_EXT_PATH = f"{CWD}/data/2-intermediate/pileup_extended.csv"
 TT_EXT_PATH = f"{CWD}/data/2-intermediate/ttbar_extended.csv"
 JET_PATH = f"{CWD}/data/2-intermediate/ttbar_jets.csv"
 
+PILEUP_NUM = 1_000_000
+TTBAR_NUM = 70903
+
 MAX_DATA_ROWS = None
 
 BMAP_SQUARE_SIDE_LENGTH = 64

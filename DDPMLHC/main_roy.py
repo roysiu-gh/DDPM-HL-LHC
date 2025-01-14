@@ -6,7 +6,7 @@ import matplotlib as mpl
 from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import *
 from DDPMLHC.dataset_ops.process_data import *
-from DDPMLHC.dataset_ops.generate_intermediate_event_data import process_noisy_data
+from DDPMLHC.dataset_ops.generate_intermediate_event_data import calculate_event_level_quantities
 from DDPMLHC.generate_plots.generate_1d_plots import foobah
 from DDPMLHC.generate_plots.visualisation import plot_detections, generate_2dhist
 from DDPMLHC.dataset_ops.data_loading import select_event
@@ -47,22 +47,26 @@ tt = np.genfromtxt(
 
 #################################################################################
 
-INTERMEDIATE_PATH = f"{CWD}/data/2-intermediate/try/"
+INTERMEDIATE_PATH = f"{CWD}/data/2-intermediate/"
 OUT_PATH_1D_HIST = f"{CWD}/data/plots/1D_histograms/particles/"
 MAX_DATA_ROWS = 100_000
 
 # === Create noisy events
 print("1 :: Creating noisy events")
-write_combined_csv(range(100), tt, pile_up, 10, save_path=INTERMEDIATE_PATH)
-write_combined_csv(range(100), tt, pile_up, 100, save_path=INTERMEDIATE_PATH)
-write_combined_csv(range(100), tt, pile_up, 200, save_path=INTERMEDIATE_PATH)
+make_noisy_data(range(100), tt, pile_up, 0, save_path=INTERMEDIATE_PATH)
+make_noisy_data(range(100), tt, pile_up, 10, save_path=INTERMEDIATE_PATH)
+make_noisy_data(range(100), tt, pile_up, 100, save_path=INTERMEDIATE_PATH)
+make_noisy_data(range(100), tt, pile_up, 200, save_path=INTERMEDIATE_PATH)
 print("FINISHED creating noisy events\n")
+
+exit(69)
 
 # === Make noisy events with extra data (e.g. transverse mmtm)
 print("2 :: Making noisy events with extra data")
-process_noisy_data(10, INTERMEDIATE_PATH)
-process_noisy_data(100, INTERMEDIATE_PATH)
-process_noisy_data(200, INTERMEDIATE_PATH)
+calculate_event_level_quantities(0, INTERMEDIATE_PATH)
+calculate_event_level_quantities(10, INTERMEDIATE_PATH)
+calculate_event_level_quantities(100, INTERMEDIATE_PATH)
+calculate_event_level_quantities(200, INTERMEDIATE_PATH)
 print("FINISHED making noisy events with extra data\n")
 
 # === Draw 1D histograms
@@ -104,6 +108,7 @@ hist_data_particles = [
 ]
 
 foobah(mu=0, event_stats_path=JET_PATH)
+# foobah(mu=0)
 foobah(mu=10)
 foobah(mu=100)
 foobah(mu=200)

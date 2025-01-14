@@ -14,9 +14,10 @@ def select_event(data, num, filter=False, max_data_rows=MAX_DATA_ROWS):
     indices = np.unique(data[:,0])
     if (not np.isin(num, indices)):
         # print(f"Warn: index was not found in data file. Returning array with ID {num} (at 0th index) of same shape as 1 sample in data, with zeroes everywhere else.")
-        zero_arr = np.zeros_like(data[0])
-        zero_arr[0] = -1
-        return zero_arr
+        # zero_arr = np.zeros_like(data[0])
+        # zero_arr[0] = -1
+        # return zero_arr
+        return None
     return data[data[:, 0] == num]
 
 

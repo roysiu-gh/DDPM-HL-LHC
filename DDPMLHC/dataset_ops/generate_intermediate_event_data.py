@@ -2,8 +2,7 @@ import numpy as np
 from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import *
 
-def process_noisy_data(mu, save_path, verbose=False):
-    """Add more attributes to noisy data for given mu."""
+def calculate_event_level_quantities(mu, save_path, verbose=False):
     # Load noisy data
     load_path = f"{CWD}/data/2-intermediate/noisy_mu{mu}.csv"
     noisy_data = np.genfromtxt(
@@ -17,7 +16,8 @@ def process_noisy_data(mu, save_path, verbose=False):
     etas = noisy_data[:, 5]
     phis = noisy_data[:, 6]
     enes = noisy_data[:, 7]
-    pTs = to_pT(pxs, pys)
+    pTs = noisy_data[:, 8]
+    # pTs = to_pT(pxs, pys)
 
     p2s = contraction(enes, pxs, pys, pzs)
     masses = np.sqrt(p2s)
