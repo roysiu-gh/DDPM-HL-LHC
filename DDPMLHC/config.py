@@ -7,6 +7,8 @@ PILEUP_PATH = f"{CWD}/data/1-initial/pileup.csv"
 TT_PATH = f"{CWD}/data/1-initial/ttbar.csv"
 
 # 2 intermediate paths
+INTERMEDIATE_PATH = f"{CWD}/data/2-intermediate/"
+# Remove the following?
 PILEUP_EXT_PATH = f"{CWD}/data/2-intermediate/pileup_extended.csv"
 TT_EXT_PATH = f"{CWD}/data/2-intermediate/ttbar_extended.csv"
 JET_PATH = f"{CWD}/data/2-intermediate/ttbar_jets.csv"

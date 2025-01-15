@@ -116,9 +116,9 @@ def plot_combined_histograms(hist_data, save_path):
     plt.tight_layout()
     plt.savefig(f"{save_path}/multiple.png", dpi=600)
 
-def foobah(mu, event_stats_path=None):
+def plot_1d_histograms(mu, event_stats_path=None):
     if event_stats_path is None:
-        event_stats_path = f"{CWD}/data/2-intermediate/noisy_event_stats_mu{mu}.csv"
+        event_stats_path = f"{CWD}/data/2-intermediate/noisy_mu{mu}_event_level.csv"
     print(f"Doing mu = {mu}...")
     events_dat = np.genfromtxt(
         event_stats_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS

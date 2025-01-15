@@ -6,14 +6,11 @@ import matplotlib as mpl
 from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import *
 from DDPMLHC.dataset_ops.process_data import *
-from DDPMLHC.dataset_ops.generate_intermediate_event_data import calculate_event_level_quantities
-from DDPMLHC.generate_plots.generate_1d_plots import foobah
-from DDPMLHC.generate_plots.visualisation import plot_detections, generate_2dhist
-from DDPMLHC.dataset_ops.data_loading import select_event
+from DDPMLHC.generate_plots.generate_1d_plots import plot_1d_histograms
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
-# MAX_DATA_ROWS = 100_000
+MAX_DATA_ROWS = 1_000_000
 
 # === Read in data
 print("0 :: Loading original data")
@@ -23,20 +20,17 @@ pile_up = np.genfromtxt(
 tt = np.genfromtxt(
     TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
 )
+print("FINISHED loading data\n")
 
 #################################################################################
 
-
-INTERMEDIATE_PATH = f"{CWD}/data/2-intermediate/"
-MAX_DATA_ROWS = 100_000
-
-# # === Create noisy events
-# print("1 :: Creating noisy events")
-# make_noisy_data(range(1000), tt, pile_up, 0, save_path=INTERMEDIATE_PATH)
-# make_noisy_data(range(1000), tt, pile_up, 10, save_path=INTERMEDIATE_PATH)
-# make_noisy_data(range(1000), tt, pile_up, 100, save_path=INTERMEDIATE_PATH)
-# make_noisy_data(range(1000), tt, pile_up, 200, save_path=INTERMEDIATE_PATH)
-# print("FINISHED creating noisy events\n")
+# === Create noisy events
+print("1 :: Creating noisy events")
+make_noisy_data(range(100), tt, pile_up, 0, save_path=INTERMEDIATE_PATH)
+make_noisy_data(range(100), tt, pile_up, 10, save_path=INTERMEDIATE_PATH)
+make_noisy_data(range(100), tt, pile_up, 100, save_path=INTERMEDIATE_PATH)
+make_noisy_data(range(100), tt, pile_up, 200, save_path=INTERMEDIATE_PATH)
+print("FINISHED creating noisy events\n")
 
 # === Collapse noisy data to event-level
 print("2 :: Making noisy events with extra data")
@@ -48,12 +42,13 @@ print("FINISHED making noisy events with extra data\n")
 
 # === Draw 1D histograms
 print("3 :: Drawing 1D histograms")
-foobah(mu=0)
-foobah(mu=10)
-foobah(mu=100)
-foobah(mu=200)
+plot_1d_histograms(mu=0)
+plot_1d_histograms(mu=10)
+plot_1d_histograms(mu=100)
+plot_1d_histograms(mu=200)
 print("FINISHED drawing 1D histograms\n")
 
+# print("4 :: Drawing overlaid histograms with varying mu")
 # print("Loading intermediate data...")
 # tt = np.genfromtxt(
 #     TT_EXT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
@@ -88,5 +83,6 @@ print("FINISHED drawing 1D histograms\n")
 #         "save_path": OUT_PATH_1D_HIST,
 #     },
 # ]
+# print("FINISHED drawing overlaid histograms\n")
 
 print("DONE ALL.")
