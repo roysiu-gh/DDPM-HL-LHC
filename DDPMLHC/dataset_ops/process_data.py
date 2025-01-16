@@ -38,7 +38,7 @@ def make_noisy_data(jet_nos, tt_data, pile_up_data, mu, save_path="data"):
         LID_index = 0
         jet_event = select_event(tt_data, jet_no, filter=False)
         if jet_event.size == 0:
-            print(f"Jet number {jet_no} not found. Perhaps MAX_DATA_ROWS is too small. Breaking loop.")
+            print(f"Jet number {jet_no} not found. Perhaps MAX_DATA_ROWS is se. Breaking loop.")
             break
         axis = get_axis_eta_phi([jet_event[:,3], jet_event[:,4], jet_event[:,5]]) # Get jet centre to shift all particles eta/phi by this
 
@@ -111,12 +111,22 @@ def make_noisy_data(jet_nos, tt_data, pile_up_data, mu, save_path="data"):
 
 
 
-def calculate_event_level_quantities(mu, save_path, verbose=False):
+def calculate_event_level_quantities(mu, save_path, verbose=False, mask=True):
     # Load noisy data
     load_path = f"{CWD}/data/2-intermediate/noisy_mu{mu}.csv"
     noisy_data = np.genfromtxt(
         load_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
     )
+
+    # Do masking
+    if mask:
+        # print(f"noisy_data.shape {noisy_data.shape}")
+        LIDs = noisy_data[:, 1].astype(int)
+        d_etas = noisy_data[:, 5]
+        d_phis = noisy_data[:, 6]
+        dR2s = d_etas*d_etas + d_phis*d_phis
+        noisy_data = noisy_data[ (LIDs == 0) | (dR2s < 1) ]  # First condition so 
+        # print(f"d_phis.shape {d_phis.shape}") 
 
     # Extract relevant columns
     NIDs = noisy_data[:, 0].astype(int)

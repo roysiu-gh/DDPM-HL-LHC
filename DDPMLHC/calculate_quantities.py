@@ -52,7 +52,6 @@ def calculate_four_momentum_massless(event_ids, px, py, pz, mask=True):
     if not (len(event_ids) == len(px) == len(py) == len(pz)):
         raise ValueError(f"All input arrays must have same length. Got {len(event_ids)}, {len(px)}, {len(py)}, {len(pz)}.")
     
-    # max_jet_id = int( np.max(event_ids) )
     max_jet_id = int( event_ids[-1] )
 
     event_ene = np.zeros(max_jet_id + 1)
@@ -60,25 +59,7 @@ def calculate_four_momentum_massless(event_ids, px, py, pz, mask=True):
     event_py = np.zeros(max_jet_id + 1)
     event_pz = np.zeros(max_jet_id + 1)
 
-    # jet_eta = np.zeros(max_jet_id + 1)
-    # jet_phi = np.zeros(max_jet_id + 1)
-
-    # Calculate total 4mmtm for each jet
     for event_id, px_val, py_val, pz_val in zip(event_ids, px, py, pz):
-        # pmag = p_magnitude(px_val, py_val, pz_val)
-        # phi_val = pseudorapidity(pmag, pz_val)
-        # eta_val = to_phi(px_val, py_val)
-
-        # # Bodge! calculate jet axis and save
-        # if (jet_eta[jet_id] == 0) and (jet_phi[jet_id] == 0):
-        #     jet_eta[jet_id] = phi_val
-        #     jet_phi[jet_id] = eta_val
-        
-        # # Skip PU more than rad 1 away from jet axis
-        # delta_R = np.sqrt(phi_val**2 + eta_val**2)
-        # if delta_R > 1:
-        #     continue
-
         ene_val = p_magnitude(px_val, py_val, pz_val)
 
         event_ene[int(event_id)] += ene_val
