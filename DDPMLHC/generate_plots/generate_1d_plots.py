@@ -132,11 +132,14 @@ def plot_1d_histograms(mu, event_stats_path=None):
     
     print("Final idx (#events - 1): ", events_dat[-1, 0])
 
+    mass_max = 300
+    mass_num_bins = 50
+
     list_of_params_foobar = [
         {
             "name": "Mass [GeV]",
             "data": event_mass,
-            "plot_params": {"x_max": 500},
+            "plot_params": {"bins" : np.mgrid[0:mass_max:(mass_num_bins+1)*1j]},
             "save_filename": "event_mass",
             "save_path": save_path,
         },

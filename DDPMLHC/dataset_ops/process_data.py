@@ -38,7 +38,7 @@ def make_noisy_data(jet_nos, tt_data, pile_up_data, mu, save_path="data"):
         LID_index = 0
         jet_event = select_event(tt_data, jet_no, filter=False)
         if jet_event.size == 0:
-            print(f"Jet number {jet_no} not found. Perhaps MAX_DATA_ROWS is se. Breaking loop.")
+            print(f"Jet number {jet_no} not found. Perhaps MAX_DATA_ROWS is set. Breaking loop.")
             break
         axis = get_axis_eta_phi([jet_event[:,3], jet_event[:,4], jet_event[:,5]]) # Get jet centre to shift all particles eta/phi by this
 
