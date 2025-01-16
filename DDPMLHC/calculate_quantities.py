@@ -13,6 +13,7 @@ def p_magnitude(px, py, pz):
     p_mag: ndarray
         1D array of same shape containing 3-momentum magnitude 
     """
+    # np.linalg.norm([px_val, py_val, pz_val]) ?
     return np.sqrt(px*px + py*py + pz*pz)
 
 
@@ -47,43 +48,45 @@ def to_pT(p_x, p_y):
 
 
 def calculate_four_momentum_massless(event_ids, px, py, pz, mask=True):
-    """Calculate the total 4-momentum of jets. Massless limit. Natural units."""
+    """Calculate the total 4-momentum of jets. Massless limit. Natural units. Optional masking to remove Delta R > 1 particles."""
     if not (len(event_ids) == len(px) == len(py) == len(pz)):
         raise ValueError(f"All input arrays must have same length. Got {len(event_ids)}, {len(px)}, {len(py)}, {len(pz)}.")
     
-    max_jet_id = int( np.max(event_ids) )
+    # max_jet_id = int( np.max(event_ids) )
+    max_jet_id = int( event_ids[-1] )
 
-    jet_ene = np.zeros(max_jet_id + 1)
-    jet_px = np.zeros(max_jet_id + 1)
-    jet_py = np.zeros(max_jet_id + 1)
-    jet_pz = np.zeros(max_jet_id + 1)
-    jet_eta = np.zeros(max_jet_id + 1)
-    jet_phi = np.zeros(max_jet_id + 1)
+    event_ene = np.zeros(max_jet_id + 1)
+    event_px = np.zeros(max_jet_id + 1)
+    event_py = np.zeros(max_jet_id + 1)
+    event_pz = np.zeros(max_jet_id + 1)
+
+    # jet_eta = np.zeros(max_jet_id + 1)
+    # jet_phi = np.zeros(max_jet_id + 1)
 
     # Calculate total 4mmtm for each jet
-    for jet_id, px_val, py_val, pz_val in zip(event_ids, px, py, pz):
-        pmag = p_magnitude(px_val, py_val, pz_val)
-        phi_val = pseudorapidity(pmag, pz_val)
-        eta_val = to_phi(px_val, py_val)
+    for event_id, px_val, py_val, pz_val in zip(event_ids, px, py, pz):
+        # pmag = p_magnitude(px_val, py_val, pz_val)
+        # phi_val = pseudorapidity(pmag, pz_val)
+        # eta_val = to_phi(px_val, py_val)
 
-        # Bodge! calculate jet axis and save
-        if (jet_eta[jet_id] == 0) and (jet_phi[jet_id] == 0):
-            jet_eta[jet_id] = phi_val
-            jet_phi[jet_id] = eta_val
+        # # Bodge! calculate jet axis and save
+        # if (jet_eta[jet_id] == 0) and (jet_phi[jet_id] == 0):
+        #     jet_eta[jet_id] = phi_val
+        #     jet_phi[jet_id] = eta_val
         
-        # Skip PU more than rad 1 away from jet axis
-        delta_R = np.sqrt(phi_val**2 + eta_val**2)
-        if delta_R > 1:
-            continue
+        # # Skip PU more than rad 1 away from jet axis
+        # delta_R = np.sqrt(phi_val**2 + eta_val**2)
+        # if delta_R > 1:
+        #     continue
 
-        ene_val = np.linalg.norm([px_val, py_val, pz_val])
+        ene_val = p_magnitude(px_val, py_val, pz_val)
 
-        jet_ene[int(jet_id)] += ene_val
-        jet_px[int(jet_id)] += px_val
-        jet_py[int(jet_id)] += py_val
-        jet_pz[int(jet_id)] += pz_val
+        event_ene[int(event_id)] += ene_val
+        event_px[int(event_id)] += px_val
+        event_py[int(event_id)] += py_val
+        event_pz[int(event_id)] += pz_val
 
-    return jet_ene, jet_px, jet_py, jet_pz
+    return event_ene, event_px, event_py, event_pz
 
 def contraction(time_like_0, space_like_1, space_like_2, space_like_3):
     """Calculate the contractions."""

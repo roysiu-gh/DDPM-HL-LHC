@@ -49,7 +49,8 @@ def make_noisy_data(jet_nos, tt_data, pile_up_data, mu, save_path="data"):
         # all = np.vstack((all, jet_event))
         jetpluspu = jet_event
         # combined.append(jet_event)
-        pu_nos = np.random.randint(low = 0, high = PILEUP_NUM, size = mu, dtype=np.int32)
+        high_PU_no = pile_up_data[-1, 0]  # Last available ID is tot num of loaded pileup
+        pu_nos = np.random.randint(low = 0, high = high_PU_no, size = mu, dtype=np.int32)
         # print(pu_nos)
         for pu_no in pu_nos:
             LID_index += 1
@@ -101,7 +102,7 @@ def make_noisy_data(jet_nos, tt_data, pile_up_data, mu, save_path="data"):
     np.savetxt(output_filepath, stacked, delimiter=",",  comments="",header="NID,LID,px,py,pz,d_eta,d_phi,pmag,p_T", fmt="%d,%d,%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%.10f")
     # np.savetxt(output_file, out, delimiter=",")
 
-    print(f"Made mu = {mu} data.\nSaved to {output_filename}.")
+    print(f"Made {int(stacked[-1,0])} events of mu = {mu} data.\nSaved to {output_filename}.")
 
 
 
@@ -116,14 +117,14 @@ def calculate_event_level_quantities(mu, save_path, verbose=False):
     NIDs = noisy_data[:, 0].astype(int)
     LIDs = noisy_data[:, 1].astype(int)
     pxs, pys, pzs = noisy_data[:, 2], noisy_data[:, 3], noisy_data[:, 4]
-    etas = noisy_data[:, 5]
-    phis = noisy_data[:, 6]
-    enes = noisy_data[:, 7]
-    pTs = noisy_data[:, 8]
+    # etas = noisy_data[:, 5]
+    # phis = noisy_data[:, 6]
+    # enes = noisy_data[:, 7]
+    # pTs = noisy_data[:, 8]
     # pTs = to_pT(pxs, pys)
 
-    p2s = contraction(enes, pxs, pys, pzs)
-    masses = np.sqrt(p2s)
+    # p2s = contraction(enes, pxs, pys, pzs)
+    # masses = np.sqrt(p2s)
 
     # ===== Create Noisy Event Data ===== #
 
@@ -158,4 +159,4 @@ def calculate_event_level_quantities(mu, save_path, verbose=False):
         comments="",
         fmt="%i, %10.10f,  %10.10f,  %10.10f,  %10.10f,  %10.10f,  %10.10f,  %10.10f"
     )
-    print(f"Collapsed mu = {mu} data to event-level.\nSaved to {output_filename}.")
+    print(f"Collapsed {int(combined_array[-1,0])} events of mu = {mu} data to event-level.\nSaved to {output_filename}.")
