@@ -33,6 +33,7 @@ def wrap_phi(phi_centre, phis, R=1):
 def make_noisy_data(jet_nos, tt_data, pile_up_data, mu, save_path="data"):
     combined = []
     running_length = 0
+    high_PU_no = pile_up_data[-1, 0]
     for jet_no in jet_nos:
         LID_index = 0
         jet_event = select_event(tt_data, jet_no, filter=False)
@@ -49,13 +50,17 @@ def make_noisy_data(jet_nos, tt_data, pile_up_data, mu, save_path="data"):
         # all = np.vstack((all, jet_event))
         jetpluspu = jet_event
         # combined.append(jet_event)
-        high_PU_no = pile_up_data[-1, 0]  # Last available ID is tot num of loaded pileup
+          # Last available ID is tot num of loaded pileup
         pu_nos = np.random.randint(low = 0, high = high_PU_no, size = mu, dtype=np.int32)
         # print(pu_nos)
         for pu_no in pu_nos:
             LID_index += 1
             pu_event = select_event(pile_up_data, pu_no, filter=False)
-            if pu_event == np.array([]): continue  # Skip if empty pile-up
+            # print(pu_event)
+            # print(pu_event.shape)
+            # print(np.array([]).shape)
+            #if pu_event == np.array([]): continue  # Skip if empty pile-up
+            if pu_event.size == 0: continue  # Skip if empty pile-up
             num_rows = pu_event.shape[0]
             LID_column = np.full((1, num_rows), LID_index) # Make array of LIDs
             NID_column = np.full((1, num_rows), jet_no) # Make array of NIDs

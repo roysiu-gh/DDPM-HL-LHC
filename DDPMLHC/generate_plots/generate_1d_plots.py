@@ -6,7 +6,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sb
 import multiprocessing
-
+from pathlib import Path
 # Local imports
 from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import p_magnitude
@@ -124,6 +124,8 @@ def plot_1d_histograms(mu, event_stats_path=None):
         event_stats_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
     )
     save_path = f"{CWD}/data/plots/1D_histograms/mu{mu}/"
+    Path(save_path).mkdir(parents=False, exist_ok=True)
+
     event_eta = events_dat[:, 4]
     event_mass = events_dat[:, 6]
     event_pT = events_dat[:, 7]
@@ -134,7 +136,7 @@ def plot_1d_histograms(mu, event_stats_path=None):
         {
             "name": "Mass [GeV]",
             "data": event_mass,
-            "plot_params": {"x_max": 250},
+            "plot_params": {"x_max": 500},
             "save_filename": "event_mass",
             "save_path": save_path,
         },
