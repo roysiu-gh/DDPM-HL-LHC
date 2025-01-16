@@ -102,7 +102,7 @@ def make_noisy_data(jet_nos, tt_data, pile_up_data, mu, save_path="data"):
     np.savetxt(output_filepath, stacked, delimiter=",",  comments="",header="NID,LID,px,py,pz,d_eta,d_phi,pmag,p_T", fmt="%d,%d,%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%.10f")
     # np.savetxt(output_file, out, delimiter=",")
 
-    print(f"Made {int(stacked[-1,0])} events of mu = {mu} data.\nSaved to {output_filename}.")
+    print(f"Made {int(stacked[-1,0])} events of mu = {mu} data.\n    Saved to {output_filename}.")
 
 
 
@@ -155,8 +155,8 @@ def calculate_event_level_quantities(mu, save_path, verbose=False):
         output_filepath,
         combined_array,
         delimiter=",",
-        header="event_id, px, py, pz, eta, phi, mass, p_T",
+        header="event_id,px,py,pz,eta,phi,mass,p_T",
         comments="",
-        fmt="%i, %10.10f,  %10.10f,  %10.10f,  %10.10f,  %10.10f,  %10.10f,  %10.10f"
+        fmt="%i,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f"
     )
-    print(f"Collapsed {int(combined_array[-1,0])} events of mu = {mu} data to event-level.\nSaved to {output_filename}.")
+    print(f"Collapsed {int(combined_array[-1,0])} events of mu = {mu} data to event-level.\n    Saved to {output_filename}.")
