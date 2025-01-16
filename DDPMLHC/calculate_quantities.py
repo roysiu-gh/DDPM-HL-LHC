@@ -91,7 +91,13 @@ def get_axis_eta_phi(p):
     jet_mag = np.linalg.norm(total_p)
     if jet_mag == 0:
         raise ValueError("Jet magnitude is zero. Input is invalid for calculations.")
-    eta = pseudorapidity(jet_mag, total_p[2])
+    try:
+        eta = pseudorapidity(jet_mag, total_p[2])
+    except Exception as e:
+        print(f"EXCEPTION")
+        print(f"jet_mag {jet_mag}")
+        print(f"total_p[2] {total_p[2]}")
+        raise e
     phi = to_phi(total_p[0], total_p[1])
     return eta, phi
 

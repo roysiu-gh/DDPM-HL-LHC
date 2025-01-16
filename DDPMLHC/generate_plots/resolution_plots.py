@@ -1,6 +1,6 @@
 # from visualisation import plot_detections, count_hist, energy_hist, generate_2dhist
 from DDPMLHC.config import *
-from DDPMLHC.dataset_ops.data_loading import select_event
+from DDPMLHC.dataset_ops.data_loading import select_event_deprecated
 from DDPMLHC.calculate_quantities import *
 import numpy as np
 import matplotlib.pyplot as plt
@@ -125,7 +125,7 @@ def mean_quantity_diff(params):
         # selected_pile_ups = np.vstack(selected_pile_ups)
         # exit(1)
         selected_pile_ups = pile_up_data[np.isin(pile_up_indices, selected_events)]
-        cd = select_event(jet_data, jet_no)
+        cd = select_event_deprecated(jet_data, jet_no)
         m, E, p_T = quantity_diff(cd[:,0], cd[:,3],cd[:,4],cd[:,5], jet_masses[jet_no], jet_pt[jet_no], selected_pile_ups[:,3], selected_pile_ups[:,4], selected_pile_ups[:,5])
         m_total += m
         E_total += E

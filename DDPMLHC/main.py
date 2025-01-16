@@ -9,7 +9,7 @@ from DDPMLHC.dataset_ops.process_data import *
 from DDPMLHC.dataset_ops.generate_intermediate_event_data import process_noisy_data
 from DDPMLHC.generate_plots.generate_1d_plots import plot_1d_histograms
 from DDPMLHC.generate_plots.visualisation import plot_detections, generate_2dhist
-from DDPMLHC.dataset_ops.data_loading import select_event
+from DDPMLHC.dataset_ops.data_loading import select_event_deprecated
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
@@ -164,8 +164,8 @@ event_IDS_100 = np.random.randint(0, np.max(pile_up[:,0]), size = 100).astype(in
 # event_IDS = np.mgrid[0:(mu-1):(mu)*1j]
 # print(f"Jet_No: {jet_no}, event IDs: {event_IDS}")
 # selected_pile_ups now contain 2D arrays
-selected_pile_ups_200 = [select_event(pile_up, event_ID, filter=True) for event_ID in event_IDS_200]
-selected_pile_ups_100 = [select_event(pile_up, event_ID, filter=True) for event_ID in event_IDS_100]
+selected_pile_ups_200 = [select_event_deprecated(pile_up, event_ID, filter=True) for event_ID in event_IDS_200]
+selected_pile_ups_100 = [select_event_deprecated(pile_up, event_ID, filter=True) for event_ID in event_IDS_100]
 
 # zero_p_mask_200 = ~((selected_pile_ups_200[:, 3] == 0) & (selected_pile_ups_200[:, 4] == 0) & (selected_pile_ups_200[:, 5] == 0))
 # zero_p_mask_100 = ~((selected_pile_ups_100[:, 3] == 0) & (selected_pile_ups_100[:, 4] == 0) & (selected_pile_ups_100[:, 5] == 0))
@@ -183,7 +183,7 @@ selected_pile_ups_100 = selected_pile_ups_100[selected_pile_ups_100[:,0] != -1]
 # Remove invalid pile_ups
 # false_ids = np.size(selected_pile_ups2, axis=0) - np.size(selected_pile_ups, axis=0)
 # print("Number of false Pile-up IDs: ",false_ids)
-jet_data = select_event(tt, jet_no, max_data_rows=MAX_DATA_ROWS)
+jet_data = select_event_deprecated(tt, jet_no, max_data_rows=MAX_DATA_ROWS)
 data100 = np.vstack((jet_data,selected_pile_ups_100))
 data200 = np.vstack((jet_data,selected_pile_ups_200))
 # data = selected_pile_ups

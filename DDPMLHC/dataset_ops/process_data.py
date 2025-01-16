@@ -1,6 +1,5 @@
 import numpy as np
 from DDPMLHC.calculate_quantities import *
-from DDPMLHC.dataset_ops.data_loading import select_event
 from DDPMLHC.config import *
 
 
@@ -36,7 +35,7 @@ def make_noisy_data(jet_nos, tt_data, pile_up_data, mu, save_path="data"):
     high_PU_no = pile_up_data[-1, 0]
     for jet_no in jet_nos:
         LID_index = 0
-        jet_event = select_event(tt_data, jet_no, filter=False)
+        jet_event = tt_data.select_event(jet_no)
         if jet_event.size == 0:
             print(f"Jet number {jet_no} not found. Perhaps MAX_DATA_ROWS is set. Breaking loop.")
             break
@@ -55,7 +54,7 @@ def make_noisy_data(jet_nos, tt_data, pile_up_data, mu, save_path="data"):
         # print(pu_nos)
         for pu_no in pu_nos:
             LID_index += 1
-            pu_event = select_event(pile_up_data, pu_no, filter=False)
+            pu_event = pile_up_data.select_event(pu_no)
             # print(pu_event)
             # print(pu_event.shape)
             # print(np.array([]).shape)

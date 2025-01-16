@@ -14,7 +14,7 @@ from matplotlib.patches import Patch, Circle
 
 # Local imports
 from DDPMLHC.calculate_quantities import get_axis_eta_phi, delta_R, p_magnitude, pseudorapidity, to_phi,centre_on_jet
-from DDPMLHC.dataset_ops.data_loading import select_event
+from DDPMLHC.dataset_ops.data_loading import select_event_deprecated
 from DDPMLHC.dataset_ops.process_data import wrap_phi
 
 
@@ -259,7 +259,7 @@ def generate_2dhist(tt_data, pile_up_data, jet_no,mu, max_event_id, bins=32, bou
     # print(f"Jet_No: {jet_no}, event IDs: {event_IDS}")
     # selected_pile_ups now contain 2D arrays
     if mu != 0:
-        selected_pile_ups2 = [select_event(pile_up_data, event_ID, filter=True) for event_ID in event_IDS] 
+        selected_pile_ups2 = [select_event_deprecated(pile_up_data, event_ID, filter=True) for event_ID in event_IDS] 
         selected_pile_ups2 = np.vstack(selected_pile_ups2)
         selected_pile_ups = selected_pile_ups2[selected_pile_ups2[:,0] != -1]
     else:
@@ -267,7 +267,7 @@ def generate_2dhist(tt_data, pile_up_data, jet_no,mu, max_event_id, bins=32, bou
     # Remove invalid pile_ups
     false_ids = np.size(selected_pile_ups2, axis=0) - np.size(selected_pile_ups, axis=0)
     print("Number of false Pile-up IDs: ",false_ids)
-    jet_data = select_event(tt_data, jet_no, max_data_rows=MAX_DATA_ROWS)
+    jet_data = select_event_deprecated(tt_data, jet_no, max_data_rows=MAX_DATA_ROWS)
     data = np.vstack((jet_data,selected_pile_ups))
     # data = selected_pile_ups
     # print(len(data))

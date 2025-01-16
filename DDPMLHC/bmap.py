@@ -6,7 +6,7 @@ import numpy as np
 from PIL import Image
 
 # Local imports
-from dataset_ops.data_loading import select_event
+from dataset_ops.data_loading import select_event_deprecated
 from calculate_quantities import *
 from dataset_ops.process_data import unit_square_the_unit_circle, wrap_phi
 
@@ -61,7 +61,7 @@ tt = np.genfromtxt(
 
 jet_no = 0
 
-jet = select_event(tt, jet_no)[:, 3:6]
+jet = select_event_deprecated(tt, jet_no)[:, 3:6]
 print(jet)
 print(len(jet))
 
