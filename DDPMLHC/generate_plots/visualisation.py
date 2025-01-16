@@ -13,9 +13,8 @@ from matplotlib.colors import ListedColormap
 from matplotlib.patches import Patch, Circle
 
 # Local imports
-from DDPMLHC.calculate_quantities import get_axis_eta_phi, delta_R, p_magnitude, pseudorapidity, to_phi,centre_on_jet
-from DDPMLHC.dataset_ops.data_loading import select_event_deprecated
-from DDPMLHC.dataset_ops.process_data import wrap_phi
+from DDPMLHC.calculate_quantities import *
+from DDPMLHC.dataset_ops.process_data import *
 
 
 PDG_IDS = {
@@ -39,8 +38,9 @@ cmap = ListedColormap(plt.cm.tab20(np.linspace(0, 1, len(unique_abs_pdgids))))
 GLOBAL_CMAP = {pid: cmap(i) for i, pid in enumerate(unique_abs_pdgids)}
 
 def plot_detections(
-    tt_bar,
-    pile_ups=None,
+    tt_data,
+    pile_up_data,
+    mu,
     # jet_data,
     centre=(0,0),
     jet_no=0,
@@ -74,20 +74,30 @@ def plot_detections(
     Returns
     -------
     """
-    # Retrieve data for the specified jet and calculate momenta and angles
-    if pile_ups is not None:
-        jet_data = np.concatenate((tt_bar, pile_ups), axis=0)
+    selected_jet = tt_data.select_event(jet_no)
+    high_PU_no = pile_up_data[-1, 0]
+
+    pu_nos = np.random.randint(low = 0, high = high_PU_no, size = mu, dtype=np.int32)
+    if mu != 0:
+        selected_pile_ups2 = [pile_up_data.select_event(event_ID) for event_ID in pu_nos] 
+        selected_pile_ups2 = [x if x is not None for x in selected_pile_ups2]
+        selected_pile_ups2 = np.vstack(selected_pile_ups2)
+        jet_data = np.vstack((tt_bar, selected_pile_ups2))
+        # selected_pile_ups = selected_pile_ups2[selected_pile_ups2[:,0] != -1]
     else:
-        jet_data = tt_bar
-    
-    print("Len jet: ", len(tt_bar))
-    print("Len pileup: ", len(pile_ups))
+        jet_data = selected_jet
+    # Retrieve data for the specified jet and calculate momenta and angles
+   
+    # print("Len jet: ", len(tt_bar))
+    # print("Len pileup: ", len(pile_ups))
+    pxj, pyj, pzj = selected_jet[:,3], selected_jet[:,4], selected_jet[:,5]
     px = jet_data[:, 3]
     py = jet_data[:, 4]
     pz = jet_data[:, 5]
     pmag = p_magnitude(px, py, pz)
     if verbose:
         print("Constituent momenta magnitudes:\n", pmag)
+    centre = get_axis_eta_phi([pxj, pyj, pzj])
     eta = pseudorapidity(pmag, pz)
     phi = to_phi(px, py)
     phi = wrap_phi(centre[1], phi)
@@ -259,15 +269,17 @@ def generate_2dhist(tt_data, pile_up_data, jet_no,mu, max_event_id, bins=32, bou
     # print(f"Jet_No: {jet_no}, event IDs: {event_IDS}")
     # selected_pile_ups now contain 2D arrays
     if mu != 0:
-        selected_pile_ups2 = [select_event_deprecated(pile_up_data, event_ID, filter=True) for event_ID in event_IDS] 
+        selected_pile_ups2 = [pile_up_data.select_event(event_ID) for event_ID in event_IDS] 
+        selected_pile_ups2 = [x if x is not None for x in selected_pile_ups2]
         selected_pile_ups2 = np.vstack(selected_pile_ups2)
-        selected_pile_ups = selected_pile_ups2[selected_pile_ups2[:,0] != -1]
+        # selected_pile_ups = selected_pile_ups2[selected_pile_ups2[:,0] != -1]
     else:
-        selected_pile_ups = np.array([])
+        selected_pile_ups2 = np.array([])
     # Remove invalid pile_ups
     false_ids = np.size(selected_pile_ups2, axis=0) - np.size(selected_pile_ups, axis=0)
     print("Number of false Pile-up IDs: ",false_ids)
-    jet_data = select_event_deprecated(tt_data, jet_no, max_data_rows=MAX_DATA_ROWS)
+    # jet_data = select_event_deprecated(tt_data, jet_no, max_data_rows=MAX_DATA_ROWS)
+    jet_data = tt_data.select_event(jet_no)
     data = np.vstack((jet_data,selected_pile_ups))
     # data = selected_pile_ups
     # print(len(data))

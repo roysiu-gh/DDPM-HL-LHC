@@ -115,8 +115,8 @@ def mean_quantity_diff(params):
     # print("ind", ind)
     # sys.exit(1)
     
-    # TODO: mask
-    event_IDS = np.random.choice(max_event_num, size = (max_jet_no, mu))
+    pu_nos = np.random.randint(low = 0, high = high_PU_no, size = mu, dtype=np.int32)
+    # event_IDS = np.random.choice(max_event_num, size = (max_jet_no, mu))
     # valid_event_IDS = event_IDS[np.isin(event_IDS, max_event_num)]        print(event_IDS)
     for jet_no in range(0, max_jet_no):
         selected_events = event_IDS[jet_no]
@@ -177,6 +177,6 @@ for name,data in zip(["Mass", "Energy", "pT"], data_y):
     plt.close()
 
 end_time_global = time.time()
-print(f"Globaal runtime: {end_time_global - start_time_global} seconds")
+print(f"Global runtime: {end_time_global - start_time_global} seconds")
 
 # mean_quantity_diff(tt, pile_up, mus, max_jet_no=1000)

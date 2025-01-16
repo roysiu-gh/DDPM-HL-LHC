@@ -6,7 +6,7 @@ import numpy as np
 from PIL import Image
 
 # Local imports
-from dataset_ops.data_loading import select_event_deprecated
+from dataset_ops.data_loading import *
 from calculate_quantities import *
 from dataset_ops.process_data import unit_square_the_unit_circle, wrap_phi
 
@@ -56,12 +56,19 @@ def convert_to_grid(energies, x, y, N=BMAP_SQUARE_SIDE_LENGTH, verbose=False):
 ##########################################################################################
 
 tt = np.genfromtxt(
-    TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=1000
+    TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
 )
+pile_up = np.genfromtxt(
+    PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+)
+
+tt = EventSelector(tt)
+pile_up = EventSelector(pile_up)
+
 
 jet_no = 0
 
-jet = select_event_deprecated(tt, jet_no)[:, 3:6]
+jet = tt.select_event(jet_no)
 print(jet)
 print(len(jet))
 

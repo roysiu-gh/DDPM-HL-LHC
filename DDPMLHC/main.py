@@ -9,7 +9,7 @@ from DDPMLHC.dataset_ops.process_data import *
 from DDPMLHC.dataset_ops.generate_intermediate_event_data import process_noisy_data
 from DDPMLHC.generate_plots.generate_1d_plots import plot_1d_histograms
 from DDPMLHC.generate_plots.visualisation import plot_detections, generate_2dhist
-from DDPMLHC.dataset_ops.data_loading import select_event_deprecated
+from DDPMLHC.dataset_ops.data_loading import *
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
