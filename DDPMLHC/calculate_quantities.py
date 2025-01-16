@@ -104,8 +104,9 @@ def get_axis_eta_phi(p):
         Location of jet axis in eta-phi space.
     """
     total_p = np.sum(p, axis=0)
-    # print("total_p", total_p)
     jet_mag = np.linalg.norm(total_p)
+    if jet_mag == 0:
+        raise ValueError("Jet magnitude is zero. Input is invalid for calculations.")
     eta = pseudorapidity(jet_mag, total_p[2])
     phi = to_phi(total_p[0], total_p[1])
     return eta, phi

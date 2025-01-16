@@ -31,13 +31,14 @@ def wrap_phi(phi_centre, phis, R=1):
 ############################################################################################
 
 def make_noisy_data(jet_nos, tt_data, pile_up_data, mu, save_path="data"):
-
-    #NID,LID,px,py,pz,d_eta,d_phi,pmag
     combined = []
     running_length = 0
     for jet_no in jet_nos:
         LID_index = 0
         jet_event = select_event(tt_data, jet_no, filter=False)
+        if jet_event.size == 0:
+            print(f"Jet number {jet_no} not found. Perhaps MAX_DATA_ROWS is too small. Breaking loop.")
+            break
         axis = get_axis_eta_phi([jet_event[:,3], jet_event[:,4], jet_event[:,5]]) # Get jet centre to shift all particles eta/phi by this
 
         num_rows = jet_event.shape[0]
@@ -53,7 +54,7 @@ def make_noisy_data(jet_nos, tt_data, pile_up_data, mu, save_path="data"):
         for pu_no in pu_nos:
             LID_index += 1
             pu_event = select_event(pile_up_data, pu_no, filter=False)
-            if pu_event is None: continue
+            if pu_event == np.array([]): continue  # Skip if empty pile-up
             num_rows = pu_event.shape[0]
             LID_column = np.full((1, num_rows), LID_index) # Make array of LIDs
             NID_column = np.full((1, num_rows), jet_no) # Make array of NIDs
