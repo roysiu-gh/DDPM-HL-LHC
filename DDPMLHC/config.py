@@ -1,6 +1,9 @@
 import os
+import numpy as np
 from cycler import cycler
+
 CWD = os.getcwd()
+np.random.seed(42)
 
 # 1 initial paths
 PILEUP_PATH = f"{CWD}/data/1-initial/pileup.csv"

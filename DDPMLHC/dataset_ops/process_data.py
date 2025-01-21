@@ -32,7 +32,8 @@ def wrap_phi(phi_centre, phis, R=1):
 def make_noisy_data(jet_nos, tt_data, pile_up_data, mu, save_path="data"):
     combined = []
     running_length = 0
-    high_PU_no = pile_up_data[-1, 0]
+    # high_PU_no = pile_up_data[-1, 0]
+    high_PU_no = pile_up_data.max_ID
     for jet_no in jet_nos:
         LID_index = 0
         jet_event = tt_data.select_event(jet_no)
@@ -120,28 +121,16 @@ def calculate_event_level_quantities(mu, save_path, verbose=False, mask=True):
 
     # Do masking
     if mask:
-        # print(f"noisy_data.shape {noisy_data.shape}")
         LIDs = noisy_data[:, 1].astype(int)
         d_etas = noisy_data[:, 5]
         d_phis = noisy_data[:, 6]
         dR2s = d_etas*d_etas + d_phis*d_phis
         noisy_data = noisy_data[ (LIDs == 0) | (dR2s < 1) ]  # First condition so 
-        # print(f"d_phis.shape {d_phis.shape}") 
 
     # Extract relevant columns
     NIDs = noisy_data[:, 0].astype(int)
     LIDs = noisy_data[:, 1].astype(int)
     pxs, pys, pzs = noisy_data[:, 2], noisy_data[:, 3], noisy_data[:, 4]
-    # etas = noisy_data[:, 5]
-    # phis = noisy_data[:, 6]
-    # enes = noisy_data[:, 7]
-    # pTs = noisy_data[:, 8]
-    # pTs = to_pT(pxs, pys)
-
-    # p2s = contraction(enes, pxs, pys, pzs)
-    # masses = np.sqrt(p2s)
-
-    # ===== Create Noisy Event Data ===== #
 
     NIDs_unique = np.unique(NIDs)
     event_enes, event_pxs, event_pys, event_pzs = calculate_four_momentum_massless(NIDs, pxs, pys, pzs)
