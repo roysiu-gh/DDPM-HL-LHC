@@ -53,7 +53,7 @@ def plot_combined_histograms_with_overlay(hist_data_mu0, hist_data_mu100, hist_d
             stat="density",  # Normalize to density
             **plot_params_mu100,
             color="orange",
-            label="$\mu=100$",
+            label="$\mu=5$",
             alpha=0.5,
         )
 
@@ -64,7 +64,7 @@ def plot_combined_histograms_with_overlay(hist_data_mu0, hist_data_mu100, hist_d
             stat="density",  # Normalize to density
             **plot_params_mu200,
             color="green",
-            label="$\mu=200$",
+            label="$\mu=10$",
             alpha=0.3,
         )
 
@@ -95,9 +95,9 @@ def plot_combined_histograms_with_overlay(hist_data_mu0, hist_data_mu100, hist_d
 
 
 # Define paths for the datasets
-mu0_event_stats_path = f"{CWD}/data/2-intermediate/ttbar_jets.csv"
-mu100_event_stats_path = f"{CWD}/data/2-intermediate/noisy_event_stats_mu100.csv"
-mu200_event_stats_path = f"{CWD}/data/2-intermediate/noisy_event_stats_mu200.csv"
+mu0_event_stats_path = f"{CWD}/data/2-intermediate/noisy_mu0_event_level.csv"
+mu100_event_stats_path = f"{CWD}/data/2-intermediate/noisy_mu5_event_level.csv"
+mu200_event_stats_path = f"{CWD}/data/2-intermediate/noisy_mu10_event_level.csv"
 save_path = f"{CWD}/data/plots/1D_histograms/"
 
 # Load datasets
