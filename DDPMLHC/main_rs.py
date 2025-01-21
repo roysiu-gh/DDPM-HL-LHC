@@ -60,5 +60,5 @@ print("FINISHED loading data\n")
 
 # print("DONE ALL.")
 
-FOO = NoisyGenerator(tt, pile_up, mu=1)
-# print(FOO)
+FOO = NoisyGenerator(tt, pile_up, mu=50)
+print(FOO)

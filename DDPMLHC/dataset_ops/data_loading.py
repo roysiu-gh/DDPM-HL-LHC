@@ -79,6 +79,7 @@ class NoisyGenerator:
     
     def __next__(self):
         self._build_next_noisy_event()
+        self._mask()
         self._calculate_event_level()
         self._next_jetID += 1
         if self._next_jetID == self._max_TT_no:
@@ -88,8 +89,6 @@ class NoisyGenerator:
         jet_event = self.tt.select_event(self._next_jetID)
         jet_px, jet_py, jet_pz = jet_event[:,3], jet_event[:,4], jet_event[:,5]
         self.jet_axis = get_axis_eta_phi(jet_px, jet_py, jet_pz)
-
-
 
         LID_index = 0
         num_rows = jet_event.shape[0]
@@ -119,25 +118,26 @@ class NoisyGenerator:
         # Combine the following 2 ops later to optimise
         phis = to_phi(pxs, pys)
         phis = wrap_phi(self.jet_axis[1], phis)
-        origin, eta_c, phi_c = centre_on_jet(self.jet_axis, etas, phis)
+        _, eta_c, phi_c = centre_on_jet(self.jet_axis, etas, phis)
         jetpluspu = np.hstack((jetpluspu, eta_c.reshape(-1, 1)))
         jetpluspu = np.hstack((jetpluspu, phi_c.reshape(-1, 1)))
         jetpluspu = np.hstack((jetpluspu, enes.reshape(-1, 1)))
         jetpluspu = np.hstack((jetpluspu, pTs.reshape(-1, 1)))
-        print("jetpluspu", jetpluspu)
+
+        jetpluspu = np.delete(jetpluspu, [2,3,4], axis=1)
+
+        # print("jetpluspu", jetpluspu)
         self.current_event = jetpluspu  # Noisy event
+        print(f"self.current_event.shape = {self.current_event.shape}")
     
+    def _mask(self):
+        LIDs = self.current_event[:, 1].astype(int)
+        d_etas = self.current_event[:, 5]
+        d_phis = self.current_event[:, 6]
+        dR2s = d_etas*d_etas + d_phis*d_phis
+        self.current_event = self.current_event[ (LIDs == 0) | (dR2s < 1) ]  # First condition so 
 
     def _calculate_event_level(self):
-        # Do masking
-        mask = True
-        if mask:
-            LIDs = self.current_event[:, 1].astype(int)
-            d_etas = self.current_event[:, 5]
-            d_phis = self.current_event[:, 6]
-            dR2s = d_etas*d_etas + d_phis*d_phis
-            self.current_event = self.current_event[ (LIDs == 0) | (dR2s < 1) ]  # First condition so 
-
         # Extract relevant columns
         NIDs = self.current_event[:, 0].astype(int)
         LIDs = self.current_event[:, 1].astype(int)
