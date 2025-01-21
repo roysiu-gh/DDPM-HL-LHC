@@ -62,3 +62,4 @@ print("FINISHED loading data\n")
 
 FOO = NoisyGenerator(tt, pile_up, mu=50)
 print(FOO)
+# print(repr(FOO))

@@ -40,8 +40,6 @@ class EventSelector:
         end = self.end_indices[idx]
         return self.data[start:end]
     
-
-
     # Treat this obj in same way as underlying data
     def __getitem__(self, key):
         return self.data[key]
@@ -69,9 +67,22 @@ class NoisyGenerator:
         self._max_TT_no = self.tt.max_ID
         self._max_PU_no = self.pu.max_ID
 
+        self.event_level = {}
+
         next(self)
     
     def __str__(self):
+        out = f"""\
+Current - Jet {self._next_jetID-1} with mu={self.mu}
+    Event-level quantities:
+        mass = {self.event_level["mass"]}
+        eta  = {self.event_level["eta"]}
+        phi  = {self.event_level["phi"]}
+        p_T  = {self.event_level["pT"]}
+        """
+        return out
+    
+    def __repr__(self):
         return str(self.current_event)
 
     def __iter__(self):
@@ -128,7 +139,7 @@ class NoisyGenerator:
 
         # print("jetpluspu", jetpluspu)
         self.current_event = jetpluspu  # Noisy event
-        print(f"self.current_event.shape = {self.current_event.shape}")
+        # print(f"self.current_event.shape = {self.current_event.shape}")
     
     def _mask(self):
         LIDs = self.current_event[:, 1].astype(int)
@@ -140,18 +151,11 @@ class NoisyGenerator:
     def _calculate_event_level(self):
         # Extract relevant columns
         NIDs = self.current_event[:, 0].astype(int)
-        LIDs = self.current_event[:, 1].astype(int)
         pxs, pys, pzs = self.current_event[:, 2], self.current_event[:, 3], self.current_event[:, 4]
 
-        NIDs_unique = np.unique(NIDs)
-        event_enes, event_pxs, event_pys, event_pzs = calculate_four_momentum_massless(NIDs, pxs, pys, pzs)
-        event_p2s = contraction(event_enes, event_pxs, event_pys, event_pzs)
-        event_masses = np.sqrt(event_p2s)[0]
-        event_etas = pseudorapidity(event_enes, event_pzs)[0]
-        event_phis = to_phi(event_pxs, event_pys)[0]
-        # event_pTs = to_pT(event_pxs, event_pys)[0]
-        # print(f"event_masses = {event_masses}")
-        # print(f"event_masses.shape = {event_masses.shape}")
-        # print(f"event_etas = {event_etas}")
-        # print(f"event_phis = {event_phis}")
-        # print(f"event_pTs = {event_pTs}")
+        enes, pxs, pys, pzs = calculate_four_momentum_massless(NIDs, pxs, pys, pzs)
+        event_p2 = contraction(enes, pxs, pys, pzs)
+        self.event_level["mass"] = np.sqrt(event_p2)[0]
+        self.event_level["eta"] = pseudorapidity(enes, pzs)[0]
+        self.event_level["phi"] = to_phi(pxs, pys)[0]
+        self.event_level["pT"] = to_pT(pxs, pys)[0]
