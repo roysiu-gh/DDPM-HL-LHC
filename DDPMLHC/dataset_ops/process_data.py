@@ -101,7 +101,7 @@ def make_noisy_data(jet_nos, tt_data, pile_up_data, mu, save_path="data"):
 
     # out = np.column_stack((NIDs, LIDs, pxs, pys, pzs, eta_c, phi_c, enes, pTs))
     # print(out)
-    output_filename = f"noisy_mu{mu}.csv"
+    output_filename = f"noisy_mu{mu}_raw.csv"
     output_filepath = f"{save_path}/{output_filename}"
     # ,
     np.savetxt(output_filepath, stacked, delimiter=",",  comments="",header="NID,LID,px,py,pz,d_eta,d_phi,pmag,p_T", fmt="%d,%d,%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%.10f")
@@ -113,7 +113,7 @@ def make_noisy_data(jet_nos, tt_data, pile_up_data, mu, save_path="data"):
 
 def calculate_event_level_quantities(mu, save_path, verbose=False, mask=True):
     # Load noisy data
-    load_path = f"{CWD}/data/2-intermediate/noisy_mu{mu}.csv"
+    load_path = f"{CWD}/data/2-intermediate/noisy_mu{mu}_raw.csv"
     noisy_data = np.genfromtxt(
         load_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
     )
