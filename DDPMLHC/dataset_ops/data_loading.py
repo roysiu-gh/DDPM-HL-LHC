@@ -67,17 +67,28 @@ class NoisyGenerator:
         self._max_TT_no = self.tt.max_ID
         self._max_PU_no = self.pu.max_ID
 
-        self.event_level = {}  # Dict for event-level quantities
-        self.column_indices = {  # Define column index mapping for getters
-            "NID": 0,
-            "LID": 1,
-            "px": 2,
-            "py": 3,
-            "pz": 4,
-            "d_eta": 5,
-            "d_phi": 6,
-            "mass": 7,
-            "p_T": 8,
+        self.event_level = np.empty(8)  # Array for event-level quantities
+        # Define column index mapping for getters
+        self.column_indices_all = {  # For array of quantities
+            "NIDs": 0,
+            "LIDs": 1,
+            "pxs": 2,
+            "pys": 3,
+            "pzs": 4,
+            "d_etas": 5,
+            "d_phis": 6,
+            "masses": 7,
+            "p_Ts": 8,
+        }
+        self.column_indices_event = {  # For event-level quantities
+            "event_id": 0,
+            "px": 1,
+            "py": 2,
+            "pz": 3,
+            "eta": 4,
+            "phi": 5,
+            "mass": 6,
+            "p_T": 7,
         }
 
         next(self)
@@ -86,10 +97,14 @@ class NoisyGenerator:
         out = f"""\
 Current - Jet {self._next_jetID-1} with mu={self.mu}
     Event-level quantities:
-        mass = {self.event_level["mass"]}
-        eta  = {self.event_level["eta"]}
-        phi  = {self.event_level["phi"]}
-        p_T  = {self.event_level["pT"]}
+        EID  = {self.event_id}
+        px   = {self.event_px}
+        py   = {self.event_py}
+        pz   = {self.event_pz}
+        eta  = {self.event_eta}
+        phi  = {self.event_phi}
+        mass = {self.event_mass}
+        p_T  = {self.event_pT}
         """
         return out
     
@@ -105,6 +120,7 @@ Current - Jet {self._next_jetID-1} with mu={self.mu}
         self._calculate_event_level()
         self._next_jetID += 1
         if self._next_jetID == self._max_TT_no:
+            print(f"dfgh{self._next_jetID}")
             raise StopIteration
 
     def _build_next_noisy_event(self):
@@ -160,43 +176,109 @@ Current - Jet {self._next_jetID-1} with mu={self.mu}
         self.current_event = self.current_event[ (LIDs == 0) | (dR2s < 1) ]  # First condition so 
 
     def _calculate_event_level(self):
-        # Extract relevant columns
-        NIDs = self.current_event[:, 0].astype(int)
-        pxs, pys, pzs = self.current_event[:, 2], self.current_event[:, 3], self.current_event[:, 4]
+        self.event_id = self._next_jetID
 
-        enes, pxs, pys, pzs = calculate_four_momentum_massless(NIDs, pxs, pys, pzs)
-        event_p2 = contraction(enes, pxs, pys, pzs)
-        self.event_level["mass"] = np.sqrt(event_p2)[0]
-        self.event_level["eta"] = pseudorapidity(enes, pzs)[0]
-        self.event_level["phi"] = to_phi(pxs, pys)[0]
-        self.event_level["pT"] = to_pT(pxs, pys)[0]
+        # Replacement of calculate_four_momentum_massless()
+        ### IS THIS CALC CORRECT?
+        self.event_px = np.sum(self.pxs)
+        self.event_py = np.sum(self.pys)
+        self.event_pz = np.sum(self.pzs)
+        self.event_mass = p_magnitude(self.event_px, self.event_py, self.event_pz)
+
+        # self.event_mass, self.event_px, self.event_py, self.event_pz = calculate_four_momentum_massless(self.NIDs, self.pxs, self.pys, self.pzs)
+        
+        # event_p2 = contraction(self.event_mass, self.event_px, self.event_py, self.event_pz)
+        # self.event_mass = np.sqrt(event_p2)
+
+        self.event_eta = pseudorapidity(self.event_mass, self.event_pz)
+        self.event_phi = to_phi(self.event_px, self.event_py)
+        self.event_pT = to_pT(self.event_px, self.event_py)
 
 
     # Getters for quantity arrays
     @property
-    def NID(self):
-        return self.current_event[:, self.column_indices["NID"]]
+    def NIDs(self):
+        return self.current_event[:, self.column_indices_all["NIDs"]]
     @property
-    def LID(self):
-        return self.current_event[:, self.column_indices["LID"]]
+    def LIDs(self):
+        return self.current_event[:, self.column_indices_all["LIDs"]]
     @property
-    def px(self):
-        return self.current_event[:, self.column_indices["px"]]
+    def pxs(self):
+        return self.current_event[:, self.column_indices_all["pxs"]]
     @property
-    def py(self):
-        return self.current_event[:, self.column_indices["py"]]
+    def pys(self):
+        return self.current_event[:, self.column_indices_all["pys"]]
     @property
-    def pz(self):
-        return self.current_event[:, self.column_indices["pz"]]
+    def pzs(self):
+        return self.current_event[:, self.column_indices_all["pzs"]]
     @property
-    def eta(self):
-        return self.current_event[:, self.column_indices["d_eta"]]
+    def etas(self):
+        return self.current_event[:, self.column_indices_all["d_etas"]]
     @property
-    def phi(self):
-        return self.current_event[:, self.column_indices["d_phi"]]
+    def phis(self):
+        return self.current_event[:, self.column_indices_all["d_phis"]]
     @property
-    def mass(self):
-        return self.current_event[:, self.column_indices["mass"]]
+    def masses(self):
+        return self.current_event[:, self.column_indices_all["masses"]]
     @property
-    def p_T(self):
-        return self.current_event[:, self.column_indices["p_T"]]
+    def p_Ts(self):
+        return self.current_event[:, self.column_indices_all["p_Ts"]]
+
+    # Getters and setters for event-level quantities
+
+    @property
+    def event_id(self):
+        return self.event_level[self.column_indices_event["event_id"]]
+    @event_id.setter
+    def event_id(self, val):
+        self.event_level[self.column_indices_event["event_id"]] = val
+    
+    @property
+    def event_px(self):
+        return self.event_level[self.column_indices_event["px"]]
+    @event_px.setter
+    def event_px(self, val):
+        self.event_level[self.column_indices_event["px"]] = val
+
+    @property
+    def event_py(self):
+        return self.event_level[self.column_indices_event["py"]]
+    @event_py.setter
+    def event_py(self, val):
+        self.event_level[self.column_indices_event["py"]] = val
+
+    @property
+    def event_pz(self):
+        return self.event_level[self.column_indices_event["pz"]]
+    @event_pz.setter
+    def event_pz(self, val):
+        self.event_level[self.column_indices_event["pz"]] = val
+
+    @property
+    def event_eta(self):
+        return self.event_level[self.column_indices_event["eta"]]
+    @event_eta.setter
+    def event_eta(self, val):
+        self.event_level[self.column_indices_event["eta"]] = val
+
+    @property
+    def event_phi(self):
+        return self.event_level[self.column_indices_event["phi"]]
+    @event_phi.setter
+    def event_phi(self, val):
+        self.event_level[self.column_indices_event["phi"]] = val
+
+    @property
+
+    def event_mass(self):
+        return self.event_level[self.column_indices_event["mass"]]
+    @event_mass.setter
+    def event_mass(self, val):
+        self.event_level[self.column_indices_event["mass"]] = val
+
+    @property
+    def event_p_T(self):
+        return self.event_level[self.column_indices_event["p_T"]]
+    @event_p_T.setter
+    def event_p_T(self, val):
+        self.event_level[self.column_indices_event["p_T"]] = val
