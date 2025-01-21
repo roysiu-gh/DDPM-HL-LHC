@@ -85,4 +85,73 @@ class NoisyGenerator:
             raise StopIteration
 
     def _build_next_noisy_event(self):
-        self.current_event = self.tt.select_event(self._next_jetID)  # Clean event only
+        jet_event = self.tt.select_event(self._next_jetID)
+        jet_px, jet_py, jet_pz = jet_event[:,3], jet_event[:,4], jet_event[:,5]
+        self.jet_axis = get_axis_eta_phi(jet_px, jet_py, jet_pz)
+
+
+
+        LID_index = 0
+        num_rows = jet_event.shape[0]
+        LID_column = np.full((1, num_rows), 0) # Make array of zeros, LID for jet is always 0
+        NID_column = np.full((1, num_rows), self._next_jetID) # Make array of zeros
+        jet_event = np.insert(jet_event, 0, LID_column, axis=1) # LID
+        jet_event = np.insert(jet_event, 0, NID_column, axis=1) # NID
+        jetpluspu = jet_event
+        # Last available ID is tot num of loaded pileup
+        pu_nos = np.random.randint(low = 0, high = self._max_PU_no, size = self.mu, dtype=np.int32)
+        for pu_no in pu_nos:
+            LID_index += 1
+            pu_event = self.pu.select_event(pu_no)
+            if pu_event.size == 0: continue  # Skip if empty pile-up
+            num_rows = pu_event.shape[0]
+            LID_column = np.full((1, num_rows), LID_index) # Make array of LIDs
+            NID_column = np.full((1, num_rows), self._next_jetID) # Make array of NIDs
+            pu_event = np.insert(pu_event, 0, LID_column, axis=1) # LID
+            pu_event = np.insert(pu_event, 0, NID_column, axis=1) # NID
+            jetpluspu = np.vstack((jetpluspu, pu_event))
+        pxs, pys, pzs = jetpluspu[:, 5], jetpluspu[:, 6], jetpluspu[:, 7]
+    
+        enes = p_magnitude(pxs, pys, pzs)
+        pTs = to_pT(pxs, pys)
+        etas = pseudorapidity(enes, pzs)
+
+        # Combine the following 2 ops later to optimise
+        phis = to_phi(pxs, pys)
+        phis = wrap_phi(self.jet_axis[1], phis)
+        origin, eta_c, phi_c = centre_on_jet(self.jet_axis, etas, phis)
+        jetpluspu = np.hstack((jetpluspu, eta_c.reshape(-1, 1)))
+        jetpluspu = np.hstack((jetpluspu, phi_c.reshape(-1, 1)))
+        jetpluspu = np.hstack((jetpluspu, enes.reshape(-1, 1)))
+        jetpluspu = np.hstack((jetpluspu, pTs.reshape(-1, 1)))
+        print("jetpluspu", jetpluspu)
+        self.current_event = jetpluspu  # Noisy event
+    
+
+    def _calculate_event_level(self):
+        # Do masking
+        mask = True
+        if mask:
+            LIDs = self.current_event[:, 1].astype(int)
+            d_etas = self.current_event[:, 5]
+            d_phis = self.current_event[:, 6]
+            dR2s = d_etas*d_etas + d_phis*d_phis
+            self.current_event = self.current_event[ (LIDs == 0) | (dR2s < 1) ]  # First condition so 
+
+        # Extract relevant columns
+        NIDs = self.current_event[:, 0].astype(int)
+        LIDs = self.current_event[:, 1].astype(int)
+        pxs, pys, pzs = self.current_event[:, 2], self.current_event[:, 3], self.current_event[:, 4]
+
+        NIDs_unique = np.unique(NIDs)
+        event_enes, event_pxs, event_pys, event_pzs = calculate_four_momentum_massless(NIDs, pxs, pys, pzs)
+        event_p2s = contraction(event_enes, event_pxs, event_pys, event_pzs)
+        event_masses = np.sqrt(event_p2s)[0]
+        event_etas = pseudorapidity(event_enes, event_pzs)[0]
+        event_phis = to_phi(event_pxs, event_pys)[0]
+        # event_pTs = to_pT(event_pxs, event_pys)[0]
+        # print(f"event_masses = {event_masses}")
+        # print(f"event_masses.shape = {event_masses.shape}")
+        # print(f"event_etas = {event_etas}")
+        # print(f"event_phis = {event_phis}")
+        # print(f"event_pTs = {event_pTs}")
