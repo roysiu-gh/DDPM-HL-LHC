@@ -39,7 +39,8 @@ def make_noisy_data(jet_nos, tt_data, pile_up_data, mu, save_path="data"):
         if jet_event.size == 0:
             print(f"Jet number {jet_no} not found. Perhaps MAX_DATA_ROWS is set. Breaking loop.")
             break
-        axis = get_axis_eta_phi([jet_event[:,3], jet_event[:,4], jet_event[:,5]]) # Get jet centre to shift all particles eta/phi by this
+        px, py, pz = jet_event[:,3], jet_event[:,4], jet_event[:,5]
+        axis = get_axis_eta_phi(px, py, pz) # Get jet centre to shift all particles eta/phi by this
 
         num_rows = jet_event.shape[0]
         LID_column = np.full((1, num_rows), 0) # Make array of zeros, LID for jet is always 0

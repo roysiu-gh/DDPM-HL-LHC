@@ -10,7 +10,7 @@ from DDPMLHC.generate_plots.generate_1d_plots import plot_1d_histograms
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
-MAX_DATA_ROWS = 1000_000
+# MAX_DATA_ROWS = 1000_000
 
 # === Read in data
 print("0 :: Loading original data")
@@ -27,11 +27,9 @@ pile_up = EventSelector(pile_up)
 
 print("FINISHED loading data\n")
 
-
-
 #################################################################################
 
-TTBAR_NUM = 100_000
+# TTBAR_NUM = 100_000
 
 # === Create noisy events
 print("1 :: Creating noisy events")

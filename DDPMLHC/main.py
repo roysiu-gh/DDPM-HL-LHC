@@ -204,7 +204,8 @@ pmagj = p_magnitude(pxj, pyj, pzj)
 
 # All columns are passed in, so make sure to select last 3 columns for the 3-momenta
 # Find jet axis
-jet_centre = get_axis_eta_phi(jet_data[:,3:])
+px, py, pz = jet_data[:,3], jet_data[:,4], jet_data[:,5]
+jet_centre = get_axis_eta_phi(px, py, pz)
 # Wrap jet axis phi between -1, 1
 # print("centre", jet_centre)
 phisj = to_phi(pxj, pyj) 

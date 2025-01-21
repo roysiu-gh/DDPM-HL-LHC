@@ -79,7 +79,7 @@ jet_pz = tt[:, 5]
 energies = p_magnitude(jet_px, jet_py, jet_pz)
 print("energies", energies)
 
-centre = get_axis_eta_phi(jet)
+centre = get_axis_eta_phi(jet_px, jet_py, jet_pz)
 print("centre", centre)
 p_mag = p_magnitude(jet_px, jet_py, jet_pz)
 etas = pseudorapidity(p_mag, jet_pz)

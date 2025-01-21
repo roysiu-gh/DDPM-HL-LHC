@@ -73,7 +73,7 @@ def contraction(time_like_0, space_like_1, space_like_2, space_like_3):
     """Calculate the contractions."""
     return time_like_0**2 - (space_like_1**2 + space_like_2**2 + space_like_3**2)
 
-def get_axis_eta_phi(p):
+def get_axis_eta_phi(px, py, pz):
     """Find COM of a collection of particles.
     Uses the massless limit (m << E).
 
@@ -87,18 +87,35 @@ def get_axis_eta_phi(p):
     eta,phi: float,float
         Location of jet axis in eta-phi space.
     """
-    total_p = np.sum(p, axis=0)
-    jet_mag = np.linalg.norm(total_p)
+    # total_p = np.sum(p, axis=0)
+    px_sum = np.sum(px)
+    py_sum = np.sum(py)
+    pz_sum = np.sum(pz)
+    # print(px_sum)
+    # print(py_sum)
+    # print(pz_sum)
+    # print("SDFGHJK<MN BVCDERTYUJK")
+    # jet_mag = np.linalg.norm(total_p)
+    jet_mag = np.sqrt( px_sum*px_sum + py_sum*py_sum + pz_sum*pz_sum )
+    # print(jet_mag)
+    # print(jet_mag.shape)
+    # print("SDFGHJK<MN BVCDERTYUJK\n")
     if jet_mag == 0:
         raise ValueError("Jet magnitude is zero. Input is invalid for calculations.")
     try:
-        eta = pseudorapidity(jet_mag, total_p[2])
+        eta = pseudorapidity(jet_mag, pz_sum)
     except Exception as e:
         print(f"EXCEPTION")
         print(f"jet_mag {jet_mag}")
-        print(f"total_p[2] {total_p[2]}")
+        try:
+            print(f"total_p[0] {px_sum}")
+            print(f"total_p[1] {py_sum}")
+            print(f"total_p[2] {pz_sum}")
+        except:
+            pass
         raise e
-    phi = to_phi(total_p[0], total_p[1])
+    phi = to_phi(px_sum, py_sum)
+    # raise Exception
     return eta, phi
 
 def centre_on_jet(centre, eta, phi):

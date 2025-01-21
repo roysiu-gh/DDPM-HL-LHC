@@ -97,7 +97,7 @@ def plot_detections(
     pmag = p_magnitude(px, py, pz)
     if verbose:
         print("Constituent momenta magnitudes:\n", pmag)
-    centre = get_axis_eta_phi([pxj, pyj, pzj])
+    centre = get_axis_eta_phi(pxj, pyj, pzj)
     eta = pseudorapidity(pmag, pz)
     phi = to_phi(px, py)
     phi = wrap_phi(centre[1], phi)
@@ -290,7 +290,8 @@ def generate_2dhist(tt_data, pile_up_data, jet_no,mu, max_event_id, bins=32, bou
     pmag = p_magnitude(px, py, pz)
     # All columns are passed in, so make sure to select last 3 columns for the 3-momenta
     # Find jet axis
-    jet_centre = get_axis_eta_phi(jet_data[:,3:])
+    px, py, pz = jet_data[:,3], jet_data[:,4], jet_data[:,5]
+    jet_centre = get_axis_eta_phi(px, py, pz)
     # Wrap jet axis phi between -1, 1
     print("centre", jet_centre)
     phis = to_phi(px, py)
