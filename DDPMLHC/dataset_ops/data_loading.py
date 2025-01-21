@@ -67,7 +67,18 @@ class NoisyGenerator:
         self._max_TT_no = self.tt.max_ID
         self._max_PU_no = self.pu.max_ID
 
-        self.event_level = {}
+        self.event_level = {}  # Dict for event-level quantities
+        self.column_indices = {  # Define column index mapping for getters
+            "NID": 0,
+            "LID": 1,
+            "px": 2,
+            "py": 3,
+            "pz": 4,
+            "d_eta": 5,
+            "d_phi": 6,
+            "mass": 7,
+            "p_T": 8,
+        }
 
         next(self)
     
@@ -159,3 +170,33 @@ Current - Jet {self._next_jetID-1} with mu={self.mu}
         self.event_level["eta"] = pseudorapidity(enes, pzs)[0]
         self.event_level["phi"] = to_phi(pxs, pys)[0]
         self.event_level["pT"] = to_pT(pxs, pys)[0]
+
+
+    # Getters for quantity arrays
+    @property
+    def NID(self):
+        return self.current_event[:, self.column_indices["NID"]]
+    @property
+    def LID(self):
+        return self.current_event[:, self.column_indices["LID"]]
+    @property
+    def px(self):
+        return self.current_event[:, self.column_indices["px"]]
+    @property
+    def py(self):
+        return self.current_event[:, self.column_indices["py"]]
+    @property
+    def pz(self):
+        return self.current_event[:, self.column_indices["pz"]]
+    @property
+    def eta(self):
+        return self.current_event[:, self.column_indices["d_eta"]]
+    @property
+    def phi(self):
+        return self.current_event[:, self.column_indices["d_phi"]]
+    @property
+    def mass(self):
+        return self.current_event[:, self.column_indices["mass"]]
+    @property
+    def p_T(self):
+        return self.current_event[:, self.column_indices["p_T"]]
