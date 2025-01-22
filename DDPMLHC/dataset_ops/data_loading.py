@@ -5,6 +5,8 @@ from DDPMLHC.dataset_ops.process_data import wrap_phi
 
 # Package imports
 import numpy as np
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 
 ######################################################################################################
 
@@ -121,7 +123,6 @@ class NoisyGenerator:
     
     def __next__(self):
         if self._next_jetID == self._max_TT_no:
-            print(f"dfgh{self._next_jetID}")
             raise StopIteration
         
         self._build_next_noisy_event()
@@ -234,6 +235,85 @@ class NoisyGenerator:
         print(f"Collapsed {int(data[-1,0])} events of mu = {self.mu} data to event-level.\n"
               f"    Saved to {output_filename}.")
         return data
+
+
+
+    def visualise_current_event(self, save_path=None, particle_scale_factor=3000):
+        """Plot the current event in eta-phi space.
+        TODO: fix red circle in legend, make legend and info text same style and equidistant from edges.
+        """
+        if self.current_event.size == 0:
+            raise RuntimeError("No event loaded to plot")
+
+        # Setup plot
+        fig, ax = plt.subplots(figsize=(8, 6))
+        ax.set_xlabel("$\Delta\eta$", fontsize=16)
+        ax.set_ylabel("$\Delta\phi$", fontsize=16)
+        
+        # Configure y-axis ticks
+        ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(base=np.pi / 4))
+        ax.yaxis.set_major_formatter(
+            mpl.ticker.FuncFormatter(
+                lambda val, pos: f"${val/np.pi}\pi$" if val != 0 else "0"
+            )
+        )
+        ax.grid(axis="y", linestyle="--", color="gray", alpha=0.7)
+        
+        # Plot jet center and boundary
+        ax.plot(0, 0, marker="x", color="blue", label="Jet axis")
+        ax.add_patch(plt.Circle((0,0), 1.0, color="black", linewidth=1, 
+                            fill=False, label="$\Delta R = 1$", alpha=0.3))
+
+        # Calculate marker sizes based on pT
+        sizes = particle_scale_factor * self.p_Ts / np.max(self.p_Ts)
+        
+        # Plot particles
+        jet_mask = self.LIDs == 0
+        ax.scatter(self.etas[jet_mask], self.phis[jet_mask], 
+                s=sizes[jet_mask], facecolors='none', color="red", alpha=1, label="Jet particles",
+                linewidth=1,
+                )
+        ax.scatter(self.etas[~jet_mask], self.phis[~jet_mask], 
+                s=sizes[~jet_mask], facecolors='none', color="blue", alpha=1, label="Pile-up")
+        
+        text_box_style = dict(
+            facecolor='white',
+            edgecolor='black',
+            alpha=0.7,
+            pad=0.5,
+            boxstyle='round'
+        )
+
+        # Event info top left
+        ax.text(0.05, 0.95, 
+                f"Jet ${int(self.event_id)}$ with $\mu = {self.mu}$\n"
+                f"$m = {self.event_mass:.1f}$ GeV\n"
+                f"$p_T = {self.event_pT:.1f}$ GeV\n"
+                f"$\eta = {self.event_eta:.2f}$",
+                transform=ax.transAxes,
+                verticalalignment="top",
+                fontsize=12,
+                bbox=text_box_style,
+                )
+        
+        # Legend top right
+        legend = ax.legend(fontsize=12, 
+                          bbox_to_anchor=(1, 1),
+                          loc='upper right',
+                          bbox_transform=ax.transAxes)
+        # Style the legend box to match the text box
+        frame = legend.get_frame()
+        frame.set_facecolor('white')
+        frame.set_edgecolor('black')
+        frame.set_alpha(0.7)
+    
+        plt.tight_layout()
+        
+        # Save plot
+        filename = f"event{self._next_jetID-1}_mu{self.mu}"
+        plt.savefig(f"{save_path}/{filename}.png", bbox_inches='tight')
+        plt.close()
+
 
 
     # Getters for quantity arrays
