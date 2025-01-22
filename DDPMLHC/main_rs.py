@@ -75,8 +75,8 @@ for idx, item in enumerate(FOO):
     # if idx == 5: break
 stacked = np.vstack(combined)
 
-print(stacked.shape)
-print(stacked[:10])
+# print(stacked.shape)
+# print(stacked[:10])
 
 output_filename = f"noisy_mu{mu}_event_level.csv"
 output_filepath = f"{INTERMEDIATE_PATH}/{output_filename}"

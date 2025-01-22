@@ -63,11 +63,9 @@ class NoisyGenerator:
         self.pu = PUselector
         self.mu = mu
         
-        self._next_jetID = 0
         self._max_TT_no = self.tt.max_ID
         self._max_PU_no = self.pu.max_ID
 
-        self.event_level = np.empty(8)  # Array for event-level quantities
         # Define column index mapping for getters
         self.column_indices_all = {  # For array of quantities
             "NIDs": 0,
@@ -91,8 +89,14 @@ class NoisyGenerator:
             "p_T": 7,
         }
 
-        next(self)
-    
+        self.reset()  # Initial reset
+
+    def reset(self):
+        """Start from beginning."""
+        self._next_jetID = 0
+        self.current_event = np.empty((0, 9))  # Needs to be 2D
+        self.event_level = np.zeros(8)  # Array for event-level quantities
+
     def __str__(self):
         out = f"""\
 Current - Jet {self._next_jetID-1} with mu={self.mu}
@@ -115,13 +119,15 @@ Current - Jet {self._next_jetID-1} with mu={self.mu}
         return self
     
     def __next__(self):
+        if self._next_jetID == self._max_TT_no:
+            print(f"dfgh{self._next_jetID}")
+            raise StopIteration
+        
         self._build_next_noisy_event()
         self._mask()
         self._calculate_event_level()
         self._next_jetID += 1
-        if self._next_jetID == self._max_TT_no:
-            print(f"dfgh{self._next_jetID}")
-            raise StopIteration
+        return self.current_event
 
     def _build_next_noisy_event(self):
         jet_event = self.tt.select_event(self._next_jetID)
@@ -186,7 +192,7 @@ Current - Jet {self._next_jetID-1} with mu={self.mu}
         event_p2 = contraction(event_ene, self.event_px, self.event_py, self.event_pz)
         self.event_mass = np.sqrt(event_p2)
 
-        self.event_eta = pseudorapidity(self.event_mass, self.event_pz)
+        self.event_eta = pseudorapidity(event_ene, self.event_pz)
         self.event_phi = to_phi(self.event_px, self.event_py)
         self.event_pT = to_pT(self.event_px, self.event_py)
 
