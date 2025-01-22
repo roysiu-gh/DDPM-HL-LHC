@@ -26,19 +26,12 @@ print("FINISHED loading data\n")
 
 #################################################################################
 
-mus = [0, 1, 3, 5, 10, 15, 30, 50, 75, 100, 125, 150, 175, 200]
-mus = [0, 1, 3, 5, 10, 15, 30, 50]
+# mus = [0, 1, 3, 5, 10, 15, 25, 30, 50, 75, 100, 125, 150, 175, 200]
+# for mu in mus:
+#     cur_generator = NoisyGenerator(tt, pile_up, mu=mu)
+#     cur_generator.save_event_level_data()
+#     plot_1d_histograms(mu=mu)
 
-for mu in mus:
-    cur_generator = NoisyGenerator(tt, pile_up, mu=mu)
-    cur_generator.save_event_level_data()
-    plot_1d_histograms(mu=mu)
-
-#################################################################################
-
-# ## WEIRD BEHAVIOUR
-# FOO = NoisyGenerator(tt, pile_up, mu=5)
-# for idx, item in enumerate(FOO):
-#     print(idx)
-#     # if idx == 5: break
-# print(FOO._max_TT_no)
+generator = NoisyGenerator(tt, pile_up, mu=100)
+next(generator)  # Load first event
+generator.visualise_current_event(save_path=f"{CWD}/data/plots/visualise")  # Plot it
