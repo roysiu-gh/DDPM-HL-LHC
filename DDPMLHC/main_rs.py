@@ -10,7 +10,7 @@ from DDPMLHC.generate_plots.generate_1d_plots import plot_1d_histograms
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
-MAX_DATA_ROWS = 100_000
+# MAX_DATA_ROWS = 100_000
 
 # === Read in data
 print("0 :: Loading original data")
@@ -60,6 +60,40 @@ print("FINISHED loading data\n")
 
 # print("DONE ALL.")
 
-FOO = NoisyGenerator(tt, pile_up, mu=50)
+FOO = NoisyGenerator(tt, pile_up, mu=5)
 print(FOO)
 # print(repr(FOO))
+print(FOO.masses)
+
+
+mu=0
+
+combined = []
+for idx, item in enumerate(FOO):
+    # print(idx)
+    combined.append(np.copy(FOO.event_level))
+    # if idx == 5: break
+stacked = np.vstack(combined)
+
+print(stacked.shape)
+print(stacked[:10])
+
+output_filename = f"noisy_mu{mu}_event_level.csv"
+output_filepath = f"{INTERMEDIATE_PATH}/{output_filename}"
+np.savetxt(
+        output_filepath,
+        stacked,
+        delimiter=",",
+        header="event_id,px,py,pz,eta,phi,mass,p_T",
+        comments="",
+        fmt="%i,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f"
+    )
+print(f"Collapsed {int(stacked[-1,0])} events of mu = {mu} data to event-level.\n    Saved to {output_filename}.")
+
+plot_1d_histograms(mu=0)
+
+# ## WEIRD BEHAVIOUR
+# for idx, item in enumerate(FOO):
+#     print(idx)
+#     # if idx == 5: break
+# print(FOO._max_TT_no)

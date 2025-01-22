@@ -178,17 +178,13 @@ Current - Jet {self._next_jetID-1} with mu={self.mu}
     def _calculate_event_level(self):
         self.event_id = self._next_jetID
 
-        # Replacement of calculate_four_momentum_massless()
-        ### IS THIS CALC CORRECT?
         self.event_px = np.sum(self.pxs)
         self.event_py = np.sum(self.pys)
         self.event_pz = np.sum(self.pzs)
-        self.event_mass = p_magnitude(self.event_px, self.event_py, self.event_pz)
 
-        # self.event_mass, self.event_px, self.event_py, self.event_pz = calculate_four_momentum_massless(self.NIDs, self.pxs, self.pys, self.pzs)
-        
-        # event_p2 = contraction(self.event_mass, self.event_px, self.event_py, self.event_pz)
-        # self.event_mass = np.sqrt(event_p2)
+        event_ene = np.sum(self.masses)
+        event_p2 = contraction(event_ene, self.event_px, self.event_py, self.event_pz)
+        self.event_mass = np.sqrt(event_p2)
 
         self.event_eta = pseudorapidity(self.event_mass, self.event_pz)
         self.event_phi = to_phi(self.event_px, self.event_py)
@@ -277,8 +273,8 @@ Current - Jet {self._next_jetID-1} with mu={self.mu}
         self.event_level[self.column_indices_event["mass"]] = val
 
     @property
-    def event_p_T(self):
+    def event_pT(self):
         return self.event_level[self.column_indices_event["p_T"]]
-    @event_p_T.setter
-    def event_p_T(self, val):
+    @event_pT.setter
+    def event_pT(self, val):
         self.event_level[self.column_indices_event["p_T"]] = val
