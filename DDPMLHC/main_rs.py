@@ -60,50 +60,13 @@ print("FINISHED loading data\n")
 
 # print("DONE ALL.")
 
-
-
-
-
-
-# FOO = NoisyGenerator(tt, pile_up, mu=5)
-# print(FOO)
-# # print(repr(FOO))
-# print(FOO.masses)
-
-
-# mu=0
-
-# combined = []
-# for idx, item in enumerate(FOO):
-#     # print(idx)
-#     combined.append(np.copy(FOO.event_level))
-#     # if idx == 5: break
-# stacked = np.vstack(combined)
-
-# output_filename = f"noisy_mu{mu}_event_level.csv"
-# output_filepath = f"{INTERMEDIATE_PATH}/{output_filename}"
-# np.savetxt(
-#         output_filepath,
-#         stacked,
-#         delimiter=",",
-#         header="event_id,px,py,pz,eta,phi,mass,p_T",
-#         comments="",
-#         fmt="%i,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f"
-#     )
-# print(f"Collapsed {int(stacked[-1,0])} events of mu = {mu} data to event-level.\n    Saved to {output_filename}.")
-
-# plot_1d_histograms(mu=0)
-
-
+#################################################################################
 
 generator = NoisyGenerator(tt, pile_up, mu=0)
-# Just collect data
 data = generator.collect_event_level_data()
-# Process data if needed...
-# Save data
 generator.save_event_level_data(INTERMEDIATE_PATH, data=data)
 
-
+#################################################################################
 
 # ## WEIRD BEHAVIOUR
 # FOO = NoisyGenerator(tt, pile_up, mu=5)
