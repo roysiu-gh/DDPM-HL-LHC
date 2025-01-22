@@ -74,3 +74,5 @@ def create_overlay_plots(mu_values, save_path=None):
 
 create_overlay_plots([0, 5, 10, 15, 30])
 create_overlay_plots([0, 10, 30, 50])
+create_overlay_plots([0, 25, 50, 75, 100])
+create_overlay_plots([0, 50, 100, 150, 200])
