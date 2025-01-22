@@ -112,6 +112,8 @@ Current - Jet {self._next_jetID-1} with mu={self.mu}
         """
         return out
     
+    # Iterator methods
+    
     def __repr__(self):
         return str(self.current_event)
 
@@ -195,6 +197,44 @@ Current - Jet {self._next_jetID-1} with mu={self.mu}
         self.event_eta = pseudorapidity(event_ene, self.event_pz)
         self.event_phi = to_phi(self.event_px, self.event_py)
         self.event_pT = to_pT(self.event_px, self.event_py)
+    
+    # Event-level output methods
+
+    def collect_event_level_data(self):
+        """Collect event-level data for all events. Will start from beginning of self.TTselector."""
+        self.reset()
+        combined = []
+        for _ in self:
+            combined.append(np.copy(self.event_level))
+        return np.vstack(combined)
+
+    def save_event_level_data(self, output_path, data=None):
+        """
+        Save event-level data to CSV.
+        
+        Args:
+            output_path (str): Base path for output file
+            data (np.ndarray, optional): Data to save. If None, collects new data
+            mu (int, optional): Override instance mu value for filename
+        """
+        if data is None:
+            data = self.collect_event_level_data()
+        
+        output_filename = f"noisy_mu{self.mu}_event_level.csv"
+        output_filepath = f"{output_path}/{output_filename}"
+        
+        np.savetxt(
+            output_filepath,
+            data,
+            delimiter=",",
+            header="event_id,px,py,pz,eta,phi,mass,p_T",
+            comments="",
+            fmt="%i,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f"
+        )
+        
+        print(f"Collapsed {int(data[-1,0])} events of mu = {self.mu} data to event-level.\n"
+              f"    Saved to {output_filename}.")
+        return data
 
 
     # Getters for quantity arrays
