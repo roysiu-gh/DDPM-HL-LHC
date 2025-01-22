@@ -98,19 +98,18 @@ class NoisyGenerator:
         self.event_level = np.zeros(8)  # Array for event-level quantities
 
     def __str__(self):
-        out = f"""\
-Current - Jet {self._next_jetID-1} with mu={self.mu}
-    Event-level quantities:
-        EID  = {self.event_id}
-        px   = {self.event_px}
-        py   = {self.event_py}
-        pz   = {self.event_pz}
-        eta  = {self.event_eta}
-        phi  = {self.event_phi}
-        mass = {self.event_mass}
-        p_T  = {self.event_pT}
-        """
-        return out
+        return (
+            f"Current - Jet {self._next_jetID - 1} with mu={self.mu}\n"
+            f"    Event-level quantities:\n"
+            f"        EID  = {self.event_id}\n"
+            f"        px   = {self.event_px}\n"
+            f"        py   = {self.event_py}\n"
+            f"        pz   = {self.event_pz}\n"
+            f"        eta  = {self.event_eta}\n"
+            f"        phi  = {self.event_phi}\n"
+            f"        mass = {self.event_mass}\n"
+            f"        p_T  = {self.event_pT}"
+        )
     
     # Iterator methods
     
@@ -208,7 +207,7 @@ Current - Jet {self._next_jetID-1} with mu={self.mu}
             combined.append(np.copy(self.event_level))
         return np.vstack(combined)
 
-    def save_event_level_data(self, output_path, data=None):
+    def save_event_level_data(self, output_path=INTERMEDIATE_PATH, data=None):
         """
         Save event-level data to CSV.
         

@@ -10,7 +10,7 @@ from DDPMLHC.generate_plots.generate_1d_plots import plot_1d_histograms
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
-# MAX_DATA_ROWS = 100_000
+MAX_DATA_ROWS = 1_000_000
 
 # === Read in data
 print("0 :: Loading original data")
@@ -26,45 +26,13 @@ print("FINISHED loading data\n")
 
 #################################################################################
 
-# TTBAR_NUM = 100_000
+mus = [0, 1, 3, 5, 10, 15, 30, 50, 75, 100, 125, 150, 175, 200]
+mus = [0, 1, 3, 5, 10, 15, 30, 50]
 
-# # === Create noisy events
-# print("1 :: Creating noisy events")
-# make_noisy_data(range(TTBAR_NUM), tt, pile_up, 0, save_path=INTERMEDIATE_PATH)
-# make_noisy_data(range(TTBAR_NUM), tt, pile_up, 5, save_path=INTERMEDIATE_PATH)
-# make_noisy_data(range(TTBAR_NUM), tt, pile_up, 10, save_path=INTERMEDIATE_PATH)
-# make_noisy_data(range(TTBAR_NUM), tt, pile_up, 15, save_path=INTERMEDIATE_PATH)
-# # make_noisy_data(range(TTBAR_NUM), tt, pile_up, 100, save_path=INTERMEDIATE_PATH)
-# # make_noisy_data(range(TTBAR_NUM), tt, pile_up, 200, save_path=INTERMEDIATE_PATH)
-# print("FINISHED creating noisy events\n")
-
-# # === Collapse noisy data to event-level
-# print("2 :: Collapsing noisy data to event-level")
-# calculate_event_level_quantities(0, INTERMEDIATE_PATH)
-# calculate_event_level_quantities(5, INTERMEDIATE_PATH)
-# calculate_event_level_quantities(10, INTERMEDIATE_PATH)
-# calculate_event_level_quantities(15, INTERMEDIATE_PATH)
-# # calculate_event_level_quantities(100, INTERMEDIATE_PATH)
-# # calculate_event_level_quantities(200, INTERMEDIATE_PATH)
-# print("FINISHED collapsing noisy data to event-level\n")
-
-# # === Draw 1D histograms
-# print("3 :: Drawing 1D histograms")
-# plot_1d_histograms(mu=0)
-# plot_1d_histograms(mu=5)
-# plot_1d_histograms(mu=10)
-# plot_1d_histograms(mu=15)
-# # plot_1d_histograms(mu=100)
-# # plot_1d_histograms(mu=200)
-# print("FINISHED drawing 1D histograms\n")
-
-# print("DONE ALL.")
-
-#################################################################################
-
-generator = NoisyGenerator(tt, pile_up, mu=0)
-data = generator.collect_event_level_data()
-generator.save_event_level_data(INTERMEDIATE_PATH, data=data)
+for mu in mus:
+    cur_generator = NoisyGenerator(tt, pile_up, mu=mu)
+    cur_generator.save_event_level_data()
+    plot_1d_histograms(mu=mu)
 
 #################################################################################
 
