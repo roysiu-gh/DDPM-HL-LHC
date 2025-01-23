@@ -2,11 +2,13 @@
 from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import *
 from DDPMLHC.dataset_ops.process_data import wrap_phi
+from DDPMLHC.bmap import *
 
 # Package imports
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from PIL import Image
 
 ######################################################################################################
 
@@ -236,7 +238,7 @@ class NoisyGenerator:
               f"    Saved to {output_filename}.")
         return data
 
-
+    # Visualisations
 
     def visualise_current_event(self, save_path=None, particle_scale_factor=3000):
         """Plot the current event in eta-phi space.
@@ -244,7 +246,8 @@ class NoisyGenerator:
         """
         if self.current_event.size == 0:
             raise RuntimeError("No event loaded to plot")
-
+        if save_path is None:
+            save_path = f"{CWD}/data/plots/visualise"
         # Setup plot
         fig, ax = plt.subplots(figsize=(8, 6))
         ax.set_xlabel("$\Delta\eta$", fontsize=16)
@@ -311,8 +314,36 @@ class NoisyGenerator:
         
         # Save plot
         filename = f"event{self._next_jetID-1}_mu{self.mu}"
-        plt.savefig(f"{save_path}/{filename}.png", bbox_inches='tight')
+        plt.savefig(f"{save_path}/{filename}_vis.png", bbox_inches='tight')
         plt.close()
+
+    def bmap_current_event(self, save_path=None, grid_side_bins=64, log_scale=True, return_grid=False):
+        if self.current_event.size == 0:
+            raise RuntimeError("No event loaded to plot")
+        if save_path is None:
+            save_path = f"{CWD}/data/plots/bmaps"
+        
+        x, y = unit_square_the_unit_circle(self.etas, self.phis)  # Map to unit square
+        x_discrete, y_discrete = discretise_points(x, y, N=grid_side_bins)  # Discretise coords
+        
+        # Scale energies for visualization (to 3SD)
+        mean = np.mean(self.masses)
+        std = np.std(self.masses)
+        scaled_energies = 255 * (self.masses - mean) / (3 * std) + 128
+        
+        # Create grid using float32 first to avoid overflow
+        grid = np.zeros((grid_side_bins, grid_side_bins), dtype=np.float32)
+        for e, xi, yi in zip(scaled_energies, x_discrete, y_discrete):
+            grid[yi, xi] += float(e)
+
+        # if log_scale:  # Log before or after gridding? onlyuse in bmap visualisation
+        #     grid = np.log1p(grid)  # log1p = log(1 + x) to handle zeros
+        
+        grid = np.clip(grid, 0, 255).astype(np.uint8)  # Remove OOB vals
+        
+        im = Image.fromarray(grid)
+        filename = f"event_{self._next_jetID-1}_mu{self.mu}"
+        im.save(f"{save_path}/{filename}.png")
 
 
 
