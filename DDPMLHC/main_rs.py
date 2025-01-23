@@ -10,7 +10,7 @@ from DDPMLHC.generate_plots.generate_1d_plots import plot_1d_histograms
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
-MAX_DATA_ROWS = 1_000_000
+MAX_DATA_ROWS = 100_000
 
 # === Read in data
 print("0 :: Loading original data")
@@ -32,6 +32,19 @@ print("FINISHED loading data\n")
 #     cur_generator.save_event_level_data()
 #     plot_1d_histograms(mu=mu)
 
-generator = NoisyGenerator(tt, pile_up, mu=100)
+#################################################################################
+
+generator = NoisyGenerator(tt, pile_up, mu=500)
 next(generator)  # Load first event
-generator.visualise_current_event(save_path=f"{CWD}/data/plots/visualise")  # Plot it
+next(generator)  # Load second event
+# generator.visualise_current_event()
+generator.bmap_current_event()
+generator.visualise_current_event()
+
+# # Or with custom parameters
+# generator.bmap_current_event(
+#     save_path="custom/path",
+#     filename="custom_name",
+#     grid_size=128,  # Higher resolution
+#     log_scale=False  # Linear energy scale
+# )

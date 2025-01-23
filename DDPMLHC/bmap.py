@@ -1,14 +1,14 @@
 # Import constants
-from config import *
+from DDPMLHC.config import *
 
 # Package imports
 import numpy as np
 from PIL import Image
 
 # Local imports
-from dataset_ops.data_loading import *
-from calculate_quantities import *
-from dataset_ops.process_data import unit_square_the_unit_circle, wrap_phi
+from DDPMLHC.dataset_ops.data_loading import *
+from DDPMLHC.calculate_quantities import *
+from DDPMLHC.dataset_ops.process_data import unit_square_the_unit_circle, wrap_phi
 
 SAVE_PATH = f"{CWD}/data/plots/bmaps/"
 
@@ -20,24 +20,21 @@ def generate_random_points_in_unit_square(num_points=10):
 
 def discretise_points(x, y, N=BMAP_SQUARE_SIDE_LENGTH):
     """Turn continuous points in the square [0,1]x[0,1] into discrete NxN grid."""
-    discrete_x = np.floor(x * N)
-    discrete_y = np.floor(y * N)
-    discrete_x = discrete_x.astype(int)
-    discrete_y = discrete_y.astype(int)
+    discrete_x = np.floor(x * N).astype(int)
+    discrete_y = np.floor(y * N).astype(int)
     return discrete_x, discrete_y
 
-def scale_energy_for_visual(energies, N=BMAP_SQUARE_SIDE_LENGTH, verbose=False):
-    """For the purpose of visualisation.
-    Scales energies to 256 bits for printing to grayscale, up to a specified std dev.
-    Assumes non-negative input.
-    """
-    # Calculate energy scale and scale values to 256
-    SD = np.std(energies)
-    scale = 256 / (3 * SD)  # Value above which we represent as full brightness (256)
-    scaled_energies = np.floor(energies * scale)
-    scaled_energies[scaled_energies > 256] = 256  # Maximise at 256
-    scaled_energies = scaled_energies.astype(int)
-    return scaled_energies
+def scale_energy_for_visual(energies, log_scale=False):
+            """Scale energies to 8-bit values (0-255)."""
+            if log_scale:
+                energies = np.log(energies + 1)  # +1 to handle zeros
+            
+            # Scale to 3 standard deviations
+            sd = np.std(energies)
+            mean = np.mean(energies)
+            scaled = 255 * (energies - mean) / (3 * sd) + 128
+            
+            return scaled
 
 def convert_to_grid(energies, x, y, N=BMAP_SQUARE_SIDE_LENGTH, verbose=False):
 
@@ -55,53 +52,48 @@ def convert_to_grid(energies, x, y, N=BMAP_SQUARE_SIDE_LENGTH, verbose=False):
 
 ##########################################################################################
 
-tt = np.genfromtxt(
-    TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-pile_up = np.genfromtxt(
-    PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
+if __name__ == "__main__":
 
-tt = EventSelector(tt)
-pile_up = EventSelector(pile_up)
+    MAX_DATA_ROWS = 10000
 
+    tt = np.genfromtxt(
+        TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+    )
+    pile_up = np.genfromtxt(
+        PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+    )
+    tt = EventSelector(tt)
+    pile_up = EventSelector(pile_up)
 
-jet_no = 0
+    jet_no = 0
+    jet = tt.select_event(jet_no)
+    jet_px = jet[:, 3]
+    jet_py = jet[:, 4]
+    jet_pz = jet[:, 5]
+    print(len(jet))
+    print(len(jet_px))
+    # print(jet)
 
-jet = tt.select_event(jet_no)
-print(jet)
-print(len(jet))
+    energies = p_magnitude(jet_px, jet_py, jet_pz)
+    print(len(energies))
+    centre = get_axis_eta_phi(jet_px, jet_py, jet_pz)
+    print("centre", centre)
+    p_mag = p_magnitude(jet_px, jet_py, jet_pz)
+    etas = pseudorapidity(p_mag, jet_pz)
+    phis = to_phi(jet_px, jet_py)
+    phis = wrap_phi(centre[1], phis)
+    _, etas, phis = delta_R(centre, jet_px, jet_py, jet_pz, etas, phis, boundary=1)
+    _, etas, phis = centre_on_jet(centre, etas, phis)
 
-jet_px = tt[:, 3]
-jet_py = tt[:, 4]
-jet_pz = tt[:, 5]
+    x, y = unit_square_the_unit_circle(etas, phis)
+    # print("x", x)
+    # print("y", y)
 
-energies = p_magnitude(jet_px, jet_py, jet_pz)
-print("energies", energies)
+    scaled_energies = scale_energy_for_visual(energies, log_scale=False)
+    x_discrete, y_discrete = discretise_points(x, y)
+    grid = convert_to_grid(scaled_energies, x_discrete, y_discrete, verbose=False)
 
-centre = get_axis_eta_phi(jet_px, jet_py, jet_pz)
-print("centre", centre)
-p_mag = p_magnitude(jet_px, jet_py, jet_pz)
-etas = pseudorapidity(p_mag, jet_pz)
-phis = to_phi(jet_px, jet_py)
-phis = wrap_phi(centre[1], phis)
-_, etas, phis = delta_R(centre, jet_px, jet_py, jet_pz, etas, phis, boundary=1)
-print("etas", etas)
-print("phis", phis)
-print(len(etas))
-print(len(phis))
+    print(grid)
 
-x, y = unit_square_the_unit_circle(etas, phis)
-
-print("x", x)
-print("y", y)
-
-scaled_energies = scale_energy_for_visual(energies)
-scaled_energies = scale_energy_for_visual(np.log(energies))
-scaled_x, scaled_y = discretise_points(x, y)
-grid = convert_to_grid(scaled_energies, scaled_x, scaled_y)
-
-print(grid)
-
-im = Image.fromarray(grid)
-im.save(f"{SAVE_PATH}/jet0.png")
+    im = Image.fromarray(grid)
+    im.save(f"{SAVE_PATH}/jet0.png")

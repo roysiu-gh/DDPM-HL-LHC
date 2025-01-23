@@ -7,8 +7,8 @@ from DDPMLHC.config import *
 
 def unit_square_the_unit_circle(etas, phis):
     """Squeezes unit circle (eta^2 + phi^2 = 1) into unit square [0,1]x[0,1]."""
-    etas /= 4
-    phis /= 4
+    etas /= 2
+    phis /= 2
     etas += 0.5
     phis += 0.5
     return etas, phis
