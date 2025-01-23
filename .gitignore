@@ -5,9 +5,11 @@ data/1-initial/ttbar.csv
 data/2-intermediate/*
 
 data/plots/bmaps/test_rand.png
+data/plots/bmaps/event_NONE_muNONE.png
 **/._*
 **/data/**/.*
 venv*
+
 ###############################################################################
 
 # Python project .gitignore template
