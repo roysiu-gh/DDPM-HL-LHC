@@ -69,6 +69,11 @@ class NoisyGenerator:
         
         self._max_TT_no = self.tt.max_ID
         self._max_PU_no = self.pu.max_ID
+        self.grid_side_bins = BMAP_SQUARE_SIDE_LENGTH
+
+        ### TODO: need to set
+        self.scaling_mean = 0
+        self.scaling_sd = 1
 
         # Define column index mapping for getters
         self.column_indices_all = {  # For array of quantities
@@ -317,35 +322,42 @@ class NoisyGenerator:
         plt.savefig(f"{save_path}/{filename}_vis.png", bbox_inches='tight')
         plt.close()
 
-    def bmap_current_event(self, save_path=None, grid_side_bins=64, log_scale=True, return_grid=False):
+    def bmap_current_event(self, save_path=None):
         if self.current_event.size == 0:
             raise RuntimeError("No event loaded to plot")
         if save_path is None:
             save_path = f"{CWD}/data/plots/bmaps"
         
-        x, y = unit_square_the_unit_circle(self.etas, self.phis)  # Map to unit square
-        x_discrete, y_discrete = discretise_points(x, y, N=grid_side_bins)  # Discretise coords
-        
-        # Scale energies for visualization (to 3SD)
-        mean = np.mean(self.masses)
-        std = np.std(self.masses)
-        scaled_energies = 255 * (self.masses - mean) / (3 * std) + 128
-        
-        # Create grid using float32 first to avoid overflow
-        grid = np.zeros((grid_side_bins, grid_side_bins), dtype=np.float32)
-        for e, xi, yi in zip(scaled_energies, x_discrete, y_discrete):
-            grid[yi, xi] += float(e)
+        bins = self.grid_side_bins
 
-        # if log_scale:  # Log before or after gridding? onlyuse in bmap visualisation
-        #     grid = np.log1p(grid)  # log1p = log(1 + x) to handle zeros
-        
+        grid = self.vectorise(for_bmap=True).reshape((bins, bins))  # Get grid, with scaling for bmap visualisation
         grid = np.clip(grid, 0, 255).astype(np.uint8)  # Remove OOB vals
         
         im = Image.fromarray(grid)
         filename = f"event_{self._next_jetID-1}_mu{self.mu}"
         im.save(f"{save_path}/{filename}.png")
 
+    # Ops
 
+    def vectorise(self, for_bmap=False):
+        bins = self.grid_side_bins
+
+        x, y = unit_square_the_unit_circle(self.etas, self.phis)  # Map to unit square
+        x_discrete, y_discrete = discretise_points(x, y, N=bins)  # Discretise coords
+
+        # TODO: Scale energies - for now, apply BEFORE gridding - check!
+        if not for_bmap:
+            scaled_energies = (self.masses - self.scaling_mean) / (self.scaling_sd)
+        elif for_bmap:  # This scaling is only for visualization (to 3SD), not suitable for NN input
+            mean = np.mean(self.masses)
+            std = np.std(self.masses)
+            scaled_energies = 255 * (self.masses - mean) / (3 * std) + 128
+
+        grid = np.zeros((bins, bins), dtype=np.float32)
+        for e, xi, yi in zip(scaled_energies, x_discrete, y_discrete):
+            grid[yi, xi] += float(e)
+        
+        return grid.reshape(bins * bins)
 
     # Getters for quantity arrays
     @property

@@ -7,11 +7,9 @@ from DDPMLHC.config import *
 
 def unit_square_the_unit_circle(etas, phis):
     """Squeezes unit circle (eta^2 + phi^2 = 1) into unit square [0,1]x[0,1]."""
-    etas /= 2
-    phis /= 2
-    etas += 0.5
-    phis += 0.5
-    return etas, phis
+    new_etas = etas / 2 + 0.5  # Don't use /= or += ... writes to passed in vals
+    new_phis = phis / 2 + 0.5
+    return new_etas, new_phis
 
 def wrap_phi(phi_centre, phis, R=1):
     # If near top edge

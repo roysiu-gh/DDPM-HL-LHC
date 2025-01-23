@@ -34,17 +34,15 @@ print("FINISHED loading data\n")
 
 #################################################################################
 
-generator = NoisyGenerator(tt, pile_up, mu=500)
-next(generator)  # Load first event
-next(generator)  # Load second event
-# generator.visualise_current_event()
-generator.bmap_current_event()
-generator.visualise_current_event()
+for mu in [0, 50, 500]:
+    generator = NoisyGenerator(tt, pile_up, mu=mu)
+    next(generator)  # Load jet 0
+    generator.bmap_current_event()
+    generator.visualise_current_event()
 
-# # Or with custom parameters
-# generator.bmap_current_event(
-#     save_path="custom/path",
-#     filename="custom_name",
-#     grid_size=128,  # Higher resolution
-#     log_scale=False  # Linear energy scale
-# )
+    next(generator)  # Load jet 1
+    generator.bmap_current_event()
+    generator.visualise_current_event()
+
+# print(generator.vectorise(for_bmap=True).reshape((BMAP_SQUARE_SIDE_LENGTH, BMAP_SQUARE_SIDE_LENGTH)), "\n")
+# print(generator.vectorise(for_bmap=False).reshape((BMAP_SQUARE_SIDE_LENGTH, BMAP_SQUARE_SIDE_LENGTH)))
