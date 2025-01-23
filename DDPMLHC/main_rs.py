@@ -4,9 +4,8 @@ import matplotlib as mpl
 # Local imports
 from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import *
-from DDPMLHC.dataset_ops.data_loading import *
-from DDPMLHC.dataset_ops.process_data import *
-from DDPMLHC.generate_plots.overlaid_1d_plots import create_overlay_plots
+from DDPMLHC.data_loading import *
+from DDPMLHC.generate_plots.overlaid_1d import create_overlay_plots
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
@@ -23,6 +22,16 @@ pile_up = np.genfromtxt(
 tt = EventSelector(tt)
 pile_up = EventSelector(pile_up)
 print("FINISHED loading data\n")
+
+#################################################################################
+
+# # Calculate what percent of PUs are empty
+# pu_ids = pile_up[:, 0]
+# total_pileups = pu_ids[-1]
+# print(f"Final number in the first column: {total_pileups}")
+# unique_vals = len(np.unique(pu_ids))
+# print(f"Number of unique values in the first column: {unique_vals}")
+# print( f"Percentage of non-empty pile-ups {(unique_vals/total_pileups)*100}" )
 
 #################################################################################
 

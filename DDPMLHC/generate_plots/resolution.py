@@ -1,6 +1,6 @@
 # from visualisation import plot_detections, count_hist, energy_hist, generate_2dhist
 from DDPMLHC.config import *
-from DDPMLHC.dataset_ops.data_loading import select_event_deprecated
+from DDPMLHC.data_loading import select_event_deprecated
 from DDPMLHC.calculate_quantities import *
 import numpy as np
 import matplotlib.pyplot as plt

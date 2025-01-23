@@ -14,7 +14,6 @@ from matplotlib.patches import Patch, Circle
 
 # Local imports
 from DDPMLHC.calculate_quantities import *
-from DDPMLHC.dataset_ops.process_data import *
 
 
 PDG_IDS = {
