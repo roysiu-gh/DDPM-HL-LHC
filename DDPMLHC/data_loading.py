@@ -261,7 +261,7 @@ class NoisyGenerator:
 
     # Visualisations
 
-    def visualise_current_event(self, save_path=None, particle_scale_factor=1000, show_pdgids=False):
+    def visualise_current_event(self, save_path=None, particle_scale_factor=3000, show_pdgids=False):
         """
         Plot the current event in eta-phi space.
         
@@ -294,7 +294,7 @@ class NoisyGenerator:
         ax.add_patch(plt.Circle((0,0), 1.0, color="black", linewidth=1, fill=False, alpha=0.3))
 
         # NB particle AREAs (not radii) are proportional to masses
-        sizes = particle_scale_factor * self.masses / np.max(self.p_Ts)
+        sizes = particle_scale_factor * self.masses / np.max(self.masses)
         
         # Plot particles
         if show_pdgids:
@@ -328,15 +328,15 @@ class NoisyGenerator:
             jet_mask = self.LIDs == 0
             ax.scatter(self.etas[jet_mask], self.phis[jet_mask], 
                     s=sizes[jet_mask], facecolors="none", color="red", 
-                    alpha=1, linewidth=1)
+                    alpha=1, linewidth=0.5)
             ax.scatter(self.etas[~jet_mask], self.phis[~jet_mask], 
                     s=sizes[~jet_mask], facecolors="none", color="blue", 
-                    alpha=1)
+                    alpha=0.5)
             
             # Create legend handles with fixed-size markers
             handles = [
                 Line2D([0], [0], marker='x', color='blue', label='Jet axis'),
-                plt.Circle((0,0), 1.0, color="black", fill=False, alpha=0.3, label="$\Delta R = 1$"),
+                plt.Circle((0,0), 1.0, color="black", fill=False, alpha=0.5, label="$\Delta R = 1$"),
                 Line2D([0], [0], marker='o', color='w', markerfacecolor='none',
                       markeredgecolor='red', markersize=10, label='Jet particles'),
                 Line2D([0], [0], marker='o', color='w', markerfacecolor='none',
@@ -363,6 +363,26 @@ class NoisyGenerator:
                 fontsize=12,
                 bbox=text_box_style,
                 )
+        
+        # Add mass scale references (bottom left)
+        reference_mass_1 = 10.0  # GeV
+        reference_mass_2 = 100.0  # GeV
+        reference_size_1 = particle_scale_factor * reference_mass_1 / np.max(self.masses)
+        reference_size_2 = particle_scale_factor * reference_mass_2 / np.max(self.masses)
+        # Position circles
+        ax.scatter(-0.68, -0.9, s=reference_size_1, facecolor="green", edgecolor="none", alpha=0.7)
+        ax.scatter(-0.85, -0.8, s=reference_size_2, facecolor="orange", edgecolor="none", alpha=0.7)
+        # Add to legend handles
+        handles.append(Line2D([0], [0], marker='o', color='w', 
+                            markerfacecolor='green',
+                            markeredgecolor='none',
+                            markersize=10, 
+                            label=f"{reference_mass_1:.0f} GeV"))
+        handles.append(Line2D([0], [0], marker='o', color='w', 
+                            markerfacecolor='orange',
+                            markeredgecolor='none',
+                            markersize=10, 
+                            label=f"{reference_mass_2:.0f} GeV"))
         
         # Legend top right
         if show_pdgids:
