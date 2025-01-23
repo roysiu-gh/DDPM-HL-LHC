@@ -43,10 +43,10 @@ print("FINISHED loading data\n")
 
 #################################################################################
 
-create_overlay_plots([0, 5, 10, 15, 30])
-create_overlay_plots([0, 10, 30, 50])
-create_overlay_plots([0, 25, 50, 75, 100])
-create_overlay_plots([0, 50, 100, 150, 200])
+# create_overlay_plots([0, 5, 10, 15, 30])
+# create_overlay_plots([0, 10, 30, 50])
+# create_overlay_plots([0, 25, 50, 75, 100])
+# create_overlay_plots([0, 50, 100, 150, 200])
 
 #################################################################################
 
@@ -55,10 +55,12 @@ for mu in [0, 50, 500]:
     next(generator)  # Load jet 0
     generator.bmap_current_event()
     generator.visualise_current_event()
+    generator.visualise_current_event(show_pdgids=True)
 
     next(generator)  # Load jet 1
     generator.bmap_current_event()
     generator.visualise_current_event()
+    generator.visualise_current_event(show_pdgids=True)
 
 # print(generator.vectorise(for_bmap=True).reshape((BMAP_SQUARE_SIDE_LENGTH, BMAP_SQUARE_SIDE_LENGTH)), "\n")
 # print(generator.vectorise(for_bmap=False).reshape((BMAP_SQUARE_SIDE_LENGTH, BMAP_SQUARE_SIDE_LENGTH)))
