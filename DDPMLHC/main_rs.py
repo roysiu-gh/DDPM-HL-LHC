@@ -62,5 +62,10 @@ for mu in [0, 50, 500]:
     generator.visualise_current_event()
     generator.visualise_current_event(show_pdgids=True)
 
+    generator.select_jet(42)
+    generator.bmap_current_event()
+    generator.visualise_current_event()
+    generator.visualise_current_event(show_pdgids=True)
+
 # print(generator.vectorise(for_bmap=True).reshape((BMAP_SQUARE_SIDE_LENGTH, BMAP_SQUARE_SIDE_LENGTH)), "\n")
 # print(generator.vectorise(for_bmap=False).reshape((BMAP_SQUARE_SIDE_LENGTH, BMAP_SQUARE_SIDE_LENGTH)))
