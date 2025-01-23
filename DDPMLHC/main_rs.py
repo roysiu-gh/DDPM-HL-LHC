@@ -67,6 +67,3 @@ for mu in [0, 50, 500]:
     save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
     generator.visualise_current_event()
     generator.visualise_current_event(show_pdgids=True)
-
-# print(generator.vectorise(for_bmap=True).reshape((BMAP_SQUARE_SIDE_LENGTH, BMAP_SQUARE_SIDE_LENGTH)), "\n")
-# print(generator.vectorise(for_bmap=False).reshape((BMAP_SQUARE_SIDE_LENGTH, BMAP_SQUARE_SIDE_LENGTH)))
