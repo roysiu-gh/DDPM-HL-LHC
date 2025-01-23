@@ -148,6 +148,12 @@ class NoisyGenerator:
         self._next_jetID += 1
         return self.current_event
 
+    def select_jet(self, jet_no):
+        if jet_no >= self._max_TT_no:
+            raise RuntimeError("Requested jet not in loaded set. Did nothing.")
+        self._next_jetID = jet_no
+        next(self)
+
     def _build_next_noisy_event(self):
         jet_event = self.tt.select_event(self._next_jetID)
         jet_px, jet_py, jet_pz = jet_event[:,3], jet_event[:,4], jet_event[:,5]
