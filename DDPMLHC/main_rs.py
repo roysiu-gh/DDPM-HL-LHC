@@ -6,7 +6,7 @@ from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import *
 from DDPMLHC.dataset_ops.data_loading import *
 from DDPMLHC.dataset_ops.process_data import *
-from DDPMLHC.generate_plots.generate_1d_plots import plot_1d_histograms
+from DDPMLHC.generate_plots.overlaid_1d_plots import create_overlay_plots
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
@@ -31,6 +31,13 @@ print("FINISHED loading data\n")
 #     cur_generator = NoisyGenerator(tt, pile_up, mu=mu)
 #     cur_generator.save_event_level_data()
 #     plot_1d_histograms(mu=mu)
+
+#################################################################################
+
+create_overlay_plots([0, 5, 10, 15, 30])
+create_overlay_plots([0, 10, 30, 50])
+create_overlay_plots([0, 25, 50, 75, 100])
+create_overlay_plots([0, 50, 100, 150, 200])
 
 #################################################################################
 

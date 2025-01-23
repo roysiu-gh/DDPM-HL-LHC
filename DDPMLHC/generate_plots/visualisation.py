@@ -278,7 +278,6 @@ def generate_2dhist(tt_data, pile_up_data, jet_no,mu, max_event_id, bins=32, bou
     # Remove invalid pile_ups
     false_ids = np.size(selected_pile_ups2, axis=0) - np.size(selected_pile_ups, axis=0)
     print("Number of false Pile-up IDs: ",false_ids)
-    # jet_data = select_event_deprecated(tt_data, jet_no, max_data_rows=MAX_DATA_ROWS)
     jet_data = tt_data.select_event(jet_no)
     data = np.vstack((jet_data,selected_pile_ups))
     # data = selected_pile_ups
@@ -308,25 +307,8 @@ def generate_2dhist(tt_data, pile_up_data, jet_no,mu, max_event_id, bins=32, bou
     masked_px = bounded_momenta[0]
     masked_py = bounded_momenta[1]
     masked_pz = bounded_momenta[2]
-    # print(len(etas) == len(phis))
-    # masked_energies = np.sqrt(masked_data[:,3]*masked_data[:,3] + masked_data[:,4]*masked_data[:,4]+masked_data[:,5]*masked_data[:,5])
-    # # energy_normed = normalize_data(energies, energy_norm_factor)
     # Unnormalised energies
     
-    # print("etas2", etas2)
-    # print("phis2", phis2)
-    # print("Orig num of eta: ", len(etas))
-    # print("Orig num of phi: ", len(phis))
-    # print("New num of eta: ", len(etas2))
-    # print("New num of phi: ", len(phis2))
-    # print("Masked number of particles, etas: ", len(etas) - len(etas2))
-    # print("Masked number of particles, etas: ", len(phis) - len(phis2))
-    # print(len(etas2) == len(phis2))
-    # print(np.min(etas2), np.max(etas2))
-    # print(np.min(etas), np.max(etas))
-    # exit(1)
-    # energy_normed = (masked_energies - energy_min) / energy_norm_denom
-    # print(energy_normed)
     # Function appends "_hist" to the end
     fig, ax = plt.subplots(1,1,figsize=(8, 6))
     # plt.subplots
@@ -366,4 +348,3 @@ def generate_2dhist(tt_data, pile_up_data, jet_no,mu, max_event_id, bins=32, bou
         plt.close()
         raise ValueError("Error: hist_plot was not 'count' or 'energy'.\n")
     
-# def generate_multiple2d()
