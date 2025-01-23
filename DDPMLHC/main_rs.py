@@ -4,9 +4,8 @@ import matplotlib as mpl
 # Local imports
 from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import *
-from DDPMLHC.dataset_ops.data_loading import *
-from DDPMLHC.dataset_ops.process_data import *
-from DDPMLHC.generate_plots.overlaid_1d_plots import create_overlay_plots
+from DDPMLHC.data_loading import *
+from DDPMLHC.generate_plots.overlaid_1d import create_overlay_plots
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
