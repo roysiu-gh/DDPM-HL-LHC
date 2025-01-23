@@ -1,4 +1,10 @@
+# Package imports
 import numpy as np
+
+# Local imports
+from DDPMLHC.config import BMAP_SQUARE_SIDE_LENGTH
+
+# Quantity operations
 
 def p_magnitude(px, py, pz):
     """
@@ -157,3 +163,33 @@ def delta_R(centre, px, py, pz, etas, phis, boundary=1.0):
     crit_R = np.sqrt(delta_eta*delta_eta + delta_phi*delta_phi)
     bounded_momenta = np.array([px[crit_R <= boundary], py[crit_R <= boundary], pz[crit_R <= boundary]])
     return bounded_momenta, etas[crit_R <= boundary], phis[crit_R <= boundary]
+
+########################################################################################################
+
+# Grid operations
+
+def unit_square_the_unit_circle(etas, phis):
+    """Squeezes unit circle (eta^2 + phi^2 = 1) into unit square [0,1]x[0,1]."""
+    new_etas = etas / 2 + 0.5  # Don't use /= or += ... writes to passed in vals
+    new_phis = phis / 2 + 0.5
+    return new_etas, new_phis
+
+def wrap_phi(phi_centre, phis, R=1):
+    # If near top edge
+    shifted_phis = phis
+    if abs(phi_centre - np.pi) < R:
+        mask_for_bottom_half = phis < 0  # Only shift for particles below line phi=0
+        shifts = 2 * np.pi * mask_for_bottom_half
+        shifted_phis += shifts
+    # If near bottom edge
+    if abs(phi_centre + np.pi) < R:
+        mask_for_top_half = phis > 0  # Only shift for particles above line phi=0
+        shifts = 2 * np.pi * mask_for_top_half
+        shifted_phis -= shifts
+    return shifted_phis
+
+def discretise_points(x, y, N=BMAP_SQUARE_SIDE_LENGTH):
+    """Turn continuous points in the square [0,1]x[0,1] into discrete NxN grid."""
+    discrete_x = np.floor(x * N).astype(int)
+    discrete_y = np.floor(y * N).astype(int)
+    return discrete_x, discrete_y

@@ -1,4 +1,4 @@
-# Local import
+# Local imports
 from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import *
 from DDPMLHC.dataset_ops.process_data import wrap_phi
