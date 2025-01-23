@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
+from matplotlib.lines import Line2D
 from PIL import Image
 
 PDG_IDS = {
@@ -260,7 +261,7 @@ class NoisyGenerator:
 
     # Visualisations
 
-    def visualise_current_event(self, save_path=None, particle_scale_factor=3000, show_pdgids=False):
+    def visualise_current_event(self, save_path=None, particle_scale_factor=1000, show_pdgids=False):
         """
         Plot the current event in eta-phi space.
         
@@ -289,12 +290,11 @@ class NoisyGenerator:
         ax.grid(axis="y", linestyle="--", color="gray", alpha=0.7)
         
         # Plot jet center and boundary
-        ax.plot(0, 0, marker="x", color="blue", label="Jet axis")
-        ax.add_patch(plt.Circle((0,0), 1.0, color="black", linewidth=1, 
-                            fill=False, label="$\Delta R = 1$", alpha=0.3))
+        ax.plot(0, 0, marker="x", color="blue")
+        ax.add_patch(plt.Circle((0,0), 1.0, color="black", linewidth=1, fill=False, alpha=0.3))
 
-        # Calculate marker sizes based on pT
-        sizes = particle_scale_factor * self.p_Ts / np.max(self.p_Ts)
+        # NB particle AREAs (not radii) are proportional to masses
+        sizes = particle_scale_factor * self.masses / np.max(self.p_Ts)
         
         # Plot particles
         if show_pdgids:
@@ -328,11 +328,20 @@ class NoisyGenerator:
             jet_mask = self.LIDs == 0
             ax.scatter(self.etas[jet_mask], self.phis[jet_mask], 
                     s=sizes[jet_mask], facecolors="none", color="red", 
-                    alpha=1, label="Jet particles", linewidth=1)
+                    alpha=1, linewidth=1)
             ax.scatter(self.etas[~jet_mask], self.phis[~jet_mask], 
                     s=sizes[~jet_mask], facecolors="none", color="blue", 
-                    alpha=1, label="Pile-up")
-            handles = None
+                    alpha=1)
+            
+            # Create legend handles with fixed-size markers
+            handles = [
+                Line2D([0], [0], marker='x', color='blue', label='Jet axis'),
+                plt.Circle((0,0), 1.0, color="black", fill=False, alpha=0.3, label="$\Delta R = 1$"),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='none',
+                      markeredgecolor='red', markersize=10, label='Jet particles'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='none',
+                      markeredgecolor='blue', markersize=10, label='Pile-up')
+            ]
 
         # Same style for all boxes
         text_box_style = dict(
@@ -363,8 +372,10 @@ class NoisyGenerator:
             legend = ax.legend(handles=handles, loc="center left", 
                             bbox_to_anchor=(1, 0.5), fontsize=12)
         else:
-            legend = ax.legend(fontsize=12, bbox_to_anchor=(1, 1),
-                            loc="upper right", bbox_transform=ax.transAxes)
+            legend = ax.legend(handles=handles, fontsize=12, 
+                            bbox_to_anchor=(1, 1),
+                            loc="upper right", 
+                            bbox_transform=ax.transAxes)
         
         # Style legend box
         frame = legend.get_frame()
