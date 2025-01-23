@@ -6,16 +6,28 @@ from DDPMLHC.calculate_quantities import *
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
 from PIL import Image
 
-######################################################################################################
+PDG_IDS = {
+    0: r"$\gamma$ (Photon)",
+    11: r"$e^-$ (Electron)",
+    -11: r"$e^+$ (Positron)",
+    22: r"$\gamma$ (Photon)",
+    130: r"$K^0_S$ (K-short)",
+    211: r"$\pi^+$ (Pion)",
+    -211: r"$\pi^-$ (Pion)",
+    321: r"$K^+$ (Kaon)",
+    -321: r"$K^-$ (Kaon)",
+    2112: r"$n$ (Neutron)",
+    -2112: r"$\bar{n}$ (Antineutron)",
+    2212: r"$p$ (Proton)",
+}
 
-def select_event_deprecated(data, num, filter=False):
-    """Select data with IDs num from data file. Assumes IDs are in the first (index = 0) column."""
-    ### Could make faster by storing a local list of ID changes so lookup indices instead rather than comparing whole dataset every time? 
-    return data[data[:, 0] == num]
-
-######################################################################################################
+# Global color scheme (tab20 for extended color range)
+unique_abs_pdgids = sorted(abs(pdgid) for pdgid in PDG_IDS.keys())
+cmap = mpl.colors.ListedColormap(plt.cm.tab20(np.linspace(0, 1, len(unique_abs_pdgids))))
+GLOBAL_CMAP = {pid: cmap(i) for i, pid in enumerate(unique_abs_pdgids)}
 
 class EventSelector:
     def __init__(self, data, mode="event"):
@@ -175,11 +187,10 @@ class NoisyGenerator:
         jetpluspu = np.hstack((jetpluspu, enes.reshape(-1, 1)))
         jetpluspu = np.hstack((jetpluspu, pTs.reshape(-1, 1)))
 
-        jetpluspu = np.delete(jetpluspu, [2,3,4], axis=1)
+        self.PDGIDs = jetpluspu[:, 3]  # For use in self.visualise_current_event(show_pdgids=True)
+        jetpluspu = np.delete(jetpluspu, [2,3,4], axis=1)  # Remove charge, PDGIDs
 
-        # print("jetpluspu", jetpluspu)
         self.current_event = jetpluspu  # Noisy event
-        # print(f"self.current_event.shape = {self.current_event.shape}")
     
     def _mask(self):
         LIDs = self.current_event[:, 1].astype(int)
@@ -243,14 +254,20 @@ class NoisyGenerator:
 
     # Visualisations
 
-    def visualise_current_event(self, save_path=None, particle_scale_factor=3000):
-        """Plot the current event in eta-phi space.
-        TODO: fix red circle in legend, make legend and info text same style and equidistant from edges.
+    def visualise_current_event(self, save_path=None, particle_scale_factor=3000, show_pdgids=False):
+        """
+        Plot the current event in eta-phi space.
+        
+        Args:
+            save_path: Directory to save plot
+            particle_scale_factor: Scale factor for particle marker sizes
+            show_pdgids: Whether to show PDG IDs in legend
         """
         if self.current_event.size == 0:
             raise RuntimeError("No event loaded to plot")
         if save_path is None:
             save_path = f"{CWD}/data/plots/visualise"
+        
         # Setup plot
         fig, ax = plt.subplots(figsize=(8, 6))
         ax.set_xlabel("$\Delta\eta$", fontsize=16)
@@ -274,20 +291,50 @@ class NoisyGenerator:
         sizes = particle_scale_factor * self.p_Ts / np.max(self.p_Ts)
         
         # Plot particles
-        jet_mask = self.LIDs == 0
-        ax.scatter(self.etas[jet_mask], self.phis[jet_mask], 
-                s=sizes[jet_mask], facecolors='none', color="red", alpha=1, label="Jet particles",
-                linewidth=1,
-                )
-        ax.scatter(self.etas[~jet_mask], self.phis[~jet_mask], 
-                s=sizes[~jet_mask], facecolors='none', color="blue", alpha=1, label="Pile-up")
-        
+        if show_pdgids:
+            pdgid_values = self.PDGIDs.astype(int)
+            colours = [GLOBAL_CMAP.get(abs(pid), "black") for pid in pdgid_values]
+            
+            # Plot particles with PDG colors
+            ax.scatter(self.etas, self.phis, s=sizes, facecolors="none", 
+                    edgecolors=colours, alpha=1, linewidth=1)
+            
+            # Create PDG ID legend
+            handles = []
+            unique_detected_pdgids = sorted(set(pdgid_values))
+            unique_abs_detected_pdgids = sorted(set(abs(i) for i in pdgid_values))
+            
+            for abs_pid in unique_abs_detected_pdgids:
+                colour = GLOBAL_CMAP.get(abs_pid, "grey")
+                if abs_pid in unique_detected_pdgids:
+                    handles.append(Patch(
+                        label=PDG_IDS.get(abs_pid, "Unknown"),
+                        color=colour
+                    ))
+                if -abs_pid in unique_detected_pdgids:
+                    handles.append(Patch(
+                        label=PDG_IDS.get(-abs_pid, "Unknown"),
+                        edgecolor=colour,
+                        facecolor="none"
+                    ))
+        else:
+            # Plot with simple jet/pile-up colors
+            jet_mask = self.LIDs == 0
+            ax.scatter(self.etas[jet_mask], self.phis[jet_mask], 
+                    s=sizes[jet_mask], facecolors="none", color="red", 
+                    alpha=1, label="Jet particles", linewidth=1)
+            ax.scatter(self.etas[~jet_mask], self.phis[~jet_mask], 
+                    s=sizes[~jet_mask], facecolors="none", color="blue", 
+                    alpha=1, label="Pile-up")
+            handles = None
+
+        # Same style for all boxes
         text_box_style = dict(
-            facecolor='white',
-            edgecolor='black',
+            facecolor="white",
+            edgecolor="black",
             alpha=0.7,
             pad=0.5,
-            boxstyle='round'
+            boxstyle="round"
         )
 
         # Event info top left
@@ -303,21 +350,28 @@ class NoisyGenerator:
                 )
         
         # Legend top right
-        legend = ax.legend(fontsize=12, 
-                          bbox_to_anchor=(1, 1),
-                          loc='upper right',
-                          bbox_transform=ax.transAxes)
-        # Style the legend box to match the text box
+        if show_pdgids:
+            # Adjust plot size to accommodate PDG legend
+            box = ax.get_position()
+            ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+            legend = ax.legend(handles=handles, loc="center left", 
+                            bbox_to_anchor=(1, 0.5), fontsize=12)
+        else:
+            legend = ax.legend(fontsize=12, bbox_to_anchor=(1, 1),
+                            loc="upper right", bbox_transform=ax.transAxes)
+        
+        # Style legend box
         frame = legend.get_frame()
-        frame.set_facecolor('white')
-        frame.set_edgecolor('black')
+        frame.set_facecolor("white")
+        frame.set_edgecolor("black")
         frame.set_alpha(0.7)
-    
+
         plt.tight_layout()
         
         # Save plot
         filename = f"event{self._next_jetID-1}_mu{self.mu}"
-        plt.savefig(f"{save_path}/{filename}_vis.png", bbox_inches='tight')
+        suffix = "_pdgids" if show_pdgids else "_vis"
+        plt.savefig(f"{save_path}/{filename}{suffix}.png", bbox_inches="tight")
         plt.close()
 
     def bmap_current_event(self, save_path=None):
