@@ -8,6 +8,7 @@ from PIL import Image
 # Local imports
 from DDPMLHC.dataset_ops.data_loading import *
 from DDPMLHC.calculate_quantities import *
+from DDPMLHC.dataset_ops.data_loading import EventSelector
 from DDPMLHC.dataset_ops.process_data import unit_square_the_unit_circle, wrap_phi
 
 SAVE_PATH = f"{CWD}/data/plots/bmaps/"
@@ -17,12 +18,6 @@ def generate_random_points_in_unit_square(num_points=10):
     energy = np.random.rand(num_points, 1).squeeze()
     points = np.random.rand(num_points, 2)
     return energy, points
-
-def discretise_points(x, y, N=BMAP_SQUARE_SIDE_LENGTH):
-    """Turn continuous points in the square [0,1]x[0,1] into discrete NxN grid."""
-    discrete_x = np.floor(x * N).astype(int)
-    discrete_y = np.floor(y * N).astype(int)
-    return discrete_x, discrete_y
 
 def scale_energy_for_visual(energies, log_scale=False):
             """Scale energies to 8-bit values (0-255)."""

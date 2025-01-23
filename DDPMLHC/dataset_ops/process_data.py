@@ -2,31 +2,6 @@ import numpy as np
 from DDPMLHC.calculate_quantities import *
 from DDPMLHC.config import *
 
-
-### Move the next two funcs into diff file?
-
-def unit_square_the_unit_circle(etas, phis):
-    """Squeezes unit circle (eta^2 + phi^2 = 1) into unit square [0,1]x[0,1]."""
-    new_etas = etas / 2 + 0.5  # Don't use /= or += ... writes to passed in vals
-    new_phis = phis / 2 + 0.5
-    return new_etas, new_phis
-
-def wrap_phi(phi_centre, phis, R=1):
-    # If near top edge
-    shifted_phis = phis
-    if abs(phi_centre - np.pi) < R:
-        mask_for_bottom_half = phis < 0  # Only shift for particles below line phi=0
-        shifts = 2 * np.pi * mask_for_bottom_half
-        shifted_phis += shifts
-    # If near bottom edge
-    if abs(phi_centre + np.pi) < R:
-        mask_for_top_half = phis > 0  # Only shift for particles above line phi=0
-        shifts = 2 * np.pi * mask_for_top_half
-        shifted_phis -= shifts
-    return shifted_phis
-
-############################################################################################
-
 def make_noisy_data(jet_nos, tt_data, pile_up_data, mu, save_path="data"):
     combined = []
     running_length = 0
