@@ -83,8 +83,6 @@ def make_noisy_data(jet_nos, tt_data, pile_up_data, mu, save_path="data"):
 
     print(f"Made {int(stacked[-1,0])} events of mu = {mu} data.\n    Saved to {output_filename}.")
 
-
-
 def calculate_event_level_quantities(mu, save_path, verbose=False, mask=True):
     # Load noisy data
     load_path = f"{CWD}/data/2-intermediate/noisy_mu{mu}_raw.csv"

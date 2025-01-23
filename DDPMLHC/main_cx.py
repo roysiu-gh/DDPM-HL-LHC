@@ -23,6 +23,22 @@ print("FINISHED loading data\n")
 
 #################################################################################
 
+# # === 2D Histograms ===
+# BINS = (16,16)
+# # === EXAMPLE USAGE OF GENERATING IMAGES ===
+max_pileup_id = np.max(pile_up[:,0])
+# # max_event_ids = np.linspace(0, max_pileup_id, num=max_pileup_id+1)
+jet_no = 493
+BINS = [32]
+# for BIN in BINS:
+#     generate_2dhist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BIN, mu=200, max_event_id=max_pileup_id, energies=None)
+#     # generate_2dhist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BIN, mu=10000)
+#     # generate_2dhist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BIN, mu=50, hist_plot="count")
+# #  Use new visualisaton to just distinguish pile up and jet
+# # ====== END 2D HIST ====
+
+#################################################################################
+
 # === Create noisy events
 print("1 :: Creating noisy events")
 make_noisy_data(range(TTBAR_NUM), tt, pile_up, 0, save_path=INTERMEDIATE_PATH)
