@@ -380,36 +380,16 @@ class NoisyGenerator:
         plt.savefig(f"{save_path}/{filename}{suffix}.png", bbox_inches="tight")
         plt.close()
 
-    def bmap_current_event(self, save_path=None):
-        if self.current_event.size == 0:
-            raise RuntimeError("No event loaded to plot")
-        if save_path is None:
-            save_path = f"{CWD}/data/plots/bmaps"
-        
-        bins = self.grid_side_bins
-
-        grid = self.vectorise(for_bmap=True).reshape((bins, bins))  # Get grid, with scaling for bmap visualisation
-        grid = np.clip(grid, 0, 255).astype(np.uint8)  # Remove OOB vals
-        
-        im = Image.fromarray(grid)
-        filename = f"event_{self._next_jetID-1}_mu{self.mu}"
-        im.save(f"{save_path}/{filename}.png")
-
     # Ops
 
-    def vectorise(self, for_bmap=False):
+    def vectorise(self):
         bins = self.grid_side_bins
 
         x, y = unit_square_the_unit_circle(self.etas, self.phis)  # Map to unit square
         x_discrete, y_discrete = discretise_points(x, y, N=bins)  # Discretise coords
 
         # TODO: Scale energies - for now, apply BEFORE gridding - check!
-        if not for_bmap:
-            scaled_energies = (self.masses - self.scaling_mean) / (self.scaling_sd)
-        elif for_bmap:  # This scaling is only for visualization (to 3SD), not suitable for NN input
-            mean = np.mean(self.masses)
-            std = np.std(self.masses)
-            scaled_energies = 255 * (self.masses - mean) / (3 * std) + 128
+        scaled_energies = (self.masses - self.scaling_mean) / (self.scaling_sd)
 
         grid = np.zeros((bins, bins), dtype=np.float32)
         for e, xi, yi in zip(scaled_energies, x_discrete, y_discrete):

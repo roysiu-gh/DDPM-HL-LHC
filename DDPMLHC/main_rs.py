@@ -6,6 +6,7 @@ from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import *
 from DDPMLHC.data_loading import *
 from DDPMLHC.generate_plots.overlaid_1d import create_overlay_plots
+from DDPMLHC.generate_plots.bmap import save_to_bmap
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
@@ -53,17 +54,17 @@ print("FINISHED loading data\n")
 for mu in [0, 50, 500]:
     generator = NoisyGenerator(tt, pile_up, mu=mu)
     next(generator)  # Load jet 0
-    generator.bmap_current_event()
+    save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
     generator.visualise_current_event()
     generator.visualise_current_event(show_pdgids=True)
 
     next(generator)  # Load jet 1
-    generator.bmap_current_event()
+    save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
     generator.visualise_current_event()
     generator.visualise_current_event(show_pdgids=True)
 
     generator.select_jet(42)
-    generator.bmap_current_event()
+    save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
     generator.visualise_current_event()
     generator.visualise_current_event(show_pdgids=True)
 
