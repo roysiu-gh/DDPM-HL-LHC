@@ -19,14 +19,14 @@ import polars as pl
 # pile_up = np.genfromtxt(
 #     PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
 =======
-print("0 :: Loading original data")
-pile_up = np.genfromtxt(
-    PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-tt = np.genfromtxt(
-    TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-print("FINISHED loading data\n")
+# print("0 :: Loading original data")
+# pile_up = np.genfromtxt(
+#     PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+# )
+# tt = np.genfromtxt(
+#     TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+# )
+# print("FINISHED loading data\n")
 
 #################################################################################
 
@@ -231,7 +231,20 @@ plt.close()
 #     plt.ylim(0 if 0 < np.min(data) else np.min(data), np.max(data))
 #     plt.savefig(f"{CWD}/data/plots/Mean_{name}_diff.pdf", format="pdf")
 #     plt.close()
-
+y_qlabel = {
+    "mass": r'$\braket{m_{\mu}^{\text{jet}} - m_{0}^{\text{jet}}}$ [GeV]',
+    "energy": r"$\braket{E_{\mu}^{\text{jet}} - E_{0}^{\text{jet}}}$ [GeV]",
+    "pt": r"$\braket{p_{T,\mu}^{\text{jet}} - p_{T,0}^{\text{jet}}}$ [GeV]"
+}
+fig  = plt.figure(figsize=(8,6))
+plt.tight_layout()
+plt.plot(mus, energy_data)
+plt.xlabel("$\mu$")
+plt.ylabel(r"$\braket{E_{\mu}^{\text{jet}} - E_{0}^{\text{jet}}}$ [GeV]")
+plt.xlim(0, np.max(mus))
+plt.ylim(0 if 0 < np.min(energy_data) else np.min(energy_data), np.max(energy_data))
+plt.savefig(f"{CWD}/data/plots/Mean_Energy_diff.pdf", format="pdf")
+plt.close()
 # end_time_global = time.time()
 # print(f"Global runtime: {end_time_global - start_time_global} seconds")
 
