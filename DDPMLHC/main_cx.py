@@ -13,33 +13,37 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 MAX_DATA_ROWS = None
 
 # === Read in data
-print("0 :: Loading original data")
-pile_up = np.genfromtxt(
-    PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-tt = np.genfromtxt(
-    TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-print("FINISHED loading data\n")
+# print("0 :: Loading original data")
+# pile_up = np.genfromtxt(
+#     PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+# )
+# tt = np.genfromtxt(
+#     TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+# )
+# print("FINISHED loading data\n")
 
-#################################################################################
-tt = EventSelector(tt)
-pile_up = EventSelector(pile_up)
+# #################################################################################
+# tt = EventSelector(tt)
+# pile_up = EventSelector(pile_up)
 
-mus = np.arange(0,5,step=1)
-high_PU_no = int(pile_up.max_ID)
-max_jet_no = int(tt.max_ID)
-print("high pu", high_PU_no)
-print("max jet", max_jet_no)
-data_y = np.zeros((3, len(mus)))
+mus = np.arange(0,11,step=1)
+# high_PU_no = int(pile_up.max_ID)
+# max_jet_no = int(tt.max_ID)
+# print("high pu", high_PU_no)
+# print("max jet", max_jet_no)
+# data_y = np.zeros((3, len(mus)))
 
-tasks = [
-        (tt, pile_up, mu, max_jet_no, high_PU_no+1) 
-        for mu in mus
-    ]
-energy_data = np.zeros(len(tasks))
-for indx,task in enumerate(tasks):
-    energy_data[indx] += mean_quantity_diff(task)
+# tasks = [
+#         (tt, pile_up, mu, max_jet_no, high_PU_no+1) 
+#         for mu in mus
+#     ]
+# energy_data = np.zeros(len(tasks))
+# energy_std = np.zeros(len(tasks))
+# for indx,task in enumerate(tasks):
+#     data = mean_quantity_diff(task)
+#     energy_data[indx] += data[0]
+#     energy_std[indx] += data[1]
+# np.savetxt(f"{CWD}/data/plots/energy_resolution_data.txt", [energy_data, energy_std], fmt="%10.10f",delimiter=",")
 # with multiprocessing.Pool(processes=int(len(mus) / 4)) as pool:
 #     results = pool.map(mean_quantity_diff, tasks)
 # pool.close()
@@ -65,14 +69,23 @@ y_qlabel = {
     "energy": r"$\braket{E_{\mu}^{\text{jet}} - E_{0}^{\text{jet}}}$ [GeV]",
     "pt": r"$\braket{p_{T,\mu}^{\text{jet}} - p_{T,0}^{\text{jet}}}$ [GeV]"
 }
-fig  = plt.figure(figsize=(8,6))
+energy_data = np.loadtxt(f"{CWD}/data/plots/energy_resolution_data.txt", delimiter=",")
+energy_mean = energy_data[0]
+energy_std = energy_data[1]
+# print(energy_data)
+fig,axs = plt.subplots(nrows=1,ncols=2, figsize=(8,6))
+ax1, ax2 = axs
 plt.tight_layout()
-plt.plot(mus, energy_data)
-plt.xlabel("$\mu$")
-plt.ylabel(r"$\braket{E_{\mu}^{\text{jet}} - E_{0}^{\text{jet}}}$ [GeV]")
-plt.xlim(0, np.max(mus))
-plt.ylim(0 if 0 < np.min(energy_data) else np.min(energy_data), np.max(energy_data))
-plt.savefig(f"{CWD}/data/plots/Mean_Energy_diff.pdf", format="pdf")
+ax1.plot(mus, energy_mean)
+ax1.set_xlabel("$\mu$")
+ax1.set_ylabel(r"$\braket{E_{\mu}^{\text{jet}} - E_{0}^{\text{jet}}}$ [GeV]")
+ax2.plot(mus, energy_std)
+ax2.set_xlabel("$\mu$")
+ax2.set_ylabel(r"$\sigma(E)$ [GeV]")
+ax1.set_xlim(0, np.max(mus))
+ax2.set_xlim(0, np.max(mus))
+ax1.set_ylim(0 if 0 < np.min(energy_mean) else np.min(energy_mean), np.max(energy_mean))
+plt.savefig(f"{CWD}/data/plots/Mean_Energy_graphs.pdf", format="pdf")
 plt.close()
 # end_time_global = time.time()
 # print(f"Global runtime: {end_time_global - start_time_global} seconds")

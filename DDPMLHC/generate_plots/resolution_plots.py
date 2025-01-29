@@ -103,6 +103,7 @@ def mean_quantity_diff(params):
     Sample random pile_ups
 
     Find <q_\mu^jet - q_0^jet> against \mu using quantity_diff
+    Find std(q_\mu^jet - q_0^jet) 
 
     Repeat for all jets (or a max number of jets)
 
@@ -123,6 +124,7 @@ def mean_quantity_diff(params):
     # pu_nos = pile_up_data.select_event()
     # event_IDS = np.random.choice(max_event_num, size = (max_jet_no, mu))
     # valid_event_IDS = event_IDS[np.isin(event_IDS, max_event_num)]        print(event_IDS)
+    E_arr = []  
     for jet_no in range(0, max_jet_no):
         cd = jet_data.select_event(jet_no)
         # print(f"jet {jet_no}: ",cd)
@@ -135,6 +137,7 @@ def mean_quantity_diff(params):
             pile_ups = np.delete(pile_ups, [0,1,2], axis=1)
             E= quantity_diff(cd[:,0], cd[:,3],cd[:,4],cd[:,5], pile_ups[:,0], pile_ups[:,1], pile_ups[:,2])
             # print(E)
+            E_arr.append(E)
         else:
             # 0 pile  up means diff is 0 anyways
             E = 0
@@ -152,10 +155,11 @@ def mean_quantity_diff(params):
     # print(f"Loop mu = {mu}: {end_time - start_time} seconds")
     # m_total /= max_jet_no
     E_total /= max_jet_no
+    E_std = np.std(E_arr) if mu != 0 else 0
     # p_T_total /= max_jet_no
     # print(m_total)
     # print(E_total)
     # print(p_T_total)
     print(f"End mu = {mu}")
-    return E_total
+    return E_total, E_std
 
