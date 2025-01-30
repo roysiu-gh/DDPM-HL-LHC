@@ -134,7 +134,8 @@ def mean_quantity_diff(params):
             pile_ups = [pile_up_data.select_event(event_ID) for event_ID in event_IDS]
             # print("Pile ups: ", pile_ups)
             pile_ups = np.vstack(pile_ups)
-            pile_ups = np.delete(pile_ups, [0,1,2], axis=1)
+            [px, py, pz], eta, phi = delta_R(centre, px, py, pz, eta, phi)
+            # pile_ups = np.delete(pile_ups, [0,1,2], axis=1)
             E= quantity_diff(cd[:,0], cd[:,3],cd[:,4],cd[:,5], pile_ups[:,0], pile_ups[:,1], pile_ups[:,2])
             # print(E)
             E_arr.append(E)
@@ -163,3 +164,16 @@ def mean_quantity_diff(params):
     print(f"End mu = {mu}")
     return E_total, E_std
 
+def mean_quantity_diff_noisy(mu):
+    if event_stats_path is None:
+        event_stats_path = f"{CWD}/data/2-intermediate/noisy_mu{mu}_event_level.csv"
+    print(f"Doing mu = {mu}...")
+    events_dat = np.genfromtxt(
+        event_stats_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+    )
+    save_path = f"{CWD}/data/plots/1D_histograms/mu{mu}/"
+    Path(save_path).mkdir(parents=False, exist_ok=True)
+
+    event_eta = events_dat[:, 4]
+    event_mass = events_dat[:, 6]
+    event_pT = events_dat[:, 7]
