@@ -45,7 +45,7 @@ print("FINISHED loading data\n")
 # tt = EventSelector(tt)
 # pile_up = EventSelector(pile_up)
 
-mus = np.arange(0,11,step=1)
+# mus = np.arange(0,11,step=1)
 # high_PU_no = int(pile_up.max_ID)
 # max_jet_no = int(tt.max_ID)
 # print("high pu", high_PU_no)
@@ -248,29 +248,7 @@ plt.close()
 #     plt.ylim(0 if 0 < np.min(data) else np.min(data), np.max(data))
 #     plt.savefig(f"{CWD}/data/plots/Mean_{name}_diff.pdf", format="pdf")
 #     plt.close()
-y_qlabel = {
-    "mass": r'$\braket{m_{\mu}^{\text{jet}} - m_{0}^{\text{jet}}}$ [GeV]',
-    "energy": r"$\braket{E_{\mu}^{\text{jet}} - E_{0}^{\text{jet}}}$ [GeV]",
-    "pt": r"$\braket{p_{T,\mu}^{\text{jet}} - p_{T,0}^{\text{jet}}}$ [GeV]"
-}
-energy_data = np.loadtxt(f"{CWD}/data/plots/energy_resolution_data.txt", delimiter=",")
-energy_mean = energy_data[0]
-energy_std = energy_data[1]
-# print(energy_data)
-fig,axs = plt.subplots(nrows=1,ncols=2, figsize=(8,6))
-ax1, ax2 = axs
-plt.tight_layout()
-ax1.plot(mus, energy_mean)
-ax1.set_xlabel("$\mu$")
-ax1.set_ylabel(r"$\braket{E_{\mu}^{\text{jet}} - E_{0}^{\text{jet}}}$ [GeV]")
-ax2.plot(mus, energy_std)
-ax2.set_xlabel("$\mu$")
-ax2.set_ylabel(r"$\sigma(E)$ [GeV]")
-ax1.set_xlim(0, np.max(mus))
-ax2.set_xlim(0, np.max(mus))
-ax1.set_ylim(0 if 0 < np.min(energy_mean) else np.min(energy_mean), np.max(energy_mean))
-plt.savefig(f"{CWD}/data/plots/Mean_Energy_graphs.pdf", format="pdf")
-plt.close()
+
 # end_time_global = time.time()
 # print(f"Global runtime: {end_time_global - start_time_global} seconds")
 
