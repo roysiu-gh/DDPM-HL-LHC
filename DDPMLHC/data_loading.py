@@ -72,6 +72,8 @@ class EventSelector:
         except AttributeError:
             raise AttributeError(f"'EventSelector' object has no attribute '{attr}'")
 
+#################################################################################
+
 class NoisyGenerator:
     def __init__(self, TTselector:EventSelector, PUselector:EventSelector, mu=0):
         self.tt = TTselector
@@ -413,7 +415,7 @@ class NoisyGenerator:
 
     # Ops
 
-    def vectorise(self):
+    def get_grid(self):
         bins = self.grid_side_bins
 
         x, y = unit_square_the_unit_circle(self.etas, self.phis)  # Map to unit square
@@ -426,6 +428,10 @@ class NoisyGenerator:
         for e, xi, yi in zip(scaled_energies, x_discrete, y_discrete):
             grid[yi, xi] += float(e)
         
+        return grid
+
+    def vectorise(self):
+        grid = self.get_grid()        
         return grid.reshape(bins * bins)
 
     # Getters for quantity arrays
@@ -515,3 +521,21 @@ class NoisyGenerator:
     @event_pT.setter
     def event_pT(self, val):
         self.event_level[self.column_indices_event["p_T"]] = val
+
+#################################################################################
+
+class OutData():
+    def __init__(self, vector, axis=(0,0)):
+        pass
+
+
+class NGenForDataloader():
+    def __init__(self, noisy_generator):
+        self.ng = noisy_generator
+    
+    def __iter__(self):
+        return self
+    
+    def __next__(self):
+        next(self.ng)
+        return self.ng.get_grid()
