@@ -11,6 +11,7 @@ from DDPMLHC.generate_plots.resolution_plots import *
 import multiprocessing
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 MAX_DATA_ROWS = None
+<<<<<<< HEAD
 import polars as pl
 
 # === Read in data
@@ -27,34 +28,48 @@ import polars as pl
 #     TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
 # )
 # print("FINISHED loading data\n")
+=======
+
+# === Read in data
+print("0 :: Loading original data")
+pile_up = np.genfromtxt(
+    PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+)
+tt = np.genfromtxt(
+    TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+)
+print("FINISHED loading data\n")
+>>>>>>> 3098d67 (Rebase model branch on main)
 
 #################################################################################
+tt = EventSelector(tt)
+pile_up = EventSelector(pile_up)
 
-# # === 2D Histograms ===
-# BINS = (16,16)
-# # === EXAMPLE USAGE OF GENERATING IMAGES ===
-max_pileup_id = np.max(pile_up[:,0])
-# # max_event_ids = np.linspace(0, max_pileup_id, num=max_pileup_id+1)
-jet_no = 493
-BINS = [32]
-# for BIN in BINS:
-#     generate_2dhist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BIN, mu=200, max_event_id=max_pileup_id, energies=None)
-#     # generate_2dhist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BIN, mu=10000)
-#     # generate_2dhist(tt, pile_up_data=pile_up, jet_no=jet_no, bins=BIN, mu=50, hist_plot="count")
-# #  Use new visualisaton to just distinguish pile up and jet
-# # ====== END 2D HIST ====
+mus = np.arange(0,5,step=1)
+high_PU_no = int(pile_up.max_ID)
+max_jet_no = int(tt.max_ID)
+print("high pu", high_PU_no)
+print("max jet", max_jet_no)
+data_y = np.zeros((3, len(mus)))
 
-#################################################################################
+tasks = [
+        (tt, pile_up, mu, max_jet_no, high_PU_no+1) 
+        for mu in mus
+    ]
+energy_data = np.zeros(len(tasks))
+for indx,task in enumerate(tasks):
+    energy_data[indx] += mean_quantity_diff(task)
+# with multiprocessing.Pool(processes=int(len(mus) / 4)) as pool:
+#     results = pool.map(mean_quantity_diff, tasks)
+# pool.close()
+# pool.join()
 
-# === Create noisy events
-print("1 :: Creating noisy events")
-make_noisy_data(range(TTBAR_NUM), tt, pile_up, 0, save_path=INTERMEDIATE_PATH)
-make_noisy_data(range(TTBAR_NUM), tt, pile_up, 1, save_path=INTERMEDIATE_PATH)
-make_noisy_data(range(TTBAR_NUM), tt, pile_up, 3, save_path=INTERMEDIATE_PATH)
-make_noisy_data(range(TTBAR_NUM), tt, pile_up, 5, save_path=INTERMEDIATE_PATH)
-make_noisy_data(range(TTBAR_NUM), tt, pile_up, 10, save_path=INTERMEDIATE_PATH)
-print("FINISHED creating noisy events\n")
+# for ind,E_total in enumerate(results):
+    # data_y[0][ind] += m_total
+    
+    # data_y[2][ind] += p_T_total
 
+<<<<<<< HEAD
 # === Collapse noisy data to event-level
 print("2 :: Collapsing noisy data to event-level")
 calculate_event_level_quantities(0, INTERMEDIATE_PATH)
@@ -221,6 +236,8 @@ plt.close()
     
     # data_y[2][ind] += p_T_total
 
+=======
+>>>>>>> 3098d67 (Rebase model branch on main)
 # for name,data in zip(["Mass", "Energy", "pT"], data_y):
 #     fig  = plt.figure(figsize=(8,6))
 #     plt.tight_layout()
