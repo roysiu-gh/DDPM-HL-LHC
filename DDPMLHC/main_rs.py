@@ -4,9 +4,9 @@ import matplotlib as mpl
 # Local imports
 from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import *
-from DDPMLHC.data_loading import *
-from DDPMLHC.generate_plots.overlaid_1d import create_overlay_plots
-from DDPMLHC.generate_plots.bmap import save_to_bmap
+from DDPMLHC.dataset_ops.data_loading import *
+from DDPMLHC.dataset_ops.process_data import *
+from DDPMLHC.generate_plots.overlaid_1d_plots import create_overlay_plots
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
@@ -44,10 +44,10 @@ print("FINISHED loading data\n")
 
 #################################################################################
 
-# create_overlay_plots([0, 5, 10, 15, 30])
-# create_overlay_plots([0, 10, 30, 50])
-# create_overlay_plots([0, 25, 50, 75, 100])
-# create_overlay_plots([0, 50, 100, 150, 200])
+create_overlay_plots([0, 5, 10, 15, 30])
+create_overlay_plots([0, 10, 30, 50])
+create_overlay_plots([0, 25, 50, 75, 100])
+create_overlay_plots([0, 50, 100, 150, 200])
 
 #################################################################################
 
