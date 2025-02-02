@@ -75,14 +75,14 @@ class EventSelector:
 #################################################################################
 
 class NoisyGenerator:
-    def __init__(self, TTselector:EventSelector, PUselector:EventSelector, mu=0):
+    def __init__(self, TTselector:EventSelector, PUselector:EventSelector, mu=0, bins=BMAP_SQUARE_SIDE_LENGTH):
         self.tt = TTselector
         self.pu = PUselector
         self.mu = mu
         
         self._max_TT_no = self.tt.max_ID
         self._max_PU_no = self.pu.max_ID
-        self.grid_side_bins = BMAP_SQUARE_SIDE_LENGTH
+        self.bins = bins
 
         ### TODO: need to set
         self.scaling_mean = 0
@@ -132,6 +132,9 @@ class NoisyGenerator:
             f"        mass = {self.event_mass}\n"
             f"        p_T  = {self.event_pT}"
         )
+
+    def __len__(self):
+        return int(self._max_TT_no) + 1
     
     # Iterator methods
     
@@ -416,7 +419,7 @@ class NoisyGenerator:
     # Ops
 
     def get_grid(self):
-        bins = self.grid_side_bins
+        bins = self.bins
 
         x, y = unit_square_the_unit_circle(self.etas, self.phis)  # Map to unit square
         x_discrete, y_discrete = discretise_points(x, y, N=bins)  # Discretise coords
@@ -521,21 +524,3 @@ class NoisyGenerator:
     @event_pT.setter
     def event_pT(self, val):
         self.event_level[self.column_indices_event["p_T"]] = val
-
-#################################################################################
-
-class OutData():
-    def __init__(self, vector, axis=(0,0)):
-        pass
-
-
-class NGenForDataloader():
-    def __init__(self, noisy_generator):
-        self.ng = noisy_generator
-    
-    def __iter__(self):
-        return self
-    
-    def __next__(self):
-        next(self.ng)
-        return self.ng.get_grid()

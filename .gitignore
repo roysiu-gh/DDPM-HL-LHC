@@ -6,6 +6,7 @@ data/2-intermediate/*
 
 data/plots/bmaps/test_rand.png
 data/plots/bmaps/event_NONE_muNONE.png
+data/ML/*
 **/._*
 **/data/**/.*
 venv*

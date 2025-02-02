@@ -192,4 +192,9 @@ def discretise_points(x, y, N=BMAP_SQUARE_SIDE_LENGTH):
     """Turn continuous points in the square [0,1]x[0,1] into discrete NxN grid."""
     discrete_x = np.floor(x * N).astype(int)
     discrete_y = np.floor(y * N).astype(int)
+
+    # TODO: check this is needed and doesn't clip stuff I don't want to clip
+    discrete_x = np.clip(discrete_x, 0, N - 1)
+    discrete_y = np.clip(discrete_y, 0, N - 1)
+
     return discrete_x, discrete_y
