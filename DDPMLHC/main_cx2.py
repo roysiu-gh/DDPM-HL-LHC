@@ -160,8 +160,13 @@ for idx,data in enumerate(data_array):
     # en_bins = np.mgrid[np.min(energy_diffs):np.max(energy_diffs):(len(energy_diffs)+1)*1j]
     # mass_bins = np.mgrid[np.min(mass_diffs2):np.max(mass_diffs2):(len(mass_diffs2)+1)*1j]
     # mass_bins = np.mgrid[0:mass_max:(mass_num_bins+1)*1j]
-    axs[idx][0].hist(energy_diffs, bins = 50, label=f"$\mu = {mus[idx]}$")
-    axs[idx][1].hist(mass_diffs2, bins = 50,label=f"$\mu = {mus[idx]}$")
+    axs[idx][0].hist(energy_diffs, bins = 50, label=f"$\\mu = {mus[idx]}$", edgecolor="black")
+    axs[idx][1].hist(mass_diffs2[mass_diffs2<5], bins = 50,label=f"$\\mu = {mus[idx]}$", edgecolor="black")
+    axs[idx][0].set_ylabel(r"Counts")
+    # axs[idx][0].set_ylabel(r"Counts")
+
+    axs[idx][0].legend(prop={'size': 14})
+    axs[idx][1].legend(prop={'size': 14})
     # std_energy_diff = np.std(energy_diffs)
     # print(std_energy_diff)
     # print(mean_energy_diff)
@@ -173,8 +178,10 @@ for idx,data in enumerate(data_array):
     # std_energy_diffs.append(std_energy_diff)
     # mean_mass_diffs.append(mean_mass_diff)
     # std_mass_diffs.append(std_mass_diff)
-
+axs[-1][0].set_xlabel(r"$\frac{E_{\mu}^{j} - E_{0}^{j}}{E_{0}^{j}}$")
+axs[-1][1].set_xlabel(r"$\frac{m_{\mu}^{j} - m_{0}^{j}}{m_{0}^{j}}$")
 plt.savefig(f"{CWD}/data/plots/hist_energymasscounts.pdf", format="pdf")
+plt.savefig(f"{CWD}/data/plots/hist_energymasscounts.png", format="png", dpi=600)
 plt.close()
 
 print("DONE ALL.")
