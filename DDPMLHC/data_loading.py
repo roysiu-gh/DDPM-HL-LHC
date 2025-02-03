@@ -214,17 +214,27 @@ class NoisyGenerator:
     def _calculate_event_level(self):
         self.event_id = self._next_jetID
 
-        self.event_px = np.sum(self.pxs)
-        self.event_py = np.sum(self.pys)
-        self.event_pz = np.sum(self.pzs)
+        event_quantities = convert_particle_detas_dphis_to_event_level(self.masses, self.pxs, self.pys, self.pzs)
 
-        event_ene = np.sum(self.masses)
-        event_p2 = contraction(event_ene, self.event_px, self.event_py, self.event_pz)
-        self.event_mass = np.sqrt(event_p2)
+        self.event_mass = event_quantities[0]
+        self.event_px = event_quantities[1]
+        self.event_py = event_quantities[2]
+        self.event_pz = event_quantities[3]
+        self.event_eta = event_quantities[4]
+        self.event_phi = event_quantities[5]
+        self.event_pT = event_quantities[6]
 
-        self.event_eta = pseudorapidity(event_ene, self.event_pz)
-        self.event_phi = to_phi(self.event_px, self.event_py)
-        self.event_pT = to_pT(self.event_px, self.event_py)
+        # self.event_px = np.sum(self.pxs)
+        # self.event_py = np.sum(self.pys)
+        # self.event_pz = np.sum(self.pzs)
+
+        # event_ene = np.sum(self.masses)
+        # event_p2 = contraction(event_ene, self.event_px, self.event_py, self.event_pz)
+        # self.event_mass = np.sqrt(event_p2)
+
+        # self.event_eta = pseudorapidity(event_ene, self.event_pz)
+        # self.event_phi = to_phi(self.event_px, self.event_py)
+        # self.event_pT = to_pT(self.event_px, self.event_py)
     
     # Event-level output methods
 
@@ -435,7 +445,7 @@ class NoisyGenerator:
 
     def vectorise(self):
         grid = self.get_grid()        
-        return grid.reshape(bins * bins)
+        return grid.reshape(self.bins * self.bins)
 
     # Getters for quantity arrays
     @property

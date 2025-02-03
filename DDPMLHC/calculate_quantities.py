@@ -198,3 +198,20 @@ def discretise_points(x, y, N=BMAP_SQUARE_SIDE_LENGTH):
     discrete_y = np.clip(discrete_y, 0, N - 1)
 
     return discrete_x, discrete_y
+
+def convert_particle_detas_dphis_to_event_level(masses, pxs, pys, pzs):
+    # self.event_id = self._next_jetID
+
+    event_px = np.sum(pxs)
+    event_py = np.sum(pys)
+    event_pz = np.sum(pzs)
+
+    event_ene = np.sum(masses)
+    event_p2 = contraction(event_ene, event_px, event_py, event_pz)
+    event_mass = np.sqrt(event_p2)
+
+    event_eta = pseudorapidity(event_ene, event_pz)
+    event_phi = to_phi(event_px, event_py)
+    event_pT = to_pT(event_px, event_py)
+
+    return (event_mass, event_px, event_py, event_pz, event_eta, event_phi, event_pT)
