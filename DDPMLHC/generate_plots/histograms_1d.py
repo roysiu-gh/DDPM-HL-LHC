@@ -35,14 +35,19 @@ class Set2DP(mpl.ticker.ScalarFormatter):
 
 def plot_1D_hist(name, data, xlog=False, plot_params=DEFAULT_PLOT_PARAMS, save_path=None, save_filename="out", x_min=None, x_max=None, ax=None, plot_ylabel=True):
     """Plot a 1D histogram. Optionally plot on a provided axis."""
+
+    ### CHANGE THIS LATER!
+    xlog = True  # Otherwise breaks on the data regenerated from grid
+
     if ax is None:
         fig, ax = plt.subplots(figsize=(10, 6))  # Create a new figure if no axes provided
     else:
         fig = None  # If ax provided, do not create a new figure
     # Copy default params if not already assigned
     plot_params.update({ k:v for k, v in DEFAULT_PLOT_PARAMS.items() if k not in plot_params})
+    
     sb.histplot(data, ax=ax, log_scale=(xlog, False), **plot_params)
-
+    
     ax.set_xlabel(name, fontsize=16)
     ax.set_xlim(left=x_min, right=x_max)
     set_y_2p = Set2DP()
@@ -116,15 +121,15 @@ def plot_combined_histograms(hist_data, save_path):
     plt.tight_layout()
     plt.savefig(f"{save_path}/multiple.png", dpi=600)
 
-def plot_1d_histograms(mu, event_stats_path=None):
+def plot_1d_histograms(mu, event_stats_path=None, output_path=None):
     if event_stats_path is None:
         event_stats_path = f"{CWD}/data/2-intermediate/noisy_mu{mu}_event_level.csv"
     print(f"Doing mu = {mu}...")
     events_dat = np.genfromtxt(
         event_stats_path, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
     )
-    save_path = f"{CWD}/data/plots/1D_histograms/mu{mu}/"
-    Path(save_path).mkdir(parents=False, exist_ok=True)
+    if output_path is None:
+        output_path = f"{CWD}/data/plots/1D_histograms/mu{mu}/"
 
     event_eta = events_dat[:, 4]
     event_mass = events_dat[:, 6]
@@ -146,24 +151,24 @@ def plot_1d_histograms(mu, event_stats_path=None):
             "data": event_mass,
             "plot_params": {"bins" : mass_bins},
             "save_filename": "event_mass",
-            "save_path": save_path,
+            "save_path": output_path,
         },
         {
             "name": "Pseudorapidity $\eta$",
             "data": event_eta,
             "plot_params": {"bins": 50},
             "save_filename": "event_eta",
-            "save_path": save_path,
+            "save_path": output_path,
         },
         {
             "name": "Transverse Momentum $p_T$ [GeV]",
             "data": event_pT,
             "plot_params": {"xlog": True, "bins": pT_bins},
             "save_filename": "event_pT",
-            "save_path": save_path,
+            "save_path": output_path,
         }
     ]
 
-    plot_single_histograms(list_of_params_foobar, save_path)
-    plot_combined_histograms(list_of_params_foobar, save_path)
+    plot_single_histograms(list_of_params_foobar, output_path)
+    plot_combined_histograms(list_of_params_foobar, output_path)
     print(f"Done mu = {mu}.\n")

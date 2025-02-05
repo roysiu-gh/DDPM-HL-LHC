@@ -209,12 +209,12 @@ class NoisyGenerator:
         d_etas = self.current_event[:, 5]
         d_phis = self.current_event[:, 6]
         dR2s = d_etas*d_etas + d_phis*d_phis
-        self.current_event = self.current_event[ (LIDs == 0) | (dR2s < 1) ]  # First condition so 
+        self.current_event = self.current_event[ (LIDs == 0) | (dR2s < 1) ]  # First condition why?
 
     def _calculate_event_level(self):
         self.event_id = self._next_jetID
 
-        event_quantities = convert_particle_detas_dphis_to_event_level(self.masses, self.pxs, self.pys, self.pzs)
+        event_quantities = particle_momenta_to_event_level(self.masses, self.pxs, self.pys, self.pzs)
 
         self.event_mass = event_quantities[0]
         self.event_px = event_quantities[1]
@@ -224,21 +224,7 @@ class NoisyGenerator:
         self.event_phi = event_quantities[5]
         self.event_pT = event_quantities[6]
 
-        # self.event_px = np.sum(self.pxs)
-        # self.event_py = np.sum(self.pys)
-        # self.event_pz = np.sum(self.pzs)
-
-        # event_ene = np.sum(self.masses)
-        # event_p2 = contraction(event_ene, self.event_px, self.event_py, self.event_pz)
-        # self.event_mass = np.sqrt(event_p2)
-
-        # self.event_eta = pseudorapidity(event_ene, self.event_pz)
-        # self.event_phi = to_phi(self.event_px, self.event_py)
-        # self.event_pT = to_pT(self.event_px, self.event_py)
-    
-    # Event-level output methods
-
-    def collect_event_level_data(self):
+    def _collect_event_level_data(self):
         """Collect event-level data for all events. Will start from beginning of self.TTselector."""
         self.reset()
         combined = []
@@ -246,17 +232,8 @@ class NoisyGenerator:
             combined.append(np.copy(self.event_level))
         return np.vstack(combined)
 
-    def save_event_level_data(self, output_path=INTERMEDIATE_PATH, data=None):
-        """
-        Save event-level data to CSV.
-        
-        Args:
-            output_path (str): Base path for output file
-            data (np.ndarray, optional): Data to save. If None, collects new data
-            mu (int, optional): Override instance mu value for filename
-        """
-        if data is None:
-            data = self.collect_event_level_data()
+    def save_event_level_data(self, output_path=INTERMEDIATE_PATH):
+        data = self._collect_event_level_data()
         
         output_filename = f"noisy_mu{self.mu}_event_level.csv"
         output_filepath = f"{output_path}/{output_filename}"
