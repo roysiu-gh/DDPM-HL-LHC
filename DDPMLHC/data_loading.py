@@ -53,6 +53,8 @@ class EventSelector:
             return np.empty((0, self.data.shape[1]))
         start = self.start_indices[idx]
         end = self.end_indices[idx]
+        # print(start)
+        # print(end)
         return self.data[start:end]
     
     # Treat this obj in same way as underlying data
@@ -75,19 +77,21 @@ class EventSelector:
 #################################################################################
 
 class NoisyGenerator:
-    def __init__(self, TTselector:EventSelector, PUselector:EventSelector, mu=0, bins=BMAP_SQUARE_SIDE_LENGTH):
+    def __init__(self, TTselector:EventSelector, PUselector:EventSelector, mu=0, bins=BMAP_SQUARE_SIDE_LENGTH, pu_only = False):
         self.tt = TTselector
         self.pu = PUselector
         self.mu = mu
         
         self._max_TT_no = self.tt.max_ID
         self._max_PU_no = self.pu.max_ID
-        self.bins = bins
+        # self.grid_side_bins = BMAP_SQUARE_SIDE_LENGTH
+        self.grid_side_bins = bins
+        self.grid = None
 
         ### TODO: need to set
         self.scaling_mean = 0
         self.scaling_sd = 1
-
+        self.pu_only = pu_only
         # Define column index mapping for getters
         self.column_indices_all = {  # For array of quantities
             "NIDs": 0,
@@ -141,9 +145,20 @@ class NoisyGenerator:
     def __repr__(self):
         return str(self.current_event)
 
+    # def __iter__(self):
+    #     return self
+    ############ THIS FUNCTION SHOLUD BE MERGED WITH OTHER CODE
+    # USING THIS TO MAKE IterableDataset for model
+    # So dataset is "streamed in" continously instead of specifically "selecting" a jet
+    def generate_jet(self):
+        while True:
+            if self._next_jetID >= self._max_TT_no:
+                raise RuntimeError("Requested jet not in loaded set. Did nothing.")
+            yield next(self)
+
+    # Return data as iterable
     def __iter__(self):
-        return self
-    
+        return iter(self.generate_jet())
     def __next__(self):
         if self._next_jetID == self._max_TT_no:
             raise StopIteration
@@ -153,7 +168,10 @@ class NoisyGenerator:
         self._calculate_event_level()
         self._next_jetID += 1
         return self.current_event
-
+    def __len__(self):
+        # print(len(self.current_event))
+        length = len(self.current_event)
+        return length
     def select_jet(self, jet_no):
         if jet_no >= self._max_TT_no:
             raise RuntimeError("Requested jet not in loaded set. Did nothing.")
@@ -201,15 +219,26 @@ class NoisyGenerator:
 
         self.PDGIDs = jetpluspu[:, 3]  # For use in self.visualise_current_event(show_pdgids=True)
         jetpluspu = np.delete(jetpluspu, [2,3,4], axis=1)  # Remove charge, PDGIDs
+        self.current_event = jetpluspu
+        # print(jetpluspu)
+        if self.pu_only:
+            data = jetpluspu[(jet_event.shape[0]):] 
 
-        self.current_event = jetpluspu  # Noisy event
-    
+
+            self.current_event =  data # Noisy event
+            return data
+        # self.current_event = jetpluspu  # Noisy event
+        
+        
     def _mask(self):
+        # If using noisy generator to only return pile-up
+
         LIDs = self.current_event[:, 1].astype(int)
         d_etas = self.current_event[:, 5]
         d_phis = self.current_event[:, 6]
         dR2s = d_etas*d_etas + d_phis*d_phis
-        self.current_event = self.current_event[ (LIDs == 0) | (dR2s < 1) ]  # First condition why?
+        self.current_event = self.current_event[ (LIDs == 0) | (dR2s < 1) ]  # First condition so 
+        return 
 
     def _calculate_event_level(self):
         self.event_id = self._next_jetID
@@ -406,21 +435,19 @@ class NoisyGenerator:
     # Ops
 
     def get_grid(self):
-        bins = self.bins
-
+        bins = self.grid_side_bins
         x, y = unit_square_the_unit_circle(self.etas, self.phis)  # Map to unit square
         x_discrete, y_discrete = discretise_points(x, y, N=bins)  # Discretise coords
-
         # TODO: Scale energies - for now, apply BEFORE gridding - check!
         scaled_energies = (self.masses - self.scaling_mean) / (self.scaling_sd)
 
         grid = np.zeros((bins, bins), dtype=np.float32)
+        # print("???", len(list(zip(scaled_energies, x_discrete, y_discrete))))
         for e, xi, yi in zip(scaled_energies, x_discrete, y_discrete):
             grid[yi, xi] += float(e)
-        
         return grid
 
-    def vectorise(self):
+    def vectorise(self,  bins):
         grid = self.get_grid()        
         return grid.reshape(self.bins * self.bins)
 
@@ -498,7 +525,6 @@ class NoisyGenerator:
         self.event_level[self.column_indices_event["phi"]] = val
 
     @property
-
     def event_mass(self):
         return self.event_level[self.column_indices_event["mass"]]
     @event_mass.setter
