@@ -172,6 +172,9 @@ def unit_square_the_unit_circle(etas, phis):
     """Squeezes unit circle (eta^2 + phi^2 = 1) into unit square [0,1]x[0,1]."""
     new_etas = etas / 2 + 0.5  # Don't use /= or += ... writes to passed in vals
     new_phis = phis / 2 + 0.5
+    # Handle floating point cases  by setting any potential negative values to 0
+    new_etas = np.clip(new_etas, a_min=0, a_max=1)
+    new_phis = np.clip(new_phis, a_min=0, a_max=1)
     return new_etas, new_phis
 
 def wrap_phi(phi_centre, phis, R=1):
@@ -192,4 +195,7 @@ def discretise_points(x, y, N=BMAP_SQUARE_SIDE_LENGTH):
     """Turn continuous points in the square [0,1]x[0,1] into discrete NxN grid."""
     discrete_x = np.floor(x * N).astype(int)
     discrete_y = np.floor(y * N).astype(int)
+    # Handle edge case on (x, N) and (N, y)
+    discrete_x = np.clip(discrete_x, a_max=N-1, a_min=0)
+    discrete_y = np.clip(discrete_y, a_max=N-1, a_min=0)
     return discrete_x, discrete_y

@@ -82,8 +82,8 @@ class NoisyGenerator:
         self.pu = PUselector
         self.mu = mu
         
-        self._max_TT_no = self.tt.max_ID
-        self._max_PU_no = self.pu.max_ID
+        self._max_TT_no = self.tt.max_ID.astype(int)
+        self._max_PU_no = self.pu.max_ID.astype(int)
         # self.grid_side_bins = BMAP_SQUARE_SIDE_LENGTH
         self.grid_side_bins = bins
         self.grid = None
@@ -142,20 +142,9 @@ class NoisyGenerator:
     def __repr__(self):
         return str(self.current_event)
 
-    # def __iter__(self):
-    #     return self
-    ############ THIS FUNCTION SHOLUD BE MERGED WITH OTHER CODE
-    # USING THIS TO MAKE IterableDataset for model
-    # So dataset is "streamed in" continously instead of specifically "selecting" a jet
-    def generate_jet(self):
-        while True:
-            if self._next_jetID >= self._max_TT_no:
-                raise RuntimeError("Requested jet not in loaded set. Did nothing.")
-            yield next(self)
-
-    # Return data as iterable
     def __iter__(self):
-        return iter(self.generate_jet())
+        return self
+
     def __next__(self):
         if self._next_jetID == self._max_TT_no:
             raise StopIteration
@@ -187,18 +176,19 @@ class NoisyGenerator:
         jet_event = np.insert(jet_event, 0, LID_column, axis=1) # LID
         jet_event = np.insert(jet_event, 0, NID_column, axis=1) # NID
         jetpluspu = jet_event
-        # Last available ID is tot num of loaded pileup
-        pu_nos = np.random.randint(low = 0, high = self._max_PU_no, size = self.mu, dtype=np.int32)
-        for pu_no in pu_nos:
-            LID_index += 1
-            pu_event = self.pu.select_event(pu_no)
-            if pu_event.size == 0: continue  # Skip if empty pile-up
-            num_rows = pu_event.shape[0]
-            LID_column = np.full((1, num_rows), LID_index) # Make array of LIDs
-            NID_column = np.full((1, num_rows), self._next_jetID) # Make array of NIDs
-            pu_event = np.insert(pu_event, 0, LID_column, axis=1) # LID
-            pu_event = np.insert(pu_event, 0, NID_column, axis=1) # NID
-            jetpluspu = np.vstack((jetpluspu, pu_event))
+        # If self.jet_only, can skip pile-up step
+        if self.mu > 0:
+            pu_nos = np.random.randint(low = 0, high = self._max_PU_no, size = self.mu, dtype=np.int32)
+            for pu_no in pu_nos:
+                LID_index += 1
+                pu_event = self.pu.select_event(pu_no)
+                if pu_event.size == 0: continue  # Skip if empty pile-up
+                num_rows = pu_event.shape[0]
+                LID_column = np.full((1, num_rows), LID_index) # Make array of LIDs
+                NID_column = np.full((1, num_rows), self._next_jetID) # Make array of NIDs
+                pu_event = np.insert(pu_event, 0, LID_column, axis=1) # LID
+                pu_event = np.insert(pu_event, 0, NID_column, axis=1) # NID
+                jetpluspu = np.vstack((jetpluspu, pu_event))
         pxs, pys, pzs = jetpluspu[:, 5], jetpluspu[:, 6], jetpluspu[:, 7]
     
         enes = p_magnitude(pxs, pys, pzs)
@@ -220,8 +210,6 @@ class NoisyGenerator:
         # print(jetpluspu)
         if self.pu_only:
             data = jetpluspu[(jet_event.shape[0]):] 
-
-
             self.current_event =  data # Noisy event
             return data
         # self.current_event = jetpluspu  # Noisy event
@@ -450,9 +438,7 @@ class NoisyGenerator:
         x_discrete, y_discrete = discretise_points(x, y, N=bins)  # Discretise coords
         # TODO: Scale energies - for now, apply BEFORE gridding - check!
         scaled_energies = (self.masses - self.scaling_mean) / (self.scaling_sd)
-
         grid = np.zeros((bins, bins), dtype=np.float32)
-        # print("???", len(list(zip(scaled_energies, x_discrete, y_discrete))))
         for e, xi, yi in zip(scaled_energies, x_discrete, y_discrete):
             grid[yi, xi] += float(e)
         return grid
