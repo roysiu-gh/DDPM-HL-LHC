@@ -76,9 +76,10 @@ class EventSelector:
 
 #################################################################################
 
-class NoisyGenerator:
+class NoisyGenerator(object):
     def __init__(self, TTselector:EventSelector, PUselector:EventSelector, mu=0, bins=64, pu_only = False):
         self.tt = TTselector
+        self.ttb = TTselector
         self.pu = PUselector
         self.mu = mu
         
@@ -87,7 +88,7 @@ class NoisyGenerator:
         # self.grid_side_bins = BMAP_SQUARE_SIDE_LENGTH
         self.grid_side_bins = bins
         self.grid = None
-
+        self.max_energy = 0
         ### TODO: need to set
         self.scaling_mean = 0
         self.scaling_sd = 1
@@ -114,9 +115,9 @@ class NoisyGenerator:
             "mass": 6,
             "p_T": 7,
         }
+        self._max_energy()
 
-        self.reset()  # Initial reset
-
+        self.reset()  # Init ial reset
     def reset(self):
         """Start from beginning."""
         self._next_jetID = 0
@@ -147,11 +148,14 @@ class NoisyGenerator:
 
     def __next__(self):
         if self._next_jetID == self._max_TT_no:
-            raise StopIteration
-        
+            raise StopIteration#
+        if not isinstance(self.tt, EventSelector):
+            self.tt = self.ttb
+        # print(self.tt) if isinstance(self.tt, np.ndarray) else None
         self._build_next_noisy_event()
         self._mask()
-        self._calculate_event_level()
+        if not self.pu_only:
+            self._calculate_event_level()
         self._next_jetID += 1
         return self.current_event
     def __len__(self):
@@ -163,7 +167,33 @@ class NoisyGenerator:
             raise RuntimeError("Requested jet not in loaded set. Did nothing.")
         self._next_jetID = jet_no
         next(self)
+    def _max_energy(self):
+        for jet_no in range(self._max_TT_no):
+            jet_event = self.tt.select_event(jet_no)
+            pxs, pys, pzs = jet_event[:,3], jet_event[:,4], jet_event[:,5]
+            # self.jet_axis = get_axis_eta_phi(jet_px, jet_py, jet_pz)
+        
+            # LID_index = 0
+            # num_rows = jet_event.shape[0]
+            # LID_column = np.full((1, num_rows), 0) # Make array of zeros, LID for jet is always 0
+            # NID_column = np.full((1, num_rows), self._next_jetID) # Make array of zeros
+            # jet_event = np.insert(jet_event, 0, LID_column, axis=1) # LID
+            # jet_event = np.insert(jet_event, 0, NID_column, axis=1) # NID
+            # jetpluspu = jet_event
+            # get total energy
+            enes = np.sum(p_magnitude(pxs, pys, pzs))
+            #  enes = p_magnitude(pxs, pys, pzs)
+            # pTs = to_pT(pxs, pys)
+            # etas = pseudorapidity(enes, pzs)
 
+            # # Combine the following 2 ops later to optimise
+            # phis = to_phi(pxs, pys)
+            # phis = wrap_phi(self.jet_axis[1], phis)
+            # _, eta_c, phi_c = centre_on_jet(self.jet_axis, etas, phis)
+            if self.max_energy < enes:
+                self.max_energy = enes
+            else: 
+                continue
     def _build_next_noisy_event(self):
         jet_event = self.tt.select_event(self._next_jetID)
         jet_px, jet_py, jet_pz = jet_event[:,3], jet_event[:,4], jet_event[:,5]
@@ -212,6 +242,7 @@ class NoisyGenerator:
             data = jetpluspu[(jet_event.shape[0]):] 
             self.current_event =  data # Noisy event
             return data
+        return jetpluspu
         # self.current_event = jetpluspu  # Noisy event
         
         
@@ -441,7 +472,9 @@ class NoisyGenerator:
         grid = np.zeros((bins, bins), dtype=np.float32)
         for e, xi, yi in zip(scaled_energies, x_discrete, y_discrete):
             grid[yi, xi] += float(e)
-        return grid
+        if self.max_energy <= 1:
+            return grid
+        return grid / self.max_energy
 
     def vectorise(self,  bins):
         grid = self.get_grid()        
