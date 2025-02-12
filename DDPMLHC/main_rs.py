@@ -5,12 +5,13 @@ import matplotlib as mpl
 from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import *
 from DDPMLHC.data_loading import *
+from DDPMLHC.generate_plots.histograms_1d import plot_1d_histograms
 from DDPMLHC.generate_plots.overlaid_1d import create_overlay_plots
 from DDPMLHC.generate_plots.bmap import save_to_bmap
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
-MAX_DATA_ROWS = 100_000
+# MAX_DATA_ROWS = 100_000
 
 # === Read in data
 print("0 :: Loading original data")
@@ -51,19 +52,73 @@ print("FINISHED loading data\n")
 
 #################################################################################
 
-for mu in [0, 50, 500]:
-    generator = NoisyGenerator(tt, pile_up, mu=mu)
-    next(generator)  # Load jet 0
-    save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
-    generator.visualise_current_event()
-    generator.visualise_current_event(show_pdgids=True)
+# for mu in [0, 50, 500]:
+#     generator = NoisyGenerator(tt, pile_up, mu=mu)
+#     next(generator)  # Load jet 0
+#     save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
+#     generator.visualise_current_event()
+#     generator.visualise_current_event(show_pdgids=True)
 
-    next(generator)  # Load jet 1
-    save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
-    generator.visualise_current_event()
-    generator.visualise_current_event(show_pdgids=True)
+#     next(generator)  # Load jet 1
+#     save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
+#     generator.visualise_current_event()
+#     generator.visualise_current_event(show_pdgids=True)
 
-    generator.select_jet(42)
-    save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
-    generator.visualise_current_event()
-    generator.visualise_current_event(show_pdgids=True)
+#     generator.select_jet(42)
+#     save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
+#     generator.visualise_current_event()
+#     generator.visualise_current_event(show_pdgids=True)
+
+#################################################################################
+
+mu = 0
+output_path = f"{CWD}/data/3-grid/"
+output_filename = f"noisy_mu{mu}_event_level_from_grid{BMAP_SQUARE_SIDE_LENGTH}.csv"
+output_filepath = f"{output_path}/{output_filename}"
+
+generator = NoisyGenerator(tt, pile_up, mu=mu)
+combined = []
+
+for idx, _ in enumerate(generator):
+    grid = generator.get_grid()
+    
+    enes, detas, dphis = grid_to_ene_deta_dphi(grid, N=generator.bins)
+    pxs, pys, pzs = deta_dphi_to_momenta(enes, detas, dphis)
+    event_quantities = particle_momenta_to_event_level(enes, pxs, pys, pzs)
+    event_mass, event_px, event_py, event_pz, event_eta, event_phi, event_pT = event_quantities
+
+    event_level = np.array([
+        idx,
+        event_px,
+        event_py,
+        event_pz,
+        event_eta,
+        event_phi,
+        event_mass,
+        event_pT,
+    ])
+
+    combined.append(np.copy(event_level))
+
+all_data = np.vstack(combined)
+
+# Final check before saving
+if np.any(np.isnan(all_data)):
+    print("\nWarning: NaN values in final data:")
+    print(f"Total NaN count: {np.sum(np.isnan(all_data))}")
+    print("NaN locations (row, column):")
+    nan_rows, nan_cols = np.where(np.isnan(all_data))
+    column_names = ['event_id', 'px', 'py', 'pz', 'eta', 'phi', 'mass', 'p_T']
+    for row, col in zip(nan_rows, nan_cols):
+        print(f"Row {row}, Column {column_names[col]}")
+
+np.savetxt(
+    output_filepath,
+    all_data,
+    delimiter=",",
+    header="event_id,px,py,pz,eta,phi,mass,p_T",
+    comments="",
+    fmt="%i,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f"
+)
+
+plot_1d_histograms(mu, event_stats_path=output_filepath, output_path=f"{output_path}/grid{BMAP_SQUARE_SIDE_LENGTH}")

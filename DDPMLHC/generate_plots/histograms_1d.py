@@ -37,7 +37,7 @@ def plot_1D_hist(name, data, xlog=False, plot_params=DEFAULT_PLOT_PARAMS, save_p
     """Plot a 1D histogram. Optionally plot on a provided axis."""
 
     ### CHANGE THIS LATER!
-    xlog = True  # Otherwise breaks on the data regenerated from grid
+    xlog = False  # Otherwise breaks on the data regenerated from grid
 
     if ax is None:
         fig, ax = plt.subplots(figsize=(10, 6))  # Create a new figure if no axes provided
@@ -47,7 +47,7 @@ def plot_1D_hist(name, data, xlog=False, plot_params=DEFAULT_PLOT_PARAMS, save_p
     plot_params.update({ k:v for k, v in DEFAULT_PLOT_PARAMS.items() if k not in plot_params})
     
     sb.histplot(data, ax=ax, log_scale=(xlog, False), **plot_params)
-    
+
     ax.set_xlabel(name, fontsize=16)
     ax.set_xlim(left=x_min, right=x_max)
     set_y_2p = Set2DP()
