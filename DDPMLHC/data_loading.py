@@ -77,9 +77,8 @@ class EventSelector:
 #################################################################################
 
 class NoisyGenerator(object):
-    def __init__(self, TTselector:EventSelector, PUselector:EventSelector, mu=0, bins=64, pu_only = False):
+    def __init__(self, TTselector:EventSelector, PUselector:EventSelector, mu=0, bins=BMAP_SQUARE_SIDE_LENGTH, pu_only = False):
         self.tt = TTselector
-        self.ttb = TTselector
         self.pu = PUselector
         self.mu = mu
         
@@ -175,24 +174,7 @@ class NoisyGenerator(object):
             jet_event = self.tt.select_event(jet_no)
             pxs, pys, pzs = jet_event[:,3], jet_event[:,4], jet_event[:,5]
             # self.jet_axis = get_axis_eta_phi(jet_px, jet_py, jet_pz)
-        
-            # LID_index = 0
-            # num_rows = jet_event.shape[0]
-            # LID_column = np.full((1, num_rows), 0) # Make array of zeros, LID for jet is always 0
-            # NID_column = np.full((1, num_rows), self._next_jetID) # Make array of zeros
-            # jet_event = np.insert(jet_event, 0, LID_column, axis=1) # LID
-            # jet_event = np.insert(jet_event, 0, NID_column, axis=1) # NID
-            # jetpluspu = jet_event
-            # get total energy
             enes = np.sum(p_magnitude(pxs, pys, pzs))
-            #  enes = p_magnitude(pxs, pys, pzs)
-            # pTs = to_pT(pxs, pys)
-            # etas = pseudorapidity(enes, pzs)
-
-            # # Combine the following 2 ops later to optimise
-            # phis = to_phi(pxs, pys)
-            # phis = wrap_phi(self.jet_axis[1], phis)
-            # _, eta_c, phi_c = centre_on_jet(self.jet_axis, etas, phis)
             if self.max_energy < enes:
                 self.max_energy = enes
             else: 
