@@ -137,6 +137,9 @@ class NoisyGenerator(object):
             f"        mass = {self.event_mass}\n"
             f"        p_T  = {self.event_pT}"
         )
+
+    def __len__(self):
+        return int(self._max_TT_no) + 1
     
     # Iterator methods
     
@@ -259,21 +262,17 @@ class NoisyGenerator(object):
     def _calculate_event_level(self):
         self.event_id = self._next_jetID
 
-        self.event_px = np.sum(self.pxs)
-        self.event_py = np.sum(self.pys)
-        self.event_pz = np.sum(self.pzs)
+        event_quantities = particle_momenta_to_event_level(self.masses, self.pxs, self.pys, self.pzs)
 
-        event_ene = np.sum(self.masses)
-        event_p2 = contraction(event_ene, self.event_px, self.event_py, self.event_pz)
-        self.event_mass = np.sqrt(event_p2)
+        self.event_mass = event_quantities[0]
+        self.event_px = event_quantities[1]
+        self.event_py = event_quantities[2]
+        self.event_pz = event_quantities[3]
+        self.event_eta = event_quantities[4]
+        self.event_phi = event_quantities[5]
+        self.event_pT = event_quantities[6]
 
-        self.event_eta = pseudorapidity(event_ene, self.event_pz)
-        self.event_phi = to_phi(self.event_px, self.event_py)
-        self.event_pT = to_pT(self.event_px, self.event_py)
-    
-    # Event-level output methods
-
-    def collect_event_level_data(self):
+    def _collect_event_level_data(self):
         """Collect event-level data for all events. Will start from beginning of self.TTselector."""
         self.reset()
         combined = []
@@ -281,17 +280,8 @@ class NoisyGenerator(object):
             combined.append(np.copy(self.event_level))
         return np.vstack(combined)
 
-    def save_event_level_data(self, output_path=INTERMEDIATE_PATH, data=None):
-        """
-        Save event-level data to CSV.
-        
-        Args:
-            output_path (str): Base path for output file
-            data (np.ndarray, optional): Data to save. If None, collects new data
-            mu (int, optional): Override instance mu value for filename
-        """
-        if data is None:
-            data = self.collect_event_level_data()
+    def save_event_level_data(self, output_path=INTERMEDIATE_PATH):
+        data = self._collect_event_level_data()
         
         output_filename = f"noisy_mu{self.mu}_event_level.csv"
         output_filepath = f"{output_path}/{output_filename}"
@@ -478,7 +468,7 @@ class NoisyGenerator(object):
 
     def vectorise(self,  bins):
         grid = self.get_grid()        
-        return grid.reshape(bins * bins)
+        return grid.reshape(self.bins * self.bins)
 
     # Getters for quantity arrays
     @property
@@ -566,21 +556,3 @@ class NoisyGenerator(object):
     @event_pT.setter
     def event_pT(self, val):
         self.event_level[self.column_indices_event["p_T"]] = val
-
-#################################################################################
-
-class OutData():
-    def __init__(self, vector, axis=(0,0)):
-        pass
-
-
-class NGenForDataloader():
-    def __init__(self, noisy_generator):
-        self.ng = noisy_generator
-    
-    def __iter__(self):
-        return self
-    
-    def __next__(self):
-        next(self.ng)
-        return self.ng.get_grid()

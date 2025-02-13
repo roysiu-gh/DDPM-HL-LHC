@@ -199,3 +199,44 @@ def discretise_points(x, y, N=BMAP_SQUARE_SIDE_LENGTH):
     discrete_x = np.clip(discrete_x, a_max=N-1, a_min=0)
     discrete_y = np.clip(discrete_y, a_max=N-1, a_min=0)
     return discrete_x, discrete_y
+
+def particle_momenta_to_event_level(masses, pxs, pys, pzs):
+    event_px = np.sum(pxs)
+    event_py = np.sum(pys)
+    event_pz = np.sum(pzs)
+    event_ene = np.sum(masses)
+
+    event_p2 = contraction(event_ene, event_px, event_py, event_pz)
+    event_mass = np.sqrt(event_p2)
+
+    event_eta = pseudorapidity(event_ene, event_pz)
+    event_phi = to_phi(event_px, event_py)
+    event_pT = to_pT(event_px, event_py)
+
+    # TODO: change order to match column_indices_event
+    return (event_mass, event_px, event_py, event_pz, event_eta, event_phi, event_pT)
+
+def grid_to_ene_deta_dphi(grid, N=BMAP_SQUARE_SIDE_LENGTH):
+    enes = np.zeros(N*N)
+    detas = np.zeros(N*N)
+    dphis = np.zeros(N*N)
+    # xbin and ybin may be wrong way around
+    for xbin in range(N):
+        for ybin in range(N):
+            idx = xbin*N + ybin
+            deta = 2*xbin/N - 1
+            dphi = 2*ybin/N - 1
+            enes[idx] = grid[xbin, ybin]
+            detas[idx] = deta
+            dphis[idx] = dphi
+    return enes, detas, dphis
+
+def deta_dphi_to_momenta(enes, detas, dphis):
+    alphas = np.tanh(detas)
+    betas = np.tan(dphis)
+
+    pzs = alphas * enes
+    pxs = enes * np.sqrt( (1 - alphas*alphas) / (1 + betas*betas) )
+    pys = betas * pxs
+
+    return pxs, pys, pzs
