@@ -154,14 +154,14 @@ def plot_1d_histograms(mu, event_stats_path=None, output_path=None):
             "save_path": output_path,
         },
         {
-            "name": "Pseudorapidity $\eta$",
+            "name": "Pseudorapidity eta",
             "data": event_eta,
             "plot_params": {"bins": 50},
             "save_filename": "event_eta",
             "save_path": output_path,
         },
         {
-            "name": "Transverse Momentum $p_T$ [GeV]",
+            "name": "Transverse Momentum p_T [GeV]",
             "data": event_pT,
             "plot_params": {"xlog": True, "bins": pT_bins},
             "save_filename": "event_pT",
