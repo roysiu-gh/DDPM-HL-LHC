@@ -446,7 +446,7 @@ class NoisyGenerator(object):
             return grid
         return grid / self.max_energy
 
-    def vectorise(self,  bins):
+    def vectorise(self):
         grid = self.get_grid()        
         return grid.reshape(self.bins * self.bins)
 
