@@ -129,7 +129,7 @@ pu = np.genfromtxt(
 tt = EventSelector(tt)
 pu = EventSelector(pu)
 print("FINISHED loading data\n")
-bins=16
+bins=32
 # Ground truth ttbar jets
 NG_jet = NoisyGenerator(TTselector=tt, PUselector=pu, bins=bins, mu=0)
 # Second one to randomly generate and return pile-up events ONLY
@@ -159,7 +159,7 @@ class NGenForDataloader(Dataset):
         return x
         #
 model = Unet(
-    dim=64,                  # Base dimensionality of feature maps
+    dim=128,                  # Base dimensionality of feature maps
     dim_mults=(1, 2, 4, 8),  # Multipliers for feature dimensions at each level
     channels=1,              # E.g. 3 for RGB
 ).to(device)
@@ -250,14 +250,14 @@ class PUDiffusion(GaussianDiffusion):
         # img = self.jet_to_tensor(shape=shape) # Geenerates a jet
         # Choose random jet
         jets = []
-        jet_indices = [16897, 54328, 7898, 2854]
+        # jet_indices = [16897, 54328, 7898, 2854]
         for i in range(batch):
             # random_jet_no = np.random.randint(low=0, high=self.jetNG._max_TT_no, size=None)
-            self.jetNG._next_jetID = jet_indices[i]
+            self.jetNG._next_jetID = i
             # Prints jets to make images from
             print(self.jetNG._next_jetID)
             # self.jetNG.select_jet(random_jet_no)  # or however you select jets
-            self.jetNG.select_jet(jet_indices[i])  # or however you select jets
+            self.jetNG.select_jet(i)  # or however you select jets
             
             jet = torch.from_numpy(self.jetNG.get_grid()).unsqueeze(0)
             # Now to add pile-up
@@ -474,7 +474,7 @@ ng_for_dataloader = NGenForDataloader(NG_jet)
 dataloader = DataLoader(ng_for_dataloader, batch_size=train_batch_size, num_workers=2, shuffle = True, pin_memory = True)
 
 save_dir = f"{CWD}/data/checkpoints"
-num_epochs = 1
+num_epochs = 200
 xd = load_and_train(diffusion, dataloader, num_epochs=num_epochs, device=device, save_dir=save_dir, lr=1e-4)
 
 print("Finished training")
@@ -567,6 +567,8 @@ if not(os.path.exists(histogram_path)):
 combined = []
 def tensor_to_data(tensor_images):
     tensor_images = tensor_images.detach().cpu().numpy()
+    tensor_saves = tensor_images[:10]
+    save_image(tensor_saves, "saved_denoised_grids.png")
     for idx,grid in enumerate(tensor_images):
         # Each grid is 1 x bins x bins
         hxW = grid[0] # Selects bins x bins
@@ -574,7 +576,7 @@ def tensor_to_data(tensor_images):
         pxs, pys, pzs = deta_dphi_to_momenta(enes, detas, dphis)
         event_quantities = particle_momenta_to_event_level(enes, pxs, pys, pzs)
         event_mass, event_px, event_py, event_pz, event_eta, event_phi, event_pT = event_quantities
-
+        
         event_level = np.array([
             idx,
             event_px,
@@ -620,3 +622,4 @@ def tensor_to_data(tensor_images):
     
 
 tensor_to_data(sampled_images)
+print("Finished running completely.")
