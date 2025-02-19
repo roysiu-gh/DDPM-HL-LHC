@@ -21,7 +21,7 @@ TTBAR_NUM = 70903
 
 MAX_DATA_ROWS = None
 
-BMAP_SQUARE_SIDE_LENGTH = 32
+BMAP_SQUARE_SIDE_LENGTH = 16
 label_fontsize = 16
 tick_fontsize = 24
 
