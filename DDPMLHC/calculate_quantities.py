@@ -16,7 +16,6 @@ from torch.amp import autocast
 import math
 from denoising_diffusion_pytorch import Unet, GaussianDiffusion
 # req torch, torchvision, einops, tqdm, ema_pytorch, accelerate
-from IPython.display import display
 from einops import rearrange, reduce, repeat
 import glob
 from ema_pytorch import EMA

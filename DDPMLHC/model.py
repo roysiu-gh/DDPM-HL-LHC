@@ -33,7 +33,7 @@ if torch.cuda.is_available():
     print("Number of GPUs:", torch.cuda.device_count())
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Remember to use {device} device from here on")
-print(os.chdir("../"))
+# print(os.chdir("../"))
 # %cd /home/physics/phuqza/E9/DDPM-HL-LHC/
 from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import *
@@ -45,17 +45,17 @@ from DDPMLHC.generate_plots.histograms_1d import *
 
 
 # %%
-def show_tensor_images(tensor_images, scale_factor=8):
-    to_pil = T.ToPILImage()
-    pil_images = [to_pil(image) for image in tensor_images]
+# def show_tensor_images(tensor_images, scale_factor=8):
+#     to_pil = T.ToPILImage()
+#     pil_images = [to_pil(image) for image in tensor_images]
 
-    for img in pil_images:
-        # Upscale the image
-        upscaled_img = img.resize(
-            (img.width * scale_factor, img.height * scale_factor), 
-            Image.NEAREST  # or Image.BOX for smoother results
-        )
-        display(upscaled_img)
+#     for img in pil_images:
+#         # Upscale the image
+#         upscaled_img = img.resize(
+#             (img.width * scale_factor, img.height * scale_factor), 
+#             Image.NEAREST  # or Image.BOX for smoother results
+#         )
+#         display(upscaled_img)
 
 
 # %%
