@@ -1,7 +1,7 @@
 # Local imports
 from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import *
-
+from denoising_diffusion_pytorch import Unet, GaussianDiffusion
 # Package imports
 import numpy as np
 import torch
