@@ -565,25 +565,48 @@ class NGenForDataloader(Dataset):
         x = torch.from_numpy( self.ng.get_grid() ).float()
         # x = x.unsqueeze(0)
         x = x.unsqueeze(0)
-        # self.jets.append(x)
-        # print("x jet img", x.shape)
-        # y = x
+
         return x
 
 
 ###############################################################################
+# Some functions from denoising_diffusion_pytorch that are required but couldn't import
+def extract(a, t, x_shape):
+    b, *_ = t.shape
+    out = a.gather(-1, t)
+    return out.reshape(b, *((1,) * (len(x_shape) - 1)))
 
 
+# Custom DataLoader class to pass in entire jet dataset
+class NGenForDataloader(Dataset):
+    def __init__(self, noisy_generator, njets=100):
+        self.ng = noisy_generator
+        self.jets = []
+        self.njets = njets
+        # next(self.ng)
+    def __iter__(self):
+        return self
+    
+    def __len__(self):
+        return self.ng._max_TT_no - 1
+    
+    def __getitem__(self, idx):
+        self.ng.select_jet(idx)
+        x = torch.from_numpy( self.ng.get_grid() ).float()
+        x = x.unsqueeze(0)
+        return x
+
+#############################################################################################
 class PUDiffusion(GaussianDiffusion):
-    def __init__(self, model, image_size, timesteps, puNG: NoisyGenerator, jet_ng: NoisyGenerator, **kwargs):
+    def __init__(self, model, image_size, timesteps, puNG: NoisyGenerator, jet_ng: NoisyGenerator, mu=200, **kwargs):
         super(PUDiffusion, self).__init__(model=model, image_size=image_size, timesteps=timesteps, **kwargs)
         self.puNG = puNG
         self.jetNG = jet_ng
         self.channels = model.channels
         self.mu_counter = 1
         self.timesteps = timesteps
+        self.mu = mu
     
-#############################################################################################
 
     def cond_noise(self, x_shape, noise):
         return self.pu_to_tensor(x_shape) if noise is None else noise
@@ -611,12 +634,7 @@ class PUDiffusion(GaussianDiffusion):
     def pu_to_tensor(self, shape):
         # Select random number of pile-ups (mu) to generate, max 200 for now since HL-LHC expected to do up to this
         # We are doing it per batch
-        # if isinstance(t, int):
-        #     mu = np.random.randint(low=1, high=200, size=None)
-        # else:
-        #     mu = np.random.randint(low=1, high=200, size=None)
         mu = 1
-        # print(mu)
         # Align jetIDs for correct centering of pile-up
         self.puNG._next_jetID = self.jetNG._next_jetID
         NG = self.puNG
@@ -659,11 +677,6 @@ class PUDiffusion(GaussianDiffusion):
         )
     def generate_noise(self,shape):
         batch, device = shape[0], self.device
-
-        # img = torch.randn(shape, device = device)
-        # This function is called in PUTrainer to sample jets
-        # img = self.jet_to_tensor(shape=shape) # Geenerates a jet
-        # Choose random jet
         jets = []
         # jet_indices = [16897, 54328, 7898, 2854]
         for i in range(batch):
@@ -679,20 +692,12 @@ class PUDiffusion(GaussianDiffusion):
             # random_pu_no = np.random.randint(low=0, high=self.jetNG._max_TT_no, size=None)
             self.puNG._next_jetID = self.jetNG._next_jetID
             # Start from 200 pileups
-            self.puNG.mu = 200
+            self.puNG.mu = self.mu
             # Generate them
             next(self.puNG)
             selected_pu = self.puNG.get_grid()
-            # If empty pile-up, return array of 0s instead since model should account for this
-            # if selected.size == 0:
-            #     return  "Error in PUDiffusion.generate_jet"
-            # print(selected_pu.shape)
             pu_tensor = torch.from_numpy(selected_pu).float()
-            # Get same shape, 1 x  grid x grid
             pu_tensor = torch.unsqueeze(pu_tensor,0)
-            # pu_tensor = torch.unsqueeze(pu_tensor,0)
-            # pu_tensor = pu_tensor.expand(shape[0], shape[1], -1, -1) 
-            # pu_tensor = torch.zeros(shape)
             noised_jet = jet + pu_tensor # add energies element wise for each bin
             noised_jet = noised_jet.to(self.device)
             jets.append(noised_jet)
@@ -703,12 +708,8 @@ class PUDiffusion(GaussianDiffusion):
    
     @torch.inference_mode()
     def p_sample_loop(self, shape, return_all_timesteps = False):
-        # print("p sample loop")
-        # print(shape)
         batch, device = shape[0], self.device
         img = self.generate_noise(shape)
-
-        # img = img.to(self.device)
         imgs = [img]
 
         x_start = None
@@ -734,30 +735,8 @@ class PUDiffusion(GaussianDiffusion):
 
     def p_losses(self, x_start, t, noise = None, offset_noise_strength = None):
         b, c, h, w = x_start.shape
-        # print(x_start.shape)
-        # Select one pile-up at a time for each timestep $t$
-        # single_pileup = self.pu.select_event(np.random.randint(low=0, high=self.pu.max_ID, size=1))
-        # print("p_losses t", t)
-
         noise = self.cond_noise(x_start.shape, noise=noise)
-        # noise = torch.zeros_like(x_start)
-
-        # if noise is None: 
-        # noise = default(noise, lambda: torch.randn_like(x_start))
-        # offset_noise_strength = default(offset_noise_strength, self.offset_noise_strength)
-
-        # if offset_noise_strength > 0:
-        #     offset_noise = torch.randn(x_start.shape[:2], device = self.device)
-        #     noise += offset_noise_strength * rearrange(offset_noise, 'b c -> b c 1 1')
-
-        # noise sample
-
         x = self.q_sample(x_start = x_start, t = t, noise = noise)
-
-        # if doing self-conditioning, 50% of the time, predict x_start from current set of times
-        # and condition with unet with that
-        # this technique will slow down training by 25%, but seems to lower FID significantly
-
         x_self_cond = None
         if self.self_condition and random() < 0.5:
             with torch.no_grad():
@@ -765,7 +744,6 @@ class PUDiffusion(GaussianDiffusion):
                 x_self_cond.detach_()
 
         # predict and take gradient step
-
         model_out = self.model(x, t, x_self_cond)
 
         if self.objective == 'pred_noise':
