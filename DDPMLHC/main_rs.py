@@ -80,7 +80,7 @@ generator = NoisyGenerator(tt, pile_up, mu=mu)
 combined = []
 
 for idx, _ in enumerate(generator):
-    grid = generator.get_grid()
+    grid = generator.get_grid(normalise=False)
     
     enes, detas, dphis = grid_to_ene_deta_dphi(grid, N=generator.bins)
     pxs, pys, pzs = deta_dphi_to_momenta(enes, detas, dphis)

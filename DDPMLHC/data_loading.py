@@ -10,7 +10,14 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
 from PIL import Image
+import random
+from tqdm import tqdm
+
 from torch.utils.data import Dataset
+from denoising_diffusion_pytorch import GaussianDiffusion
+from torch.amp import autocast
+import torch.nn.functional as F
+from einops import reduce
 
 PDG_IDS = {
     0: r"$\gamma$ (Photon)",
@@ -83,7 +90,7 @@ class EventSelector:
 #################################################################################
 
 class NoisyGenerator(object):
-    def __init__(self, TTselector:EventSelector, PUselector:EventSelector, mu=0, bins=BMAP_SQUARE_SIDE_LENGTH, pu_only = False):
+    def __init__(self, TTselector:EventSelector, PUselector:EventSelector, mu=0, bins=BMAP_SQUARE_SIDE_LENGTH, pu_only=False):
         self.tt = TTselector
         self.pu = PUselector
         self.mu = mu
@@ -91,7 +98,7 @@ class NoisyGenerator(object):
         self._max_TT_no = self.tt.max_ID.astype(int)
         self._max_PU_no = self.pu.max_ID.astype(int)
         # self.grid_side_bins = BMAP_SQUARE_SIDE_LENGTH
-        self.grid_side_bins = bins
+        self.bins = bins
         self.grid = None
         self.max_energy = 0
         ### TODO: need to set
@@ -444,8 +451,8 @@ class NoisyGenerator(object):
 
     # Ops
 
-    def get_grid(self):
-        bins = self.grid_side_bins
+    def get_grid(self, normalise=True):
+        bins = self.bins
         x, y = unit_square_the_unit_circle(self.etas, self.phis)  # Map to unit square
         x_discrete, y_discrete = discretise_points(x, y, N=bins)  # Discretise coords
         # TODO: Scale energies - for now, apply BEFORE gridding - check!
@@ -453,9 +460,13 @@ class NoisyGenerator(object):
         grid = np.zeros((bins, bins), dtype=np.float32)
         for e, xi, yi in zip(scaled_energies, x_discrete, y_discrete):
             grid[yi, xi] += float(e)
-        if self.max_energy <= 1:
+        
+        if not normalise:
             return grid
-        return grid / self.max_energy
+        elif self.max_energy <= 1:
+            return grid
+        else:
+            return grid / self.max_energy
 
     def vectorise(self):
         grid = self.get_grid()        
@@ -576,6 +587,11 @@ def extract(a, t, x_shape):
     out = a.gather(-1, t)
     return out.reshape(b, *((1,) * (len(x_shape) - 1)))
 
+def extract(a, t, x_shape):
+    """from denoising_diffusion_pytorch that are required but couldn't import"""
+    b, *_ = t.shape
+    out = a.gather(-1, t)
+    return out.reshape(b, *((1,) * (len(x_shape) - 1)))
 
 # Custom DataLoader class to pass in entire jet dataset
 class NGenForDataloader(Dataset):
@@ -597,6 +613,7 @@ class NGenForDataloader(Dataset):
         return x
 
 #############################################################################################
+
 class PUDiffusion(GaussianDiffusion):
     def __init__(self, model, image_size, timesteps, puNG: NoisyGenerator, jet_ng: NoisyGenerator, mu=200, **kwargs):
         super(PUDiffusion, self).__init__(model=model, image_size=image_size, timesteps=timesteps, **kwargs)
@@ -607,6 +624,7 @@ class PUDiffusion(GaussianDiffusion):
         self.timesteps = timesteps
         self.mu = mu
     
+    #############################################################################################
 
     def cond_noise(self, x_shape, noise):
         return self.pu_to_tensor(x_shape) if noise is None else noise

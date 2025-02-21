@@ -3,7 +3,7 @@ data/1-initial/pileup.csv
 data/1-initial/ttbar.csv
 data/ML
 data/2-intermediate/*
-data/3-grid/*
+data/3-grid/*.csv
 slurm_out
 data/plots/bmaps/test_rand.png
 data/plots/bmaps/event_NONE_muNONE.png
