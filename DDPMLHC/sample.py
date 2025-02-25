@@ -98,33 +98,35 @@ def load_and_train(
 
     optimizer = optim.Adam(diffusion.parameters(), lr=lr)
     epoch_range = range(last_epoch, last_epoch + num_epochs)
-    final_epoch = list(epoch_range)[-1]
-    for epoch in epoch_range:
-        print(f"\nEpoch {epoch + 1}/{last_epoch + num_epochs}")
-        progress_bar = tqdm(enumerate(dataloader), total=len(dataloader))
+    final_epoch = list(epoch_range)[-1] if len(list(epoch_range))> 0 else last_epoch
+    # If num_epochs == 0, then 
+    if num_epochs > 0:
+        for epoch in epoch_range:
+            print(f"\nEpoch {epoch + 1}/{last_epoch + num_epochs}")
+            progress_bar = tqdm(enumerate(dataloader), total=len(dataloader))
 
-        running_loss = 0.0
-        for i, images in progress_bar:
-            images = images.to(device)
-            optimizer.zero_grad()
-            loss = diffusion(images)
-            loss.backward()
-            optimizer.step()
+            running_loss = 0.0
+            for i, images in progress_bar:
+                images = images.to(device)
+                optimizer.zero_grad()
+                loss = diffusion(images)
+                loss.backward()
+                optimizer.step()
 
-            running_loss += loss.item()
-            avg_loss = running_loss / (i + 1)
-            progress_bar.set_postfix({'Loss': f'{avg_loss:.10f}'})
-        loss_array.append(avg_loss)
-        # Save checkpoint at the end of each epoch
-        if epoch % 50 == 0 or epoch == final_epoch:
-            checkpoint_path = os.path.join(save_dir, f'checkpoint_epoch_{epoch+1}_loss_{avg_loss:.10f}.pth')
-            torch.save({
-                'epoch': epoch,
-                'model_state_dict': diffusion.state_dict(),
-                'optimizer_state_dict': optimizer.state_dict(),
-                'loss': avg_loss,
-            }, checkpoint_path)
-            print(f'Checkpoint saved: {checkpoint_path}')
+                running_loss += loss.item()
+                avg_loss = running_loss / (i + 1)
+                progress_bar.set_postfix({'Loss': f'{avg_loss:.10f}'})
+            loss_array.append(avg_loss)
+            # Save checkpoint at the end of each epoch
+            if epoch % 20 == 0 or epoch == final_epoch:
+                checkpoint_path = os.path.join(save_dir, f'checkpoint_epoch_{epoch+1}_loss_{avg_loss:.10f}.pth')
+                torch.save({
+                    'epoch': epoch,
+                    'model_state_dict': diffusion.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'loss': avg_loss,
+                }, checkpoint_path)
+                print(f'Checkpoint saved: {checkpoint_path}')
     return loss_array
 # DATA LOADING
 MAX_DATA_ROWS = None
@@ -178,12 +180,13 @@ diffusion = PUDiffusion(
 # Print Diagnostics right before training
 mu = 200
 train_batch_size = 200
-num_epochs = 1000
+# Sampling: only load checkpoint
+num_epochs = 0
 
 print("#############################")
 print("DIAGNOSTIC PARAMETERS")
 print("#############################")
-print("MODE: TRAINING")
+print("MODE: SAMPLING")
 print(f"Training Batch Size: {train_batch_size}")
 print(f"mu: {mu}")
 print(f"Image Size/bins: {BMAP_SQUARE_SIDE_LENGTH}")
@@ -199,12 +202,11 @@ print("#############################")
 ng_for_dataloader = NGenForDataloader(NG_jet)
 dataloader = DataLoader(ng_for_dataloader, batch_size=train_batch_size, num_workers=2, shuffle = True, pin_memory = True)
 save_dir = f"{CWD}/data/ML/Unet{UNET_DIMS}_bins{bins}_mu{mu}"
-#for name, param in diffusion.parameters():
- #   if param.requires_grad:
-  #      print(name, param.data) 
+
 print("Begin training")
 xd = load_and_train(diffusion, dataloader, num_epochs=num_epochs, device=device, save_dir=save_dir, lr=1e-5)
 print("Finished training")
+
 # %%
 # Set model to evaluation mode
 # model_cpu = model.to(torch.device("cpu"))
@@ -215,8 +217,8 @@ print("Finished training")
 
 
 
-# model.eval()
-# diffusion.eval()
+model.eval()
+diffusion.eval()
 
 # # %%
 # MPL_GLOBAL_PARAMS = {
@@ -286,9 +288,9 @@ print("Finished training")
 # # NG_jet.reset()
 # # NG_pu.reset()
 # # sampled_images = diffusion.sample(batch_size=100)
-# batch_size = int(1000)
-# sampled_images = diffusion.sample(batch_size=batch_size)
-# rescaled = sampled_images * NG_jet.max_energy
+batch_size = 48
+sampled_images = diffusion.sample(batch_size=batch_size)
+rescaled = sampled_images * NG_jet.max_energy
 # # rescaled_np = rescaled.numpy()
 
 # # Move model to CPU after training
@@ -302,15 +304,15 @@ print("Finished training")
 # # %%
 # # Data post-processing
 # mu = 200
-# output_path = f"{CWD}/data/3-grid"
-# output_filename = f"noisy_mu{mu}_event_level_from_grid{bins}.csv"
-# output_filepath = f"{output_path}/{output_filename}"
-# histogram_path = f"{output_path}/grid{bins}_hist"
+output_path = f"{CWD}/data/3-grid/Unet{UNET_DIMS}_bins{bins}_mu{mu}"
+output_filename = f"noisy_mu{mu}_event_level_from_grid{bins}.csv"
+output_filepath = f"{output_path}/{output_filename}"
+histogram_path = f"{output_path}/grid{bins}_hist"
 # mpl.rcParams.update(MPL_GLOBAL_PARAMS)
-# if not(os.path.exists(output_path)):
-#     os.mkdir(output_path)
-# if not(os.path.exists(histogram_path)):
-#     os.mkdir(histogram_path)
+if not(os.path.exists(output_path)):
+    os.mkdir(output_path)
+if not(os.path.exists(histogram_path)):
+    os.mkdir(histogram_path)
     
 # # generator = NoisyGenerator(tt, pile_up, mu=mu)
 # combined = []
@@ -328,10 +330,10 @@ print("Finished training")
 #             detas[idx] = deta
 #             dphis[idx] = dphi
 #     return enes, detas, dphis
-# def tensor_to_data(tensor_images):
-#     tensor_images_cpu = tensor_images.detach().cpu().numpy()
-#     tensor_saves = tensor_images[:48]
-#     save_image(tensor_saves, f"{histogram_path}/saved_denoised_grids2.png")
+def tensor_to_data(tensor_images):
+    # tensor_images_cpu = tensor_images.detach().cpu().numpy()
+    tensor_saves = tensor_images[:48]
+    save_image(tensor_saves, f"{histogram_path}/saved_denoised_grids2.png")
 #     for idx,grid in enumerate(tensor_images_cpu):
 #         # Each grid is 1 x bins x bins
 #         hxW = grid[0] # Selects bins x bins
@@ -384,7 +386,7 @@ print("Finished training")
     
     
 # # rescaled = sampled_images * NG_jet.max_energy
-# # tensor_to_data(rescaled)
+tensor_to_data(rescaled)
 # # np.savetxt(f"tensor_data_denoised.txt", rescaled_np,delimiter=",")
 
 # tensor_to_data(rescaled)

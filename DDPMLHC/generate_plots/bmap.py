@@ -1,11 +1,12 @@
 # Local imports
 from DDPMLHC.config import *
 
-# Package imports
-import numpy as np
-from PIL import Image
+# # Package imports
+# import numpy as np
+# from PIL import Image
 
 def save_to_bmap(vector, bins=BMAP_SQUARE_SIDE_LENGTH, jet_no="NONE", mu="NONE", save_path=None):
+    return
     if vector.size != bins*bins:
         raise RuntimeError(f"Vector not of size {bins}x{bins}={bins*bins}")
     if save_path is None:
