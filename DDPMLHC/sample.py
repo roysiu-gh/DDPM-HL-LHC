@@ -118,7 +118,7 @@ def load_and_train(
                 progress_bar.set_postfix({'Loss': f'{avg_loss:.10f}'})
             loss_array.append(avg_loss)
             # Save checkpoint at the end of each epoch
-            if epoch % 20 == 0 or epoch == final_epoch:
+            if epoch % 50 == 0 or epoch == final_epoch:
                 checkpoint_path = os.path.join(save_dir, f'checkpoint_epoch_{epoch+1}_loss_{avg_loss:.10f}.pth')
                 torch.save({
                     'epoch': epoch,
@@ -215,11 +215,6 @@ print("Finished training")
 # model_cpu.eval()
 # diffusion_cpu.eval()
 
-
-
-model.eval()
-diffusion.eval()
-
 # # %%
 # MPL_GLOBAL_PARAMS = {
 #     'text.usetex' : False, # use latex text
@@ -288,9 +283,33 @@ diffusion.eval()
 # # NG_jet.reset()
 # # NG_pu.reset()
 # # sampled_images = diffusion.sample(batch_size=100)
+output_path = f"{CWD}/data/3-grid/Unet{UNET_DIMS}_bins{bins}_mu{mu}"
+output_filename = f"noisy_mu{mu}_event_level_from_grid{bins}.csv"
+output_filepath = f"{output_path}/{output_filename}"
+histogram_path = f"{output_path}/grid{bins}_hist"
+# mpl.rcParams.update(MPL_GLOBAL_PARAMS)
+if not(os.path.exists(output_path)):
+    os.mkdir(output_path)
+if not(os.path.exists(histogram_path)):
+    os.mkdir(histogram_path)
+    
+def tensor_to_data(tensor_images):
+    # tensor_images_cpu = tensor_images.detach().cpu().numpy()
+    tensor_saves = tensor_images[:48]
+    save_image(tensor_saves, f"{histogram_path}/saved_denoised_grids2.png")
+
 batch_size = 48
-sampled_images = diffusion.sample(batch_size=batch_size)
-rescaled = sampled_images * NG_jet.max_energy
+with torch.inference_mode():
+    model.eval()
+    diffusion.eval()
+    sampled_images = diffusion.sample(batch_size=batch_size)
+    rescaled = sampled_images * NG_jet.max_energy
+    tensor_to_data(rescaled)
+
+    del rescaled
+    del sampled_images
+    torch.empty_cuda_cache()
+
 # # rescaled_np = rescaled.numpy()
 
 # # Move model to CPU after training
@@ -304,16 +323,7 @@ rescaled = sampled_images * NG_jet.max_energy
 # # %%
 # # Data post-processing
 # mu = 200
-output_path = f"{CWD}/data/3-grid/Unet{UNET_DIMS}_bins{bins}_mu{mu}"
-output_filename = f"noisy_mu{mu}_event_level_from_grid{bins}.csv"
-output_filepath = f"{output_path}/{output_filename}"
-histogram_path = f"{output_path}/grid{bins}_hist"
-# mpl.rcParams.update(MPL_GLOBAL_PARAMS)
-if not(os.path.exists(output_path)):
-    os.mkdir(output_path)
-if not(os.path.exists(histogram_path)):
-    os.mkdir(histogram_path)
-    
+
 # # generator = NoisyGenerator(tt, pile_up, mu=mu)
 # combined = []
 # def grid_to_ene_deta_dphi(grid, N=BMAP_SQUARE_SIDE_LENGTH):
@@ -330,10 +340,6 @@ if not(os.path.exists(histogram_path)):
 #             detas[idx] = deta
 #             dphis[idx] = dphi
 #     return enes, detas, dphis
-def tensor_to_data(tensor_images):
-    # tensor_images_cpu = tensor_images.detach().cpu().numpy()
-    tensor_saves = tensor_images[:48]
-    save_image(tensor_saves, f"{histogram_path}/saved_denoised_grids2.png")
 #     for idx,grid in enumerate(tensor_images_cpu):
 #         # Each grid is 1 x bins x bins
 #         hxW = grid[0] # Selects bins x bins
@@ -386,7 +392,6 @@ def tensor_to_data(tensor_images):
     
     
 # # rescaled = sampled_images * NG_jet.max_energy
-tensor_to_data(rescaled)
 # # np.savetxt(f"tensor_data_denoised.txt", rescaled_np,delimiter=",")
 
 # tensor_to_data(rescaled)
