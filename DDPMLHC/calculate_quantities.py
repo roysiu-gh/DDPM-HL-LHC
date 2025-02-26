@@ -245,8 +245,8 @@ def grid_to_ene_deta_dphi(grid, N=BMAP_SQUARE_SIDE_LENGTH):
     for xbin in range(N):
         for ybin in range(N):
             idx = xbin*N + ybin
-            deta = 2*xbin/N - 1
-            dphi = 2*ybin/N - 1
+            deta = 2*(xbin + 0.5)/N - 1
+            dphi = 2*(ybin + 0.5)/N - 1
             enes[idx] = grid[xbin, ybin]
             detas[idx] = deta
             dphis[idx] = dphi

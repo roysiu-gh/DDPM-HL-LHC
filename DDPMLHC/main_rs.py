@@ -72,15 +72,19 @@ print("FINISHED loading data\n")
 #################################################################################
 
 mu = 0
-output_path = f"{CWD}/data/3-grid/"
+output_path = f"{CWD}/data/3-grid/mu{mu}/"
 output_filename = f"noisy_mu{mu}_event_level_from_grid{BMAP_SQUARE_SIDE_LENGTH}.csv"
 output_filepath = f"{output_path}/{output_filename}"
+
+###
 
 generator = NoisyGenerator(tt, pile_up, mu=mu)
 combined = []
 
 for idx, _ in enumerate(generator):
     grid = generator.get_grid(normalise=False)
+    if idx == 0:
+        print(f"grid.shape {grid.shape}")
     
     enes, detas, dphis = grid_to_ene_deta_dphi(grid, N=generator.bins)
     pxs, pys, pzs = deta_dphi_to_momenta(enes, detas, dphis)
@@ -110,5 +114,7 @@ np.savetxt(
     comments="",
     fmt="%i,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f"
 )
+
+###
 
 plot_1d_histograms(mu, event_stats_path=output_filepath, output_path=f"{output_path}/grid{BMAP_SQUARE_SIDE_LENGTH}")

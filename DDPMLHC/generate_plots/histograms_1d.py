@@ -138,7 +138,7 @@ def plot_1d_histograms(mu, event_stats_path=None, output_path=None):
     print("Final idx (#events - 1): ", events_dat[-1, 0])
 
     # mass_max = 300
-    mass_max = 1000
+    mass_max = 300
     mass_num_bins = 50
     mass_bins = np.mgrid[0:mass_max:(mass_num_bins+1)*1j]
 
