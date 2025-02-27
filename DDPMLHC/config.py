@@ -24,7 +24,7 @@ MAX_DATA_ROWS = None
 BMAP_SQUARE_SIDE_LENGTH = 16
 label_fontsize = 16
 tick_fontsize = 24
-UNET_DIMS = 64
+UNET_DIMS = 128
 
 
     # 'font.family' : r'Computer Modern Roman',
@@ -32,6 +32,7 @@ MPL_GLOBAL_PARAMS = {
     'text.usetex' : False, # use latex text
     'text.latex.preamble' : r'\usepackage{type1cm}\usepackage{braket}\usepackage{amssymb}\usepackage{amsmath}\usepackage{txfonts}', # latex packages
     'font.size' : 24,
+    "font.family":"serif",
     'figure.dpi' : 600,
     'figure.figsize' : (8, 6),
     'figure.autolayout' : True, # tight layout (True) or not (False)

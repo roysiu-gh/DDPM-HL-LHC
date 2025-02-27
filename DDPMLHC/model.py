@@ -47,39 +47,7 @@ from DDPMLHC.model_utils import load_and_train
 MAX_DATA_ROWS = None
 bins=BMAP_SQUARE_SIDE_LENGTH
 
-# === Read in data
-print("0 :: Loading original data")
-tt = np.genfromtxt(
-    TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-pu = np.genfromtxt(
-    PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-tt = EventSelector(tt)
-pu = EventSelector(pu)
-print("FINISHED loading data\n")
 
-# Ground truth ttbar jets
-NG_jet = NoisyGenerator(TTselector=tt, PUselector=pu, bins=bins, mu=0)
-# Second one to randomly generate and return pile-up events ONLY
-NG_pu = NoisyGenerator(TTselector=tt, PUselector=pu, bins=bins, mu=0, pu_only=True)
-
-model = Unet(
-    dim=UNET_DIMS,                  # Base dimensionality of feature maps
-    dim_mults=(1, 2, 4, 8),  # Multipliers for feature dimensions at each level
-    channels=1,              # E.g. 3 for RGB
-).to(device)
-
-# 
-diffusion = PUDiffusion(
-    model = model,
-    puNG = NG_pu,
-    jet_ng= NG_jet,
-    image_size = bins, 
-    timesteps = 200,  # Number of diffusion steps
-    objective = "pred_x0",
-    sampling_timesteps = None
-).to(device)
 
 # %%
 # Generate samples
