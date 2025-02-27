@@ -9,39 +9,61 @@ from DDPMLHC.config import *
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 def plot_combined_histograms_with_overlay(hist_data_list, mu_values, save_path):
-    """Plot mass, eta, p_T for multiple mu values."""
+    """Plot mass and p_T for multiple mu values."""
     colors = ['blue', 'orange', 'green', 'red', 'purple'][:len(mu_values)]
     alphas = np.linspace(0.7, 0.3, len(mu_values))
     
-    fig, axes = plt.subplots(1, 3, figsize=(16, 5))
+    fig, axes = plt.subplots(1, 2, figsize=(11, 5))
     first_dataset = hist_data_list[0]
     
     for idx, ax in enumerate(axes):
         entry_ref = first_dataset[idx]
         plot_params_ref = entry_ref.get("plot_params", {}).copy()
-        xlog, x_min, x_max = [plot_params_ref.pop(k, None) for k in ["xlog", "x_min", "x_max"]]
+        
+        # Extract parameters needed for bin calculation
+        xlog = plot_params_ref.pop("xlog", False)
+        x_min = plot_params_ref.pop("x_min", None)
+        x_max = plot_params_ref.pop("x_max", None)
+        bins = plot_params_ref.pop("bins", 50)
+        
+        # Calculate common bin edges for this axis
+        if xlog:
+            bin_edges = np.logspace(np.log10(x_min or 1), np.log10(x_max), bins)
+        else:
+            bin_edges = np.linspace(x_min, x_max, bins)
         
         for hist_data, mu, color, alpha in zip(hist_data_list, mu_values, colors, alphas):
             entry = hist_data[idx]
-            plot_params = {k:v for k,v in entry.get("plot_params", {}).items() 
-                         if k not in ["xlog", "x_min", "x_max"]}
-            
-            sb.histplot(entry["data"], ax=ax, stat="density", **plot_params,
-                       color=color, label=f"$\\mu={mu}$", alpha=alpha)
+            sb.histplot(entry["data"], ax=ax, stat="density",
+                       bins=bin_edges, color=color, 
+                       label=f"$\\mu={mu}$", alpha=alpha,
+                       edgecolor='black', linewidth=0.2)
         
-        if xlog: ax.set_xscale("log")
+        if xlog:
+            ax.set_xscale("log")
+            if idx == 1:  # For p_T plot
+                ax.xaxis.set_major_formatter(mpl.ticker.ScalarFormatter())
+                ax.xaxis.set_major_locator(mpl.ticker.LogLocator(base=10.0, numticks=5))
+                ax.set_xticks([250, 300, 400, 500, 600, 700])
+                
         ax.set_xlim(left=x_min, right=x_max)
-        ax.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
+        ax.ticklabel_format(axis="y", style="sci", scilimits=(0,0), useMathText=True)
+        ax.yaxis.offsetText.set_visible(False)  # Hide the offset text at the top
         ax.set_xlabel(entry_ref["name"], fontsize=14)
-        ax.set(ylabel="Frequency Density" if idx == 0 else "")
-        if idx == 0: ax.yaxis.label.set_size(12)
-        ax.legend(fontsize=12, frameon=False)
+        
+        # Set y-label with scale factor included
+        if idx == 0:
+            ax.set_ylabel("Frequency Density ($\\times 10^{-2}$)", fontsize=12)
+        else:
+            ax.set_ylabel("")
+            
+        ax.legend(fontsize=10, frameon=False)
     
     plt.tight_layout()
     plt.savefig(f"{save_path}/overlaid_mu_{'_'.join(map(str, mu_values))}", dpi=600)
     plt.close(fig)
 
-def create_overlay_plots(mu_values, save_path=None):
+def create_overlay_plots(mu_values, mass_max=250, save_path=None):
     """Create overlay plots for specified mu values."""
     if len(mu_values) > 5:
         raise ValueError("Maximum 5 mu values supported")
@@ -56,11 +78,9 @@ def create_overlay_plots(mu_values, save_path=None):
     
     hist_params = [
         {"name": "Mass [GeV]", "col": 6, 
-         "params": {"x_min": 0, "x_max": 250}},
-        {"name": "Pseudorapidity $\\eta$", "col": 4, 
-         "params": {"bins": 50, "x_min": -1, "x_max": 1}},
+         "params": {"bins": 50, "x_min": 0, "x_max": mass_max}},
         {"name": "Transverse Momentum $p_T$ [GeV]", "col": 7, 
-         "params": {"xlog": True, "bins": 50, "x_max": 1000}},
+         "params": {"xlog": True, "bins": 50, "x_min": 250, "x_max": 700}},
     ]
     
     list_of_params_all = [[{

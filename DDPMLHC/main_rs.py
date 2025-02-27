@@ -13,17 +13,17 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 # MAX_DATA_ROWS = 100_000
 
-# === Read in data
-print("0 :: Loading original data")
-tt = np.genfromtxt(
-    TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-pile_up = np.genfromtxt(
-    PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-tt = EventSelector(tt)
-pile_up = EventSelector(pile_up)
-print("FINISHED loading data\n")
+# # === Read in data
+# print("0 :: Loading original data")
+# tt = np.genfromtxt(
+#     TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+# )
+# pile_up = np.genfromtxt(
+#     PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+# )
+# tt = EventSelector(tt)
+# pile_up = EventSelector(pile_up)
+# print("FINISHED loading data\n")
 
 #################################################################################
 
@@ -45,10 +45,10 @@ print("FINISHED loading data\n")
 
 #################################################################################
 
-# create_overlay_plots([0, 5, 10, 15, 30])
-# create_overlay_plots([0, 10, 30, 50])
-# create_overlay_plots([0, 25, 50, 75, 100])
-# create_overlay_plots([0, 50, 100, 150, 200])
+create_overlay_plots([0, 5, 10, 15, 30])
+create_overlay_plots([0, 10, 30, 50])
+create_overlay_plots([0, 25, 50, 75, 100], mass_max=300)
+create_overlay_plots([0, 50, 100, 150, 200], mass_max=400)
 
 #################################################################################
 
@@ -71,52 +71,52 @@ print("FINISHED loading data\n")
 
 #################################################################################
 
-mu = 0
-output_path = f"{CWD}/data/3-grid/mu{mu}/"
-output_filename = f"noisy_mu{mu}_event_level_from_grid{BMAP_SQUARE_SIDE_LENGTH}.csv"
-output_filepath = f"{output_path}/{output_filename}"
+# mu = 0
+# output_path = f"{CWD}/data/3-grid/mu{mu}/"
+# output_filename = f"noisy_mu{mu}_event_level_from_grid{BMAP_SQUARE_SIDE_LENGTH}.csv"
+# output_filepath = f"{output_path}/{output_filename}"
 
-###
+# ###
 
-generator = NoisyGenerator(tt, pile_up, mu=mu)
-combined = []
+# generator = NoisyGenerator(tt, pile_up, mu=mu)
+# combined = []
 
-for idx, _ in enumerate(generator):
-    grid = generator.get_grid(normalise=False)
-    axis = generator.jet_axis
-    if idx == 0:
-        print(f"grid.shape {grid.shape}")
+# for idx, _ in enumerate(generator):
+#     grid = generator.get_grid(normalise=False)
+#     axis = generator.jet_axis
+#     if idx == 0:
+#         print(f"grid.shape {grid.shape}")
     
-    enes, detas, dphis = grid_to_ene_deta_dphi(grid, N=generator.bins)
-    detas, dphis = decentre(axis, detas, dphis)
-    pxs, pys, pzs = deta_dphi_to_momenta(enes, detas, dphis)
-    event_quantities = particle_momenta_to_event_level(enes, pxs, pys, pzs)
-    event_mass, event_px, event_py, event_pz, event_eta, event_phi, event_pT = event_quantities
+#     enes, detas, dphis = grid_to_ene_deta_dphi(grid, N=generator.bins)
+#     detas, dphis = decentre(axis, detas, dphis)
+#     pxs, pys, pzs = deta_dphi_to_momenta(enes, detas, dphis)
+#     event_quantities = particle_momenta_to_event_level(enes, pxs, pys, pzs)
+#     event_mass, event_px, event_py, event_pz, event_eta, event_phi, event_pT = event_quantities
 
-    event_level = np.array([
-        idx,
-        event_px,
-        event_py,
-        event_pz,
-        event_eta,
-        event_phi,
-        event_mass,
-        event_pT,
-    ])
+#     event_level = np.array([
+#         idx,
+#         event_px,
+#         event_py,
+#         event_pz,
+#         event_eta,
+#         event_phi,
+#         event_mass,
+#         event_pT,
+#     ])
 
-    combined.append(np.copy(event_level))
+#     combined.append(np.copy(event_level))
 
-all_data = np.vstack(combined)
+# all_data = np.vstack(combined)
 
-np.savetxt(
-    output_filepath,
-    all_data,
-    delimiter=",",
-    header="event_id,px,py,pz,eta,phi,mass,p_T",
-    comments="",
-    fmt="%i,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f"
-)
+# np.savetxt(
+#     output_filepath,
+#     all_data,
+#     delimiter=",",
+#     header="event_id,px,py,pz,eta,phi,mass,p_T",
+#     comments="",
+#     fmt="%i,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f"
+# )
 
-###
+# ###
 
-plot_1d_histograms(mu, event_stats_path=output_filepath, output_path=f"{output_path}/grid{BMAP_SQUARE_SIDE_LENGTH}")
+# plot_1d_histograms(mu, event_stats_path=output_filepath, output_path=f"{output_path}/grid{BMAP_SQUARE_SIDE_LENGTH}")
