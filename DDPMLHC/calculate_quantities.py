@@ -151,6 +151,12 @@ def centre_on_jet(centre, eta, phi):
     """
     return (0,0), eta - centre[0], phi - centre[1]
 
+def decentre(centre, eta, phi):
+    """ 
+    Inverse of centre_on_jet().
+    """
+    return eta + centre[0], phi + centre[1]
+
 def delta_R(centre, px, py, pz, etas, phis, boundary=1.0):
     """
     This function takes in particle information, and removes particles whose \Delta R(eta,phi) > 1.0 and returns all the others.

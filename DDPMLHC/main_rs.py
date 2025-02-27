@@ -83,10 +83,12 @@ combined = []
 
 for idx, _ in enumerate(generator):
     grid = generator.get_grid(normalise=False)
+    axis = generator.jet_axis
     if idx == 0:
         print(f"grid.shape {grid.shape}")
     
     enes, detas, dphis = grid_to_ene_deta_dphi(grid, N=generator.bins)
+    detas, dphis = decentre(axis, detas, dphis)
     pxs, pys, pzs = deta_dphi_to_momenta(enes, detas, dphis)
     event_quantities = particle_momenta_to_event_level(enes, pxs, pys, pzs)
     event_mass, event_px, event_py, event_pz, event_eta, event_phi, event_pT = event_quantities
