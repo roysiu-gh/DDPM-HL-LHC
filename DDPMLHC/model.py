@@ -178,7 +178,7 @@ diffusion = PUDiffusion(
 # Print Diagnostics right before training
 mu = 200
 train_batch_size = 200
-num_epochs = 1000
+num_epochs = 500
 
 print("#############################")
 print("DIAGNOSTIC PARAMETERS")

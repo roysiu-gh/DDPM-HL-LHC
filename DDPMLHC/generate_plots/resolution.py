@@ -17,9 +17,9 @@ pile_up = np.genfromtxt(
 tt = np.genfromtxt(
     TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
 )
-tt_int = np.genfromtxt(
-    TT_INTER_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
+# tt_int = np.genfromtxt(
+#     TT_INTER_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+# )
 def quantity_diff(jet_ids, jet_px, jet_py, jet_pz, jet_mass, jet_pt, pu_px, pu_py, pu_pz):
     """
     This function calculates and returns q_\mu^jet - q_0^jet for different jets with \mu pileups versus no pile_up.
@@ -84,8 +84,8 @@ def quantity_diff(jet_ids, jet_px, jet_py, jet_pz, jet_mass, jet_pt, pu_px, pu_p
     # elif q == "phi"
 pile_up_indices = pile_up[:,0]
 max_event_num = np.unique(pile_up_indices).astype(int)
-jet_masses = tt_int[:,6]
-jet_pt = tt_int[:,7]
+# jet_masses = tt_int[:,6]
+# jet_pt = tt_int[:,7]
 y_qlabel = {
     "mass": r'$\braket{m_{\mu}^{\text{jet}} - m_{0}^{\text{jet}}}$ [GeV]',
     "energy": r"$\braket{E_{\mu}^{\text{jet}} - E_{0}^{\text{jet}}}$ [GeV]",

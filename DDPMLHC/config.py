@@ -21,15 +21,15 @@ TTBAR_NUM = 70903
 
 MAX_DATA_ROWS = None
 
-BMAP_SQUARE_SIDE_LENGTH = 64
+BMAP_SQUARE_SIDE_LENGTH = 16
 label_fontsize = 16
 tick_fontsize = 24
-UNET_DIMS = 256
+UNET_DIMS = 64
 
 
     # 'font.family' : r'Computer Modern Roman',
 MPL_GLOBAL_PARAMS = {
-    'text.usetex' : True, # use latex text
+    'text.usetex' : False, # use latex text
     'text.latex.preamble' : r'\usepackage{type1cm}\usepackage{braket}\usepackage{amssymb}\usepackage{amsmath}\usepackage{txfonts}', # latex packages
     'font.size' : 24,
     'figure.dpi' : 600,

@@ -649,6 +649,7 @@ class PUDiffusion(GaussianDiffusion):
         # pu_tensor = torch.zeros(shape)
         pu_tensor = pu_tensor.to(self.device)
         return pu_tensor
+    # @torch.inference_mode()
     def pu_to_tensor(self, shape):
         # Select random number of pile-ups (mu) to generate, max 200 for now since HL-LHC expected to do up to this
         # We are doing it per batch
@@ -661,6 +662,7 @@ class PUDiffusion(GaussianDiffusion):
         # next(self.puNG)
         pu_tensor = self.generate_data(shape=shape, NG=NG)
         return pu_tensor
+    # @torch.inference_mode()
     def jet_to_tensor(self, shape):
         NG = self.jetNG
         # Align jetIDs for correct centering of pile-up
@@ -693,6 +695,7 @@ class PUDiffusion(GaussianDiffusion):
             extract(self.sqrt_alphas_cumprod, t, x_start.shape) * x_start +
             extract(self.sqrt_one_minus_alphas_cumprod, t, x_start.shape) * noise
         )
+    # @torch.inference_mode()
     def generate_noise(self,shape):
         batch, device = shape[0], self.device
         jets = []
@@ -708,7 +711,7 @@ class PUDiffusion(GaussianDiffusion):
             jet = torch.from_numpy(self.jetNG.get_grid()).unsqueeze(0).float()
             # Now to add pile-up
             # random_pu_no = np.random.randint(low=0, high=self.jetNG._max_TT_no, size=None)
-            self.puNG._next_jetID = self.jetNG._next_jetID
+            self.puNG._next_jetID = i
             # Start from 200 pileups
             self.puNG.mu = self.mu
             # Generate them
@@ -717,7 +720,7 @@ class PUDiffusion(GaussianDiffusion):
             pu_tensor = torch.from_numpy(selected_pu).float()
             pu_tensor = torch.unsqueeze(pu_tensor,0)
             noised_jet = jet + pu_tensor # add energies element wise for each bin
-            noised_jet = noised_jet.to(self.device)
+            # noised_jet = noised_jet.to(self.device)
             jets.append(noised_jet)
         # Should now  be batch x 1 x grid x grid
         jets = torch.stack(jets)

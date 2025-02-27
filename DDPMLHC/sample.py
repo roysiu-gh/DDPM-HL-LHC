@@ -295,20 +295,112 @@ if not(os.path.exists(histogram_path)):
     
 def tensor_to_data(tensor_images):
     # tensor_images_cpu = tensor_images.detach().cpu().numpy()
-    tensor_saves = tensor_images[:48]
-    save_image(tensor_saves, f"{histogram_path}/saved_denoised_grids2.png")
+    save_image(tensor_images, f"{histogram_path}/saved_denoised_grids_new.png")
 
-batch_size = 48
+
+class OutData():
+    def __init__(self, diffusion, NG_jet, num_jets_to_process, bins=BMAP_SQUARE_SIDE_LENGTH):
+        self.diffusion = diffusion
+        self.NG_jet = NG_jet
+        self.num_jets = num_jets_to_process
+        self.bins = bins
+    
+    def _calculate_event_level(self):
+        print(f"Generating {self.num_jets} jets...")
+        
+        sampled_images = diffusion.sample(batch_size=self.num_jets)
+        # show_tensor_images(sampled_images[:5] * NG_jet.max_energy, scale_factor=10)
+        # print(len(sampled_images))
+        # print(sampled_images[0])
+        # save_image(sampled_images[:4], f"{histogram_path}/saved_denoised_grids2.png")
+
+        rescaled = sampled_images * self.NG_jet.max_energy
+        tensor_to_data(rescaled[:48])
+
+        # print(len(rescaled))
+        # print(rescaled[0])
+        rescaled = rescaled.cpu().numpy()  # PyTorch to numpy
+        
+        # Remove channel dimension if exists
+        print(f"rescaled.shape {rescaled.shape}")
+        if len(rescaled.shape) == 4:  # (batch, channel, height, width)
+            rescaled = rescaled.squeeze(1)
+        print(f"rescaled.shape {rescaled.shape}")
+        
+        combined = []
+        for idx, grid in enumerate(rescaled):
+            enes, detas, dphis = grid_to_ene_deta_dphi(grid, N=self.bins)
+            pxs, pys, pzs = deta_dphi_to_momenta(enes, detas, dphis)
+            event_quantities = particle_momenta_to_event_level(enes, pxs, pys, pzs)
+            event_mass, event_px, event_py, event_pz, event_eta, event_phi, event_pT = event_quantities
+            
+            event_level = np.array([
+                idx,
+                event_px,
+                event_py,
+                event_pz,
+                event_eta,
+                event_phi,
+                event_mass,
+                event_pT,
+            ])
+            
+            combined.append(np.copy(event_level))
+                
+        all_data = np.vstack(combined)
+        del rescaled
+        del sampled_images
+        return all_data
+    
+    def save_event_level(self, output_folder=f"{CWD}/data/4-reconstruction", output_filename=None):
+        if output_filename is None:
+            output_filename = f"reconstructed_mu{self.diffusion.mu}_event_level_from_grid{self.bins}.csv"
+        output_path = f"{output_folder}/{output_filename}"
+        
+        data = self._calculate_event_level()
+        np.savetxt(
+            output_path,
+            data,
+            delimiter=",",
+            header="event_id,px,py,pz,eta,phi,mass,p_T",
+            comments="",
+            fmt="%i,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f"
+        )
+        
+        return output_path
+
+batch_size = 100
+# model_cpu = model.
 with torch.inference_mode():
     model.eval()
     diffusion.eval()
-    sampled_images = diffusion.sample(batch_size=batch_size)
-    rescaled = sampled_images * NG_jet.max_energy
-    tensor_to_data(rescaled)
+    # sampled_images = diffusion.sample(batch_size=batch_size)
+    # rescaled = sampled_images * NG_jet.max_energy
+    # tensor_to_data(rescaled)
+    output_folder=f"{CWD}/data/4-reconstruction"
+    output_filename = f"reconstructed_mu{diffusion.mu}_event_level_from_grid{BMAP_SQUARE_SIDE_LENGTH}.csv"
 
-    del rescaled
-    del sampled_images
-    torch.empty_cuda_cache()
+    OD = OutData(diffusion, NG_jet, 2000)
+    output_path = OD.save_event_level(output_folder=output_folder, output_filename=output_filename)
+
+torch.cuda.empty_cache()
+events_dat = np.genfromtxt(
+        output_path, delimiter=",", encoding="utf-8", skip_header=1
+    )
+mass_num_bins = 50
+mass_max = 400
+pT_max = 5000
+pT_num_bins = 50
+pT_bins = np.mgrid[0:pT_max:(pT_num_bins+1)*1j]
+
+mass_bins = np.mgrid[0:mass_max:(mass_num_bins+1)*1j]
+fig, axs = plt.subplots(1,3,figsize=(14,6))
+axs[0].hist(events_dat[:,6], bins=mass_bins, density=True)
+axs[1].hist(events_dat[:,4], bins=50,density=True)
+# axs[2].hist(events_dat[:,5], bins=50,density=True)
+axs[2].hist(events_dat[:,7], bins = pT_bins, density=True)
+plt.savefig(f"{CWD}/data/3-grid/grid{bins}/test.pdf")
+plt.close()
 
 # # rescaled_np = rescaled.numpy()
 

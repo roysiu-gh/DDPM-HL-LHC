@@ -242,6 +242,9 @@ def grid_to_ene_deta_dphi(grid, N=BMAP_SQUARE_SIDE_LENGTH):
     detas = np.zeros(N*N)
     dphis = np.zeros(N*N)
     # xbin and ybin may be wrong way around
+    # Since grid is energy weighted so flattening it to 1D array is easy
+    # Grid is flattened row-major style
+    enes = np.ravel(grid)
     for xbin in range(N):
         for ybin in range(N):
             idx = xbin*N + ybin
