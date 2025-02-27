@@ -5,6 +5,9 @@ data/ML
 data/2-intermediate/*
 data/3-grid/*.csv
 data/3-grid/*/*.csv
+data/4-reconstruction/*.csv
+data/4-reconstruction/BACKUP
+
 slurm_out
 data/plots/bmaps/test_rand.png
 data/plots/bmaps/event_NONE_muNONE.png
