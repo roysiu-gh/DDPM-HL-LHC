@@ -56,8 +56,7 @@ def plot_combined_histograms_with_overlay(hist_data_list, mu_values, save_path):
             ax.set_ylabel("Frequency Density ($\\times 10^{-2}$)", fontsize=12)
         else:
             ax.set_ylabel("")
-            
-        ax.legend(fontsize=10, frameon=False)
+            ax.legend(fontsize=14, frameon=False)  # Only show legend for p_T plot
     
     plt.tight_layout()
     plt.savefig(f"{save_path}/overlaid_mu_{'_'.join(map(str, mu_values))}", dpi=600)
