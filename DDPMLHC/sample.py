@@ -22,7 +22,7 @@ from pathlib import Path
 from random import random
 from functools import partial
 from collections import namedtuple
-
+import polars as pl
 import os
 CWD = os.getcwd()
 
@@ -41,46 +41,11 @@ from DDPMLHC.data_loading import *
 from DDPMLHC.generate_plots.overlaid_1d import *
 from DDPMLHC.generate_plots.bmap import *
 from DDPMLHC.generate_plots.histograms_1d import *
-from DDPMLHC.model_utils import load_and_train
+from DDPMLHC.model_utils import *
 
 # DATA LOADING
 MAX_DATA_ROWS = None
 bins=BMAP_SQUARE_SIDE_LENGTH
-
-# === Read in data
-print("0 :: Loading original data")
-tt = np.genfromtxt(
-    TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-pu = np.genfromtxt(
-    PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-tt = EventSelector(tt)
-pu = EventSelector(pu)
-print("FINISHED loading data\n")
-
-# Ground truth ttbar jets
-NG_jet = NoisyGenerator(TTselector=tt, PUselector=pu, bins=bins, mu=0)
-# Second one to randomly generate and return pile-up events ONLY
-NG_pu = NoisyGenerator(TTselector=tt, PUselector=pu, bins=bins, mu=0, pu_only=True)
-
-model = Unet(
-    dim=UNET_DIMS,                  # Base dimensionality of feature maps
-    dim_mults=(1, 2, 4, 8),  # Multipliers for feature dimensions at each level
-    channels=1,              # E.g. 3 for RGB
-).to(device)
-
-# 
-diffusion = PUDiffusion(
-    model = model,
-    puNG = NG_pu,
-    jet_ng= NG_jet,
-    image_size = bins,  # Size of your images (ensure your images are square)
-    timesteps = 200,  # Number of diffusion steps
-    objective = "pred_x0",
-    sampling_timesteps = None
-).to(device)
-
 # %%
 # Generate samples
 # batch_size = 4
@@ -98,100 +63,15 @@ train_batch_size = 200
 # Sampling: only load checkpoint
 num_epochs = 0
 
-print("#############################")
-print("DIAGNOSTIC PARAMETERS")
-print("#############################")
-print("MODE: SAMPLING")
-print(f"Training Batch Size: {train_batch_size}")
-print(f"mu: {mu}")
-print(f"Image Size/bins: {BMAP_SQUARE_SIDE_LENGTH}")
-print(f"UNET DIMS: {UNET_DIMS}")
-print(f"TOTAL EPOCHS: {num_epochs}")
-print(f"TOTAL DIFFUSION TIMESTEPS: {diffusion.timesteps}")
-print(f"DEVICE: {device.type}")
-print("#############################")
-print("END DIAGNOSTIC PARAMETERS")
-print("#############################")
-
+print_params(mode="SAMPLING")
 # this one is to be passed into DataLoader for training
 ng_for_dataloader = NGenForDataloader(NG_jet)
 dataloader = DataLoader(ng_for_dataloader, batch_size=train_batch_size, num_workers=2, shuffle = True, pin_memory = True)
 save_dir = f"{CWD}/data/ML/Unet{UNET_DIMS}_bins{bins}_mu{mu}"
 
 print("Begin training")
-xd = load_and_train(diffusion, dataloader, num_epochs=num_epochs, device=device, save_dir=save_dir, lr=1e-5)
+xd = load_and_train(diffusion, dataloader, num_epochs=0, device=device, save_dir=save_dir)
 print("Finished training")
-
-# %%
-# Set model to evaluation mode
-# model_cpu = model.to(torch.device("cpu"))
-# diffusion_cpu = diffusion.to(torch.device("cpu"))
-
-# model_cpu.eval()
-# diffusion_cpu.eval()
-
-# # %%
-# MPL_GLOBAL_PARAMS = {
-#     'text.usetex' : False, # use latex text
-#     'text.latex.preamble' : r'\usepackage{type1cm}\usepackage{braket}\usepackage{amssymb}\usepackage{amsmath}\usepackage{txfonts}', # latex packages
-#     'font.size' : 24,
-#     'figure.dpi' : 600,
-#     'figure.figsize' : (4, 3),
-#     'figure.autolayout' : True, # tight layout (True) or not (False)
-#     'axes.labelpad' : 5,
-#     'axes.xmargin' : 0,
-#     'axes.ymargin' : 0,
-#     'axes.grid' : False,
-#     'axes.autolimit_mode' : 'round_numbers', # set axis limits by rounding min/max values
-#     # 'axes.autolimit_mode' : 'data', # set axis limits as min/max values
-#     'xtick.major.pad' : 10,
-#     'ytick.major.pad' : 10,
-#     'xtick.labelsize': label_fontsize,
-#     'ytick.labelsize': label_fontsize,
-#     'lines.linewidth' : 1.3,
-#     'xtick.direction' : 'in',
-#     'ytick.direction' : 'in',
-#     'xtick.top' : True,
-#     'ytick.right' : True,
-#     'xtick.minor.visible' : True,
-#     'ytick.minor.visible' : True,
-#     'axes.prop_cycle': cycler(color = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']*3),
-#     'legend.framealpha': None
-#   }
-# mpl.rcParams.update(MPL_GLOBAL_PARAMS)
-
-# import glob
-# import re
-# import os
-
-# def get_losses_from_checkpoints(checkpoint_dir='./data/ML/second'):
-#     # Get absolute path to checkpoint directory
-#     print(os.listdir("."))
-#     checkpoint_pattern = os.path.join(checkpoint_dir, 'checkpoint_epoch_*_loss_*.pth')
-    
-#     # Get all matching files
-#     files = glob.glob(checkpoint_pattern)
-#     print(files)
-#     losses = []
-#     pattern = r'loss_([\d.]+)\.pth'
-    
-#     for file in files:
-#         match = re.search(pattern, file)
-#         if match:
-#             loss = float(match.group(1))
-#             losses.append(loss)
-    
-#     return len(files), losses
-
-# # Usage:
-# num_files, losses = get_losses_from_checkpoints()  
-# print(f"Number of checkpoint files: {num_files}")
-# print(f"Losses: {losses}")
-
-# fig = plt.figure()
-# # num,losses = get_losses_from_checkpoints()
-# plt.plot(list(range(num_files)),losses)
-# plt.show()
 
 # # %%
 # # Generate samples
@@ -285,6 +165,8 @@ class OutData():
         return output_path
 
 batch_size = 100
+# Number of jets to sample - note very high memory requirement
+jets_to_sample = 1000
 # model_cpu = model.
 with torch.inference_mode():
     model.eval()
@@ -295,111 +177,147 @@ with torch.inference_mode():
     output_folder=f"{CWD}/data/4-reconstruction"
     output_filename = f"reconstructed_mu{diffusion.mu}_event_level_from_grid{BMAP_SQUARE_SIDE_LENGTH}.csv"
 
-    OD = OutData(diffusion, NG_jet, 2000)
+    OD = OutData(diffusion, NG_jet, jets_to_sample)
     output_path = OD.save_event_level(output_folder=output_folder, output_filename=output_filename)
 
 torch.cuda.empty_cache()
+##### CODE FOR GENERATING MASS/ETA/PT PLOTS####
 events_dat = np.genfromtxt(
         output_path, delimiter=",", encoding="utf-8", skip_header=1
     )
-mass_num_bins = 50
-mass_max = 400
-pT_max = 5000
-pT_num_bins = 50
-pT_bins = np.mgrid[0:pT_max:(pT_num_bins+1)*1j]
+# mass_num_bins = 50
+# mass_max = 400
+# pT_max = 5000
+# pT_num_bins = 50
+# pT_bins = np.mgrid[0:pT_max:(pT_num_bins+1)*1j]
+# mass_bins = np.mgrid[0:mass_max:(mass_num_bins+1)*1j]
+# fig, axs = plt.subplots(1,3,figsize=(14,6))
+# axs[0].hist(events_dat[:,6], bins=mass_bins, density=True)
+# axs[1].hist(events_dat[:,4], bins=50,density=True)
+# # axs[2].hist(events_dat[:,5], bins=50,density=True)
+# axs[2].hist(events_dat[:,7], bins = pT_bins, density=True)
+# plt.savefig(f"{CWD}/data/3-grid/grid{bins}/test.pdf")
+# plt.close()
 
-mass_bins = np.mgrid[0:mass_max:(mass_num_bins+1)*1j]
-fig, axs = plt.subplots(1,3,figsize=(14,6))
-axs[0].hist(events_dat[:,6], bins=mass_bins, density=True)
-axs[1].hist(events_dat[:,4], bins=50,density=True)
-# axs[2].hist(events_dat[:,5], bins=50,density=True)
-axs[2].hist(events_dat[:,7], bins = pT_bins, density=True)
-plt.savefig(f"{CWD}/data/3-grid/grid{bins}/test.pdf")
-plt.close()
+##### CODE TO GENERATE RESOLUTION PLOTS #####
+def generate_event_level_gridded_jets(NG: NoisyGenerator, save_dir=INTERMEDIATE_PATH):
+    NG.reset()
+    gt_file = f"{save_dir}/noisy_mu0_event_level_gridded.csv"
+    combined = []
+    for idx, _ in enumerate(NG):
+        # next(NG)
+        grid = NG.get_grid(normalise=False)
+        enes, detas, dphis = grid_to_ene_deta_dphi(grid, N=NG.bins)
+        pxs, pys, pzs = deta_dphi_to_momenta(enes, detas, dphis)
+        event_quantities = particle_momenta_to_event_level(enes, pxs, pys, pzs)
+        event_mass, event_px, event_py, event_pz, event_eta, event_phi, event_pT = event_quantities
+        
+        event_level = np.array([
+            idx,
+            event_px,
+            event_py,
+            event_pz,
+            event_eta,
+            event_phi,
+            event_mass,
+            event_pT,
+        ])
+        
+        combined.append(np.copy(event_level))
+            
+    all_data = np.vstack(combined)
+    np.savetxt(
+            gt_file,
+            all_data,
+            delimiter=",",
+            header="event_id,px,py,pz,eta,phi,mass,p_T",
+            comments="",
+            fmt="%i,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f"
+    )
+    return all_data, gt_file
+def mass_energy_diff(save_dir=INTERMEDIATE_PATH, mu=200):
+    """
+    Finds the relative difference between the model's denoised images and the binned jets as ground truths
+    """
+    gt_file = f"{save_dir}/noisy_mu0_event_level_gridded.csv"
+    if not os.path.isfile(gt_file):
+        generate_event_level_gridded_jets(NG_jet)
 
-# # rescaled_np = rescaled.numpy()
+    jet_quantities = pl.read_csv(gt_file)
+    jets_px = jet_quantities['px']
+    jets_py = jet_quantities['py']
+    jets_pz = jet_quantities['pz']
+    jets_mass = jet_quantities['mass'].to_numpy()
+# print(your[24717:])
+    jets_mass = np.concatenate((jets_mass[0:24716], jets_mass[24717:]))
+        
+    jet_energy = (jets_px ** 2) + (jets_py ** 2) + (jets_pz ** 2)
+    jet_energy = jet_energy.to_numpy()
+    jet_energy = np.concatenate((jet_energy[0:24716], jet_energy[24717:]))
+    jet_energy = np.sqrt(jet_energy)
+    csv_file_paths = [f"./data/4-reconstruction/reconstructed_mu{mu}_event_level_from_grid{BMAP_SQUARE_SIDE_LENGTH}.csv"]
+    fig,axs = plt.subplots(nrows=len(csv_file_paths),ncols=2, figsize=(8,6))
+    #  = axs
+    energy_counts = []
+    mass_counts = []
+    mean_mass_diffs = []
+    std_mass_diffs = []
+    data_array = [pl.read_csv(csv_file_path) for csv_file_path in csv_file_paths]
 
-# # Move model to CPU after training
+    for idx,data in enumerate(data_array):
+        df = data
+        max_id = df['event_id'].max() + 1
+        # get jet indices
+        # Will select from ground truth jets
+        # jet_indices = df['event_id']
+        px = df['px']
+        py = df['py']
+        pz = df['pz']
+        # print(px)
+        mass = df['mass']
+        mass = mass.to_numpy()
+        # mass = np.concatenate((mass[0:24716], mass[24717:]))
+        # massless limit
+        energy = (px ** 2) + (py ** 2) + (pz ** 2)
+        energy = energy.to_numpy()
+        # energy = np.concatenate((energy[0:24716], energy[24717:]))
 
-# # # print(sampled_images)
-# # show_tensor_images(rescaled[0], scale_factor=10)
+        energy = np.sqrt(energy)
+        # print(energy)
+        # Find energy difference between jet+pile-up and jet for feach jet_id
+        jet_energy1 = jet_energy[:max_id]
+        jets_mass1 = jets_mass[:max_id]
+        energy_diffs = energy - jet_energy1
+        energy_diffs = energy_diffs / jet_energy1
+        mass_diffs = mass - jets_mass1
+        mass_diffs2 = mass_diffs/ jets_mass1
+        # print(mass_diffs2)
+        # mean_energy_diff = np.sum(energy_diffs) / (max_id - 1)
+        # en_bins = np.mgrid[np.min(energy_diffs):np.max(energy_diffs):(len(energy_diffs)+1)*1j]
+        # mass_bins = np.mgrid[np.min(mass_diffs2):np.max(mass_diffs2):(len(mass_diffs2)+1)*1j]
+        # mass_bins = np.mgrid[0:mass_max:(mass_num_bins+1)*1j]
+        axs[0].hist(energy_diffs, bins = 50, label=f"$\\mu = {mu}$", edgecolor="black")
+        axs[1].hist(mass_diffs2[mass_diffs2<5], bins = 50,label=f"$\\mu = {mu}$", edgecolor="black")
+        axs[0].set_ylabel(r"Counts")
+        # axs[idx][0].set_ylabel(r"Counts")
 
+        axs[0].legend(prop={'size': 14})
+        axs[1].legend(prop={'size': 14})
+        # std_energy_diff = np.std(energy_diffs)
+        # print(std_energy_diff)
+        # print(mean_energy_diff)
 
+        # mean_mass_diff = np.sum(mass_diffs2) / (max_id - 1)
+        # std_mass_diff = np.std(mass_diffs2)
 
-
-# # %%
-# # Data post-processing
-# mu = 200
-
-# # generator = NoisyGenerator(tt, pile_up, mu=mu)
-# combined = []
-# def grid_to_ene_deta_dphi(grid, N=BMAP_SQUARE_SIDE_LENGTH):
-#     enes = np.zeros(N*N)
-#     detas = np.zeros(N*N)
-#     dphis = np.zeros(N*N)
-#     # xbin and ybin may be wrong way around
-#     for xbin in range(N):
-#         for ybin in range(N):
-#             idx = xbin*N + ybin
-#             deta = 2*xbin/N - 1
-#             dphi = 2*ybin/N - 1
-#             enes[idx] = grid[xbin, ybin]
-#             detas[idx] = deta
-#             dphis[idx] = dphi
-#     return enes, detas, dphis
-#     for idx,grid in enumerate(tensor_images_cpu):
-#         # Each grid is 1 x bins x bins
-#         hxW = grid[0] # Selects bins x bins
-#         enes, detas, dphis = grid_to_ene_deta_dphi(hxW, N=bins)
-#         pxs, pys, pzs = deta_dphi_to_momenta(enes, detas, dphis)
-#         event_quantities = particle_momenta_to_event_level(enes, pxs, pys, pzs)
-#         event_mass, event_px, event_py, event_pz, event_eta, event_phi, event_pT = event_quantities
-
-#         event_level = np.array([
-#             idx,
-#             event_px,
-#             event_py,
-#             event_pz,
-#             event_eta,
-#             event_phi,
-#             event_mass,
-#             event_pT,
-#         ])
-
-#         combined.append(np.copy(event_level))
-#     all_data = np.vstack(combined)
-
-#     # Final check before saving
-#     if np.any(np.isnan(all_data)):
-#         print("\nWarning: NaN values in final data:")
-#         print(f"Total NaN count: {np.sum(np.isnan(all_data))}")
-#         print("NaN locations (row, column):")
-#         nan_rows, nan_cols = np.where(np.isnan(all_data))
-#         column_names = ['event_id', 'px', 'py', 'pz', 'eta', 'phi', 'mass', 'p_T']
-#         for row, col in zip(nan_rows, nan_cols):
-#             print(f"Row {row}, Column {column_names[col]}")
-    
-
-#     np.savetxt(
-#             output_filepath,
-#             all_data,
-#             delimiter=",",
-#             header="event_id,px,py,pz,eta,phi,mass,p_T",
-#             comments="",
-#             fmt="%i,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f"
-#         )
-    
-#     # Here mu is the initial mu we set simulations to start from
-#     plot_1d_histograms(mu, event_stats_path=output_filepath, output_path=f"{output_path}/grid{bins}_hist")
-
-#     # Tensors are current;y in BxCxHxW tensor
-#     # Want to ex
-# # for idx, _ in enumerate(generator):
-# #     grid = generator.get_grid()
-    
-    
-# # rescaled = sampled_images * NG_jet.max_energy
-# # np.savetxt(f"tensor_data_denoised.txt", rescaled_np,delimiter=",")
-
-# tensor_to_data(rescaled)
-
+        # mean_energy_diffs.append(mean_energy_diff)
+        # std_energy_diffs.append(std_energy_diff)
+        # mean_mass_diffs.append(mean_mass_diff)
+        # std_mass_diffs.append(std_mass_diff)
+    axs[0].set_xlabel(r"$\frac{E_{\mu}^{j} - E_{0}^{j}}{E_{0}^{j}}$")
+    axs[1].set_xlabel(r"$\frac{m_{\mu}^{j} - m_{0}^{j}}{m_{0}^{j}}$")
+    plt.tight_layout()
+    plt.savefig(f"{CWD}/data/plots/hist_energymasscounts_model.pdf", format="pdf")
+    # plt.savefig(f"{CWD}/data/plots/hist_energymasscounts_model.png", format="png", dpi=600)
+    plt.close()
+mass_energy_diff()

@@ -625,10 +625,11 @@ class PUDiffusion(GaussianDiffusion):
         self.mu = mu
     
     #############################################################################################
-
+    @torch.inference_mode()
     def cond_noise(self, x_shape, noise):
-        return self.pu_to_tensor(x_shape) if noise is None else noise
+        return self.pu_to_tensor(x_shape).to(self.device) if noise is None else noise
         # return torch.zeros_like(x_start) if noise is None else noise
+    @torch.inference_mode()
     def generate_data(self, shape, NG: NoisyGenerator):
         """
         This function generates image data matched to the correct shape
@@ -647,7 +648,7 @@ class PUDiffusion(GaussianDiffusion):
         pu_tensor = torch.unsqueeze(pu_tensor,0)
         pu_tensor = pu_tensor.expand(shape[0], shape[1], -1, -1) 
         # pu_tensor = torch.zeros(shape)
-        pu_tensor = pu_tensor.to(self.device)
+        # pu_tensor = pu_tensor.to(self.device)
         return pu_tensor
     # @torch.inference_mode()
     def pu_to_tensor(self, shape):
@@ -662,7 +663,7 @@ class PUDiffusion(GaussianDiffusion):
         # next(self.puNG)
         pu_tensor = self.generate_data(shape=shape, NG=NG)
         return pu_tensor
-    # @torch.inference_mode()
+    @torch.inference_mode()
     def jet_to_tensor(self, shape):
         NG = self.jetNG
         # Align jetIDs for correct centering of pile-up
@@ -680,7 +681,7 @@ class PUDiffusion(GaussianDiffusion):
         # print("batched times", t)
         model_mean, _, model_log_variance, x_start = self.p_mean_variance(x = x, t = batched_times, x_self_cond = x_self_cond, clip_denoised = True)
         ######## MODIFY
-        noise = self.pu_to_tensor(x.shape) if t > 0 else 0 # no noise if t == 0
+        noise = self.pu_to_tensor(x.shape).to(self.device) if t > 0 else 0 # no noise if t == 0
         pred_img = model_mean + (0.5 * model_log_variance).exp() * noise
         return pred_img, x_start
     @autocast('cuda', enabled = False)
@@ -695,7 +696,7 @@ class PUDiffusion(GaussianDiffusion):
             extract(self.sqrt_alphas_cumprod, t, x_start.shape) * x_start +
             extract(self.sqrt_one_minus_alphas_cumprod, t, x_start.shape) * noise
         )
-    # @torch.inference_mode()
+    @torch.inference_mode()
     def generate_noise(self,shape):
         batch, device = shape[0], self.device
         jets = []

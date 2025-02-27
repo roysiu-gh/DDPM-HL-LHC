@@ -10,7 +10,7 @@ PILEUP_PATH = f"{CWD}/data/1-initial/pileup.csv"
 TT_PATH = f"{CWD}/data/1-initial/ttbar.csv"
 
 # 2 intermediate paths
-INTERMEDIATE_PATH = f"{CWD}/data/2-intermediate/"
+INTERMEDIATE_PATH = f"{CWD}/data/2-intermediate"
 # Remove the following?
 PILEUP_EXT_PATH = f"{CWD}/data/2-intermediate/pileup_extended.csv"
 TT_EXT_PATH = f"{CWD}/data/2-intermediate/ttbar_extended.csv"
@@ -22,11 +22,13 @@ TTBAR_NUM = 70903
 MAX_DATA_ROWS = None
 
 BMAP_SQUARE_SIDE_LENGTH = 16
-label_fontsize = 16
-tick_fontsize = 24
 UNET_DIMS = 128
+TIMESTEPS=200
+EPOCHS=1000
+BATCH_SIZE=200
 
-
+tick_fontsize = 24
+label_fontsize = 16
     # 'font.family' : r'Computer Modern Roman',
 MPL_GLOBAL_PARAMS = {
     'text.usetex' : False, # use latex text
@@ -40,8 +42,8 @@ MPL_GLOBAL_PARAMS = {
     'axes.xmargin' : 0,
     'axes.ymargin' : 0,
     'axes.grid' : False,
-    # 'axes.autolimit_mode' : round_numbers, # set axis limits by rounding min/max values
-    'axes.autolimit_mode' : 'data', # set axis limits as min/max values
+    'axes.autolimit_mode' : 'round_numbers', # set axis limits by rounding min/max values
+    # 'axes.autolimit_mode' : 'data', # set axis limits as min/max values
     'xtick.major.pad' : 10,
     'ytick.major.pad' : 10,
     'xtick.labelsize': label_fontsize,

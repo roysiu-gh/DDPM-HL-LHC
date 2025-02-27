@@ -9,21 +9,20 @@ from torchvision.utils import save_image
 from tqdm import tqdm
 from datetime import datetime
 from torch.amp import autocast
-import math
 from denoising_diffusion_pytorch import Unet
-# req torch, torchvision, einops, tqdm, ema_pytorch, accelerate
-# from IPython.display import display
 from einops import rearrange, reduce, repeat
-import glob
 from ema_pytorch import EMA
 from scipy.optimize import linear_sum_assignment
 from accelerate import Accelerator
+import math
+import glob
 from pathlib import Path
 from random import random
 from functools import partial
 from collections import namedtuple
-
 import os
+import re
+from typing import Literal
 CWD = os.getcwd()
 
 # Device stuff
@@ -100,7 +99,8 @@ def load_and_train(
 
     optimizer = optim.Adam(diffusion.parameters(), lr=lr)
     epoch_range = range(last_epoch, last_epoch + num_epochs)
-    final_epoch = list(epoch_range)[-1]
+    final_epoch = list(epoch_range)[-1] if len(list(epoch_range))> 0 else last_epoch
+
     for epoch in epoch_range:
         print(f"\nEpoch {epoch + 1}/{last_epoch + num_epochs}")
         progress_bar = tqdm(enumerate(dataloader), total=len(dataloader))
@@ -130,6 +130,25 @@ def load_and_train(
     return loss_array
 
 
+## Plot losses from available checkpoints
+
+def get_losses_from_checkpoints(checkpoint_dir='./data/ML/second'):
+    # Get absolute path to checkpoint directory
+    checkpoint_pattern = os.path.join(checkpoint_dir, 'checkpoint_epoch_*_loss_*.pth')
+    
+    # Get all matching files
+    files = glob.glob(checkpoint_pattern)
+    losses = []
+    pattern = r'loss_([\d.]+)\.pth'
+    
+    for file in files:
+        match = re.search(pattern, file)
+        if match:
+            loss = float(match.group(1))
+            losses.append(loss)
+    
+    return len(files), losses
+
 # === Read in data
 print("0 :: Loading original data")
 tt = np.genfromtxt(
@@ -158,8 +177,27 @@ diffusion = PUDiffusion(
     model = model,
     puNG = NG_pu,
     jet_ng= NG_jet,
-    image_size = bins, 
-    timesteps = 200,  # Number of diffusion steps
+    image_size = BMAP_SQUARE_SIDE_LENGTH, 
+    timesteps = TIMESTEPS,  # Number of diffusion steps
     objective = "pred_x0",
-    sampling_timesteps = None
 ).to(device)
+
+ng_for_dataloader = NGenForDataloader(NG_jet)
+dataloader = DataLoader(ng_for_dataloader, batch_size=BATCH_SIZE, num_workers=2, shuffle = True, pin_memory = True)
+
+
+def print_params(mode: Literal["TRAINING", "SAMPLING"],num_epochs=EPOCHS, mu=200):
+    print("#############################")
+    print("DIAGNOSTIC PARAMETERS")
+    print("#############################")
+    print(F"MODE: {mode}")
+    print(f"Training Batch Size: {BATCH_SIZE}")
+    print(f"mu: {mu}")
+    print(f"Image Size/bins: {BMAP_SQUARE_SIDE_LENGTH}")
+    print(f"UNET DIMS: {UNET_DIMS}")
+    print(f"TOTAL EPOCHS: {num_epochs}")
+    print(f"TOTAL DIFFUSION TIMESTEPS: {TIMESTEPS}")
+    print(f"DEVICE: {device.type}")
+    print("#############################")
+    print("END DIAGNOSTIC PARAMETERS")
+    print("#############################")
