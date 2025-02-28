@@ -45,10 +45,10 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 #################################################################################
 
-create_overlay_plots([0, 5, 10, 15, 30])
-create_overlay_plots([0, 10, 30, 50])
-create_overlay_plots([0, 25, 50, 75, 100], mass_max=300)
-create_overlay_plots([0, 50, 100, 150, 200], mass_max=400)
+# create_overlay_plots([0, 5, 10, 15, 30])
+# create_overlay_plots([0, 10, 30, 50])
+# create_overlay_plots([0, 25, 50, 75, 100], mass_max=300)
+# create_overlay_plots([0, 50, 100, 150, 200], mass_max=400)
 
 #################################################################################
 
@@ -120,3 +120,13 @@ create_overlay_plots([0, 50, 100, 150, 200], mass_max=400)
 # ###
 
 # plot_1d_histograms(mu, event_stats_path=output_filepath, output_path=f"{output_path}/grid{BMAP_SQUARE_SIDE_LENGTH}")
+
+#################################################################################
+
+mu = 0
+output_path = f"{CWD}/data/3-grid/mu{mu}/"
+for bins in [1,2,4,8,16,32,64,128,256]:
+    output_filename = f"noisy_mu{mu}_event_level_from_grid{bins}.csv"
+    output_filepath = f"{output_path}/{output_filename}"
+
+    plot_1d_histograms(mu, event_stats_path=output_filepath, output_path=f"{output_path}/grid{bins}")

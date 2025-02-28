@@ -142,8 +142,7 @@ def plot_1d_histograms(mu, event_stats_path=None, output_path=None):
     mass_num_bins = 50
     mass_bins = np.mgrid[0:mass_max:(mass_num_bins+1)*1j]
 
-    # pT_max = 1000
-    pT_max = 5000
+    pT_max = 700
     pT_num_bins = 50
     pT_bins = np.mgrid[0:pT_max:(pT_num_bins+1)*1j]
 
@@ -151,7 +150,7 @@ def plot_1d_histograms(mu, event_stats_path=None, output_path=None):
         {
             "name": "Mass [GeV]",
             "data": event_mass,
-            "plot_params": {"bins" : mass_bins},
+            "plot_params": {"bins" : mass_bins, "x_max": mass_max},
             "save_filename": "event_mass",
             "save_path": output_path,
         },
@@ -165,7 +164,7 @@ def plot_1d_histograms(mu, event_stats_path=None, output_path=None):
         {
             "name": "Transverse Momentum p_T [GeV]",
             "data": event_pT,
-            "plot_params": {"xlog": True, "bins": pT_bins},
+            "plot_params": {"xlog": True, "bins": pT_bins, "x_max": pT_max},
             "save_filename": "event_pT",
             "save_path": output_path,
         }
