@@ -7,6 +7,7 @@ from DDPMLHC.calculate_quantities import *
 from DDPMLHC.data_loading import *
 from DDPMLHC.generate_plots.histograms_1d import plot_1d_histograms
 from DDPMLHC.generate_plots.overlaid_1d import create_overlay_plots
+from DDPMLHC.generate_plots.overlaid_debin import create_overlay_plots_debin
 from DDPMLHC.generate_plots.bmap import save_to_bmap
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
@@ -123,10 +124,17 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 #################################################################################
 
-mu = 0
-output_path = f"{CWD}/data/3-grid/mu{mu}/"
-for bins in [1,2,4,8,16,32,64,128,256]:
-    output_filename = f"noisy_mu{mu}_event_level_from_grid{bins}.csv"
-    output_filepath = f"{output_path}/{output_filename}"
+# mu = 0
+# output_path = f"{CWD}/data/3-grid/mu{mu}/"
+# for bins in [1,2,4,8,16,32,64,128,256]:
+#     output_filename = f"noisy_mu{mu}_event_level_from_grid{bins}.csv"
+#     output_filepath = f"{output_path}/{output_filename}"
 
-    plot_1d_histograms(mu, event_stats_path=output_filepath, output_path=f"{output_path}/grid{bins}")
+#     plot_1d_histograms(mu, event_stats_path=output_filepath, output_path=f"{output_path}/grid{bins}")
+
+#################################################################################
+
+create_overlay_plots_debin([4,8,16,32])
+create_overlay_plots_debin([4,16,64,256])
+create_overlay_plots_debin([2,4,8])
+create_overlay_plots_debin([2,4,8,256])
