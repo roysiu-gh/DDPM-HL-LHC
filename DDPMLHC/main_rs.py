@@ -53,17 +53,18 @@ print("FINISHED loading data\n")
 
 #################################################################################
 
-# mus = [0, 50, 200, 500]
-mus = [200]
+mus = [0, 50, 200, 500]
+# mus = [200]
 
 for mu in mus:
     generator = NoisyGenerator(tt, pile_up, mu=mu)
-    next(generator)  # Load jet 0
+    # next(generator)  # Load jet 0
+    generator.select_jet(0)
     save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
     generator.visualise_current_event()
     generator.visualise_current_event(show_pdgids=True)
 
-    next(generator)  # Load jet 1
+    generator.select_jet(1)
     save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
     generator.visualise_current_event(particle_scale_factor=1200, )
     generator.visualise_current_event(particle_scale_factor=1200, show_pdgids=True)

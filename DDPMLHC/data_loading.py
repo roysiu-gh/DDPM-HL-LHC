@@ -301,7 +301,7 @@ class NoisyGenerator(object):
 
     def visualise_current_event(self, save_path=None, particle_scale_factor=3000, show_pdgids=False):
         """
-        Plot the current event in eta-phi space.
+        Plot the current event in eta-phi space. Original code human, augmented by Claude 3.5.
         
         Args:
             save_path: Directory to save plot
@@ -319,16 +319,26 @@ class NoisyGenerator(object):
         ax.set_ylabel("$\Delta\phi$", fontsize=16)
         
         # Configure y-axis ticks
+        def pi_formatter(x, pos):
+            n = int(round(x / (np.pi/4)))  # Round to nearest pi/4
+            if n == 0:
+                return "0"
+            elif n == 1:
+                return "$\\frac{\\pi}{4}$"
+            elif n == -1:
+                return "$-\\frac{\\pi}{4}$"
+            elif n > 0:
+                return f"$\\frac{{{n}\\pi}}{{4}}$"
+            else:
+                return f"$-\\frac{{{-n}\\pi}}{{4}}$"
+        
         ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(base=np.pi / 4))
-        ax.yaxis.set_major_formatter(
-            mpl.ticker.FuncFormatter(
-                lambda val, pos: f"${val/np.pi}\pi$" if val != 0 else "0"
-            )
-        )
+        ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(pi_formatter))
+        ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(base=np.pi/4))
         ax.grid(axis="y", linestyle="--", color="gray", alpha=0.7)
         
         # Plot jet center and boundary
-        ax.plot(0, 0, marker="x", color="blue")
+        ax.plot(0, 0, marker="x", color="black")
         ax.add_patch(plt.Circle((0,0), 1.0, color="black", linewidth=1, fill=False, alpha=0.3))
 
         # NB particle AREAs (not radii) are proportional to masses
@@ -373,7 +383,7 @@ class NoisyGenerator(object):
             
             # Create legend handles with fixed-size markers
             handles = [
-                Line2D([0], [0], marker='x', color='blue', label='Jet axis'),
+                Line2D([0], [0], marker='x', color='black', label='Jet axis'),
                 plt.Circle((0,0), 1.0, color="black", fill=False, alpha=0.5, label="$\Delta R = 1$"),
                 Line2D([0], [0], marker='o', color='w', markerfacecolor='none',
                       markeredgecolor='red', markersize=10, label='Jet particles'),
@@ -396,7 +406,7 @@ class NoisyGenerator(object):
                 f"$\mu = {self.mu}$\n"
                 f"$m = {self.event_mass:.1f}$ GeV\n"
                 f"$p_T = {self.event_pT:.1f}$ GeV\n"
-                f"$\eta = {self.event_eta:.2f}$",
+                f"$\eta_0 = {self.event_eta:.2f}$",
                 transform=ax.transAxes,
                 verticalalignment="top",
                 fontsize=12,
