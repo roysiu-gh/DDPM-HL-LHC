@@ -14,17 +14,17 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 # MAX_DATA_ROWS = 100_000
 
-# # === Read in data
-# print("0 :: Loading original data")
-# tt = np.genfromtxt(
-#     TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-# )
-# pile_up = np.genfromtxt(
-#     PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-# )
-# tt = EventSelector(tt)
-# pile_up = EventSelector(pile_up)
-# print("FINISHED loading data\n")
+# === Read in data
+print("0 :: Loading original data")
+tt = np.genfromtxt(
+    TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+)
+pile_up = np.genfromtxt(
+    PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+)
+tt = EventSelector(tt)
+pile_up = EventSelector(pile_up)
+print("FINISHED loading data\n")
 
 #################################################################################
 
@@ -53,22 +53,30 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 #################################################################################
 
-# for mu in [0, 50, 500]:
-#     generator = NoisyGenerator(tt, pile_up, mu=mu)
-#     next(generator)  # Load jet 0
-#     save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
-#     generator.visualise_current_event()
-#     generator.visualise_current_event(show_pdgids=True)
+# mus = [0, 50, 200, 500]
+mus = [200]
 
-#     next(generator)  # Load jet 1
-#     save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
-#     generator.visualise_current_event()
-#     generator.visualise_current_event(show_pdgids=True)
+for mu in mus:
+    generator = NoisyGenerator(tt, pile_up, mu=mu)
+    next(generator)  # Load jet 0
+    save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
+    generator.visualise_current_event()
+    generator.visualise_current_event(show_pdgids=True)
 
-#     generator.select_jet(42)
-#     save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
-#     generator.visualise_current_event()
-#     generator.visualise_current_event(show_pdgids=True)
+    next(generator)  # Load jet 1
+    save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
+    generator.visualise_current_event(particle_scale_factor=1200, )
+    generator.visualise_current_event(particle_scale_factor=1200, show_pdgids=True)
+
+    generator.select_jet(42)
+    save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
+    generator.visualise_current_event()
+    generator.visualise_current_event(show_pdgids=True)
+
+    generator.select_jet(493)
+    save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
+    generator.visualise_current_event(particle_scale_factor=2000, )
+    generator.visualise_current_event(particle_scale_factor=2000, show_pdgids=True)
 
 #################################################################################
 
@@ -134,10 +142,10 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 #################################################################################
 
-create_overlay_plots_debin([4,8,16,32])
-create_overlay_plots_debin([4,16,64,256])
-create_overlay_plots_debin([4,16,64,256], pure=True)
-create_overlay_plots_debin([4,8,16,256], pure=True)
-create_overlay_plots_debin([8,16,256], pure=True)
-create_overlay_plots_debin([2,4,8])
-create_overlay_plots_debin([2,4,8,256], pure=True)
+# create_overlay_plots_debin([4,8,16,32])
+# create_overlay_plots_debin([4,16,64,256])
+# create_overlay_plots_debin([4,16,64,256], pure=True)
+# create_overlay_plots_debin([4,8,16,256], pure=True)
+# create_overlay_plots_debin([8,16,256], pure=True)
+# create_overlay_plots_debin([2,4,8])
+# create_overlay_plots_debin([2,4,8,256], pure=True)

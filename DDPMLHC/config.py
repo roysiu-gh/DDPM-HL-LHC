@@ -43,7 +43,7 @@ MPL_GLOBAL_PARAMS = {
     'axes.xmargin' : 0,
     'axes.ymargin' : 0,
     'axes.grid' : False,
-    'axes.autolimit_mode' : 'round_numbers',
+    # 'axes.autolimit_mode' : 'round_numbers',
     'xtick.major.pad' : 10,
     'ytick.major.pad' : 10,
     'xtick.labelsize': label_fontsize,

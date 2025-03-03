@@ -392,7 +392,8 @@ class NoisyGenerator(object):
 
         # Event info top left
         ax.text(0.05, 0.95, 
-                f"Jet ${int(self.event_id)}$ with $\mu = {self.mu}$\n"
+                # f"$t \\bar t$ event ${int(self.event_id)}$ with $\mu = {self.mu}$\n"
+                f"$\mu = {self.mu}$\n"
                 f"$m = {self.event_mass:.1f}$ GeV\n"
                 f"$p_T = {self.event_pT:.1f}$ GeV\n"
                 f"$\eta = {self.event_eta:.2f}$",
