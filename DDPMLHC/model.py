@@ -44,15 +44,12 @@ from DDPMLHC.generate_plots.histograms_1d import *
 from DDPMLHC.model_utils import *
 
 # Print Diagnostics right before training
-mu = 200
-train_batch_size = 200
-num_epochs = 500
-
+mu=200
 print_params(mode="TRAINING")
 # this one is to be passed into DataLoader for training
 save_dir = f"{CWD}/data/ML/Unet{UNET_DIMS}_bins{BMAP_SQUARE_SIDE_LENGTH}_mu{mu}"
 print("Begin training")
-xd = load_and_train(diffusion, dataloader, num_epochs=num_epochs, device=device, save_dir=save_dir)
+xd = load_and_train(diffusion, dataloader, num_epochs=EPOCHS, device=device, save_dir=save_dir, lr=LR)
 print("Finished training")
 
 
