@@ -162,32 +162,48 @@ def relative_resolution(ground_truth, comparison):
     return np.abs(comparison - ground_truth) / ground_truth
 
 def mass_resolution_plot():
-    # Load ground truth data
+    # Ground truth (pure ttbar, not binned before calcs)
     gt_file = f"{CWD}/data/2-intermediate/noisy_mu0_event_level.csv"
-    gt_mass = pl.read_csv(gt_file)['mass'].to_numpy()
+    gt_mass = pl.read_csv(gt_file)["mass"].to_numpy()
     
-    # Load reconstructed jet data
-    csv_file_path = f"{CWD}/data/3-grid/mu0/noisy_mu0_event_level_from_grid{BMAP_SQUARE_SIDE_LENGTH}.csv"
-    reconstructed_mass = pl.read_csv(csv_file_path)['mass'].to_numpy()
+    # Direct bin/unbinned best case data
+    csv_file_path_mu0 = f"{CWD}/data/3-grid/mu0/noisy_mu0_event_level_from_grid{BMAP_SQUARE_SIDE_LENGTH}.csv"
+    reconstructed_mass_mu0 = pl.read_csv(csv_file_path_mu0)["mass"].to_numpy()
+
+    # Noisy mu=200 data
+    csv_file_path_mu200 = f"{CWD}/data/2-intermediate/noisy_mu200_event_level.csv"
+    reconstructed_mass_mu200 = pl.read_csv(csv_file_path_mu200)["mass"].to_numpy()
 
     # Remove problematic index with zero mass
     problem_index = 24716
     gt_mass = np.delete(gt_mass, problem_index)
-    reconstructed_mass = np.delete(reconstructed_mass, problem_index)
+    reconstructed_mass_mu0 = np.delete(reconstructed_mass_mu0, problem_index)
+    reconstructed_mass_mu200 = np.delete(reconstructed_mass_mu200, problem_index)
     
-    mass_res = relative_resolution(gt_mass, reconstructed_mass)
+    # Calculate mass res'
+    mass_res_mu0 = relative_resolution(gt_mass, reconstructed_mass_mu0)
+    mass_res_mu200 = relative_resolution(gt_mass, reconstructed_mass_mu200)
     
     # Plot
     plt.figure(figsize=(10, 6))
-    plt.hist(mass_res[mass_res < 5], bins=50, 
-             label=f"Best case", 
-             edgecolor='black', 
-             alpha=0.7)
+    plt.hist(mass_res_mu0[mass_res_mu0 < 5], bins=50, 
+             label="Best case", 
+             edgecolor="black", 
+             alpha=0.7,
+             histtype="step")
+    
+    plt.hist(mass_res_mu200[mass_res_mu200 < 5], bins=50, 
+             label="$\mu = 200$", 
+             edgecolor="red", 
+             alpha=0.7,
+             histtype="step")
     
     plt.xlabel(r'$\frac{\left|m_{\mu}^{j} - m_{0}^{j}\right|}{m_{0}^{j}}$')
-    plt.ylabel('Counts')
-    plt.title('Jet Mass Resolution')
-    plt.legend()
+    plt.ylabel("Counts")
+    plt.yscale("log")
+    
+    # Add legend with image dimensions
+    plt.legend(title=rf"${BMAP_SQUARE_SIDE_LENGTH}\times {BMAP_SQUARE_SIDE_LENGTH}$ grid", loc="upper right")
     plt.tight_layout()
     
     plt.savefig(f"{CWD}/data/plots/relative_resolutions/mass_resolution_test.pdf")
