@@ -180,6 +180,7 @@ plot_resolutions(
         "Noisy ($\mu = 200$)": "red",
         "Reconstructed": "blue"
     },
+    use_log = True,
     save_path = f"{CWD}/data/plots/relative_resolutions/resolution_grid{BMAP_SQUARE_SIDE_LENGTH}_Unet{UNET_DIMS}_mass_gtORIG.pdf"
 )
 
@@ -202,66 +203,3 @@ plot_resolutions(
     },
     save_path = f"{CWD}/data/plots/relative_resolutions/resolution_grid{BMAP_SQUARE_SIDE_LENGTH}_Unet{UNET_DIMS}_mass_gtBEST.pdf"
 )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# # best_case_res = load_variable_data(best_case_path)
-# # noisy_res = load_variable_data(noisy_path)
-# # reconstructed_res = load_variable_data(reconstructed_path)
-
-# mass_resolutions = {
-#     "Best case": load_variable_data(best_case_path, "mass"),
-#     "Noisy ($\mu = 200$)": load_variable_data(noisy_path, "mass"),
-#     "Reconstructed": load_variable_data(reconstructed_path, "mass")
-# }
-
-# pt_resolutions = {
-#     "Best case": load_variable_data(best_case_path, "p_T"),
-#     "Noisy ($\mu = 200$)": load_variable_data(noisy_path, "p_T"),
-#     "Reconstructed": load_variable_data(reconstructed_path, "p_T")
-# }
-
-# plot_resolutions(
-#     mass_resolutions, pt_resolutions,
-#     colors={
-#         "Best case": "black",
-#         "Noisy ($\mu = 200$)": "red",
-#         "Reconstructed": "blue"
-#     },
-#     save_path = f"{CWD}/data/plots/relative_resolutions/resolution_grid{BMAP_SQUARE_SIDE_LENGTH}_Unet{UNET_DIMS}_mass_gtORIG.pdf"
-# )
-
-# ###
-
-# # # Comparison against best case
-# # # best_case_res = load_mass_data(best_case_path)
-# # noisy_res = load_variable_data(noisy_path, truth_path=best_case_path)
-# # reconstructed_res = load_variable_data(reconstructed_path, truth_path=best_case_path)
-
-# # resolutions = {
-# #     # "Best case": best_case_res,
-# #     "Noisy ($\mu = 200$)": noisy_res,
-# #     "Reconstructed": reconstructed_res
-# # }
-
-# # plot_resolutions(
-# #     resolutions=resolutions,
-# #     colors={
-# #         # "Best case": "black",
-# #         "Noisy ($\mu = 200$)": "red",
-# #         "Reconstructed": "blue"
-# #     },
-# #     save_path = f"{CWD}/data/plots/relative_resolutions/resolution_grid{BMAP_SQUARE_SIDE_LENGTH}_Unet{UNET_DIMS}_mass_gtBEST.pdf"
-# # )
