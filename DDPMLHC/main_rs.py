@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib as mpl
 import polars as pl
+import warnings
 # Local imports
 from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import *
@@ -174,15 +175,37 @@ def mass_resolution_plot():
     csv_file_path_mu200 = f"{CWD}/data/2-intermediate/noisy_mu200_event_level.csv"
     reconstructed_mass_mu200 = pl.read_csv(csv_file_path_mu200)["mass"].to_numpy()
 
+    # Reconstructed mu=200 data
+    csv_file_path_mu200_reconstructed = f"{CWD}/data/4-reconstruction/reconstructed_mu200_event_level_from_grid{BMAP_SQUARE_SIDE_LENGTH}.csv"
+    reconstructed_mass_mu200_reconstructed = pl.read_csv(csv_file_path_mu200_reconstructed)["mass"].to_numpy()
+
+    # Use min len if not same len
+    if not (len(reconstructed_mass_mu0) == len(reconstructed_mass_mu200) == len(reconstructed_mass_mu200_reconstructed)):
+        warnings.warn(
+            f"Length mismatch in input arrays:\n"
+            f"best case: {len(reconstructed_mass_mu0)}\n"
+            f"noisy: {len(reconstructed_mass_mu200)}\n"
+            f"reconstructed: {len(reconstructed_mass_mu200_reconstructed)}\n"
+            "Calculations will use the shortest array length.", 
+            UserWarning
+        )
+        min_len = min(len(reconstructed_mass_mu0), len(reconstructed_mass_mu200), len(reconstructed_mass_mu200_reconstructed))
+        gt_mass = gt_mass[:min_len]
+        reconstructed_mass_mu0 = reconstructed_mass_mu0[:min_len]
+        reconstructed_mass_mu200 = reconstructed_mass_mu200[:min_len]
+        reconstructed_mass_mu200_reconstructed = reconstructed_mass_mu200_reconstructed[:min_len]
+
     # Remove problematic index with zero mass
     problem_index = 24716
     gt_mass = np.delete(gt_mass, problem_index)
     reconstructed_mass_mu0 = np.delete(reconstructed_mass_mu0, problem_index)
     reconstructed_mass_mu200 = np.delete(reconstructed_mass_mu200, problem_index)
+    reconstructed_mass_mu200_reconstructed = np.delete(reconstructed_mass_mu200_reconstructed, problem_index)
     
     # Calculate mass res'
     mass_res_mu0 = relative_resolution(gt_mass, reconstructed_mass_mu0)
     mass_res_mu200 = relative_resolution(gt_mass, reconstructed_mass_mu200)
+    mass_res_mu200_reconstructed = relative_resolution(gt_mass, reconstructed_mass_mu200_reconstructed)
     
     # Plot
     plt.figure(figsize=(10, 6))
@@ -193,8 +216,14 @@ def mass_resolution_plot():
              histtype="step")
     
     plt.hist(mass_res_mu200[mass_res_mu200 < 5], bins=50, 
-             label="$\mu = 200$", 
+             label="Noisy ($\mu = 200$)", 
              edgecolor="red", 
+             alpha=0.7,
+             histtype="step")
+    
+    plt.hist(mass_res_mu200_reconstructed[mass_res_mu200_reconstructed < 5], bins=50, 
+             label="Reconstructed", 
+             edgecolor="blue", 
              alpha=0.7,
              histtype="step")
     
