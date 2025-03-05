@@ -128,7 +128,7 @@ class NoisyGenerator(object):
             "p_T": 7,
         }
         self._max_energy()
-
+        print("Max_energy: ", self.max_energy)
         self.reset()  # Initial reset
 
     def reset(self):
@@ -570,36 +570,10 @@ class NoisyGenerator(object):
     def event_pT(self, val):
         self.event_level[self.column_indices_event["p_T"]] = val
 
-class NGenForDataloader(Dataset):
-    def __init__(self, noisy_generator, njets=100):
-        self.ng = noisy_generator
-        self.jets = []
-        self.njets = njets
-        # next(self.ng)
-    def __iter__(self):
-        return self
-    
-    def __len__(self):
-        return self.ng._max_TT_no - 1
-    
-    def __getitem__(self, idx):
-        self.ng.select_jet(idx)
-        x = torch.from_numpy( self.ng.get_grid() ).float()
-        # x = x.unsqueeze(0)
-        x = x.unsqueeze(0)
-
-        return x
-
 
 ###############################################################################
 # Some functions from denoising_diffusion_pytorch that are required but couldn't import
 def extract(a, t, x_shape):
-    b, *_ = t.shape
-    out = a.gather(-1, t)
-    return out.reshape(b, *((1,) * (len(x_shape) - 1)))
-
-def extract(a, t, x_shape):
-    """from denoising_diffusion_pytorch that are required but couldn't import"""
     b, *_ = t.shape
     out = a.gather(-1, t)
     return out.reshape(b, *((1,) * (len(x_shape) - 1)))

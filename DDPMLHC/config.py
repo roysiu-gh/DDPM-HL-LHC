@@ -21,11 +21,15 @@ TTBAR_NUM = 70903
 
 MAX_DATA_ROWS = None
 
-BMAP_SQUARE_SIDE_LENGTH = 16
-UNET_DIMS = 128
+BMAP_SQUARE_SIDE_LENGTH =32
+UNET_DIMS = 64
 TIMESTEPS=200
+SAMPLE_BATCH=1000
 EPOCHS=1000
 BATCH_SIZE=200
+LR=1e-5
+jets_to_sample =1000
+
 
 tick_fontsize = 24
 label_fontsize = 16
@@ -37,7 +41,7 @@ MPL_GLOBAL_PARAMS = {
     'mathtext.fontset': 'stix',
     'font.size' : 24,
     'figure.dpi' : 600,
-    'figure.figsize' : (8, 6),
+    'figure.figsize' : (8, 4),
     'figure.autolayout' : True,
     'axes.labelpad' : 5,
     'axes.xmargin' : 0,

@@ -47,7 +47,7 @@ from DDPMLHC.model_utils import *
 mu=200
 print_params(mode="TRAINING")
 # this one is to be passed into DataLoader for training
-save_dir = f"{CWD}/data/ML/Unet{UNET_DIMS}_bins{BMAP_SQUARE_SIDE_LENGTH}_mu{mu}"
+save_dir = f"{CWD}/data/ML/Unet{UNET_DIMS}_bins{BMAP_SQUARE_SIDE_LENGTH}_mu{mu}_beta1"
 print("Begin training")
 xd = load_and_train(diffusion, dataloader, num_epochs=EPOCHS, device=device, save_dir=save_dir, lr=LR)
 print("Finished training")

@@ -54,6 +54,201 @@ from DDPMLHC.generate_plots.histograms_1d import *
 #         )
 #         display(upscaled_img)
 
+def constant_beta_schedule(beta_end, num_diffusion_timesteps=TIMESTEPS):
+    # betas = beta_end * torch.ones([1,num_diffusion_timesteps], dtype=np.float64)
+    betas = beta_end * np.ones(num_diffusion_timesteps, dtype=np.float64)
+    return betas
+
+class PUDiffusion(GaussianDiffusion):
+    def __init__(self, model, image_size, timesteps, puNG: NoisyGenerator, jet_ng: NoisyGenerator, mu=200, **kwargs):
+        super(PUDiffusion, self).__init__(model=model, image_size=image_size, timesteps=timesteps, **kwargs)
+        self.puNG = puNG
+        self.jetNG = jet_ng
+        self.channels = model.channels
+        self.mu_counter = 1
+        self.timesteps = timesteps
+        self.mu = mu
+        
+        self.begin_sample = 0
+        # Override beta scheduler with constant scheduler
+        betas = constant_beta_schedule(beta_end=0.5)
+        # betas = constant_beta_schedule(beta_end=0.0102)
+        betas = torch.from_numpy(betas)
+        betas = betas.to(self.device)
+        alphas = 1. - betas
+        alphas_cumprod = torch.cumprod(alphas, dim=0)
+        alphas_cumprod_prev = F.pad(alphas_cumprod[:-1], (1, 0), value = 1.)
+
+        timesteps, = betas.shape
+        self.num_timesteps = int(timesteps)
+
+    def reset_sample(self):
+        self.jetNG.reset()
+        self.begin_sample = 0
+    #############################################################################################
+    def cond_noise(self, x_shape, noise, t):
+        return self.pu_to_tensor(x_shape, t=t).to(self.device) if noise is None else noise
+        # return torch.zeros_like(x_start) if noise is None else noise
+    def generate_data(self, shape, NG: NoisyGenerator):
+        """
+        This function generates image data matched to the correct shape
+        """
+        # Start next jet
+        next(NG)
+        selected = NG.get_grid()
+        # If empty pile-up, return array of 0s instead since model should account for this
+        if selected.size == 0:
+            return  "Error in PUDiffusion.generate_jet"
+        # print(selected_pu.shape)
+        pu_tensor = torch.from_numpy(selected).float()
+
+        pu_tensor = torch.unsqueeze(pu_tensor,0)
+        # This tensor has dimensions BxCxHxW to match x_start
+        pu_tensor = torch.unsqueeze(pu_tensor,0)
+        pu_tensor = pu_tensor.expand(shape[0], shape[1], -1, -1) 
+        # pu_tensor = torch.zeros(shape)
+        # pu_tensor = pu_tensor.to(self.device)
+        return pu_tensor
+    # @torch.inference_mode()
+    def pu_to_tensor(self, shape, t):
+        # Select random number of pile-ups (mu) to generate, max 200 for now since HL-LHC expected to do up to this
+        # We are doing it per batch
+        # Align jetIDs for correct centering of pile-up
+        self.puNG._next_jetID = self.jetNG._next_jetID
+        NG = self.puNG
+        # Ensures if t is array valued, select the value
+        NG.mu = int(t[0]) if isinstance(t, (torch.Tensor)) else int(t)
+        # NG.reset()
+        # next(self.puNG)
+        pu_tensor = self.generate_data(shape=shape, NG=NG)
+        return pu_tensor
+    def jet_to_tensor(self, shape):
+        NG = self.jetNG
+        # Align jetIDs for correct centering of pile-up
+        self.puNG._next_jetID = self.jetNG._next_jetID
+        # next(NG)
+        pu_tensor = self.generate_data(shape=shape, NG=self.jetNG)
+        return pu_tensor
+    
+    #############################################################################################
+    
+    @torch.inference_mode()
+    def p_sample(self, x, t: int, x_self_cond = None):
+        b, *_, device = *x.shape, self.device
+        batched_times = torch.full((b,), t, device = device, dtype = torch.long)
+        # print("batched times", t)
+        model_mean, _, model_log_variance, x_start = self.p_mean_variance(x = x, t = batched_times, x_self_cond = x_self_cond, clip_denoised = True)
+        ######## MODIFY
+        noise = self.pu_to_tensor(x.shape, t=t).to(self.device) if t > 0 else 0 # no noise if t == 0
+        pred_img = model_mean + (0.5 * model_log_variance).exp() * noise
+        return pred_img, x_start
+    @autocast('cuda', enabled = False)
+    def q_sample(self, x_start, t, noise = None):
+        noise = self.cond_noise(x_shape=x_start.shape, noise=noise, t=t)
+
+        if self.immiscible:
+            assign = self.noise_assignment(x_start, noise)
+            noise = noise[assign]
+        # print("q_sample t", t)
+        return (
+            extract(self.sqrt_alphas_cumprod, t, x_start.shape) * x_start +
+            extract(self.sqrt_one_minus_alphas_cumprod, t, x_start.shape) * noise
+        )
+    @torch.inference_mode()
+    def generate_noise(self,shape):
+        batch, device = shape[0], self.device
+        jets = []
+        self.puNG.mu = self.mu
+        end_sample = min(self.begin_sample + batch, self.jetNG._max_TT_no-1) 
+        for i in range(self.begin_sample, end_sample):
+            # random_jet_no = np.random.randint(low=0, high=self.jetNG._max_TT_no, size=None)
+            self.jetNG._next_jetID = i
+            self.jetNG.select_jet(i)  # or however you select jets
+            print("jet", i) 
+            jet = torch.from_numpy(self.jetNG.get_grid()).unsqueeze(0)
+            # Now to add pile-up
+            # random_pu_no = np.random.randint(low=0, high=self.jetNG._max_TT_no, size=None)
+            self.puNG._next_jetID = i
+            # Start from 200 pileups
+            # Generate them
+            next(self.puNG)
+            selected_pu = self.puNG.get_grid()
+            pu_tensor = torch.from_numpy(selected_pu)
+            pu_tensor = torch.unsqueeze(pu_tensor,0)
+            noised_jet = jet + pu_tensor # add energies element wise for each bin
+            noised_jet =noised_jet.float()
+            jets.append(noised_jet)
+        self.begin_sample = end_sample
+        # Should now  be batch x 1 x grid x grid
+        jets = torch.stack(jets)
+        jets = jets.to(self.device)
+        return jets
+
+    @torch.inference_mode()
+    def p_sample_loop(self, shape, return_all_timesteps = False):
+        batch, device = shape[0], self.device
+        img = self.generate_noise(shape)
+        imgs = [img]
+
+        x_start = None
+
+        for t in tqdm(reversed(range(0, self.num_timesteps)), desc = 'sampling loop time step', total = self.num_timesteps):
+            # self_cond = x_start
+            self_cond = x_start if self.self_condition else None
+            img, x_start = self.p_sample(img, t, self_cond)
+            imgs.append(img)
+
+        ret = img if not return_all_timesteps else torch.stack(imgs, dim = 1)  # Returns intermediate imgs?
+
+        ret = self.unnormalize(ret)
+        print("final timestep: ", self.num_timesteps)
+        return ret
+    @torch.inference_mode()
+    def sample(self, batch_size = 16, return_all_timesteps = False):
+        (h, w), channels = self.image_size, self.channels
+        # sample_fn = self.p_sample_loop if not self.is_ddim_sampling else self.ddim_sample
+        sample_fn = self.p_sample_loop
+        return sample_fn((batch_size, channels, h, w), return_all_timesteps = return_all_timesteps)
+
+
+    def p_losses(self, x_start, t, noise = None, offset_noise_strength = None):
+        b, c, h, w = x_start.shape
+        noise = self.cond_noise(x_start.shape, noise=noise, t=t)
+        x = self.q_sample(x_start = x_start, t = t, noise = noise)
+        x_self_cond = None
+        if self.self_condition and random() < 0.5:
+            with torch.no_grad():
+                x_self_cond = self.model_predictions(x, t).pred_x_start
+                x_self_cond.detach_()
+
+        # predict and take gradient step
+        model_out = self.model(x, t, x_self_cond)
+
+        if self.objective == 'pred_noise':
+            target = noise
+        elif self.objective == 'pred_x0':
+            target = x_start
+        elif self.objective == 'pred_v':
+            v = self.predict_v(x_start, t, noise)
+            target = v
+        else:
+            raise ValueError(f'unknown objective {self.objective}')
+
+        loss = F.mse_loss(model_out, target, reduction = 'none')
+        loss = reduce(loss, 'b ... -> b', 'mean')
+
+        loss = loss * extract(self.loss_weight, t, loss.shape)
+        return loss.mean()
+    def forward(self, img, *args, **kwargs):
+        # img = img.squeeze(0)
+        # print("???", *img.shape)
+        b, c, h, w, device, img_size, = *img.shape, img.device, self.image_size
+        assert h == img_size[0] and w == img_size[1], f'height and width of image must be {img_size}'
+        t = torch.randint(0, self.num_timesteps, (b,), device=device).long()
+        
+        img = self.normalize(img)
+        return self.p_losses(img, t, *args, **kwargs)
+
 
 # %%
 # Base code for training generated by Claude 3.5. Since modified for our purposes.
@@ -165,7 +360,8 @@ print("FINISHED loading data\n")
 NG_jet = NoisyGenerator(TTselector=tt, PUselector=pu, bins=BMAP_SQUARE_SIDE_LENGTH, mu=0)
 # Second one to randomly generate and return pile-up events ONLY
 NG_pu = NoisyGenerator(TTselector=tt, PUselector=pu, bins=BMAP_SQUARE_SIDE_LENGTH, mu=0, pu_only=True)
-
+# Default NG just for convenience
+NG_default = NoisyGenerator(TTselector=tt, PUselector=pu, bins=BMAP_SQUARE_SIDE_LENGTH, mu=200)
 model = Unet(
     dim=UNET_DIMS,                  # Base dimensionality of feature maps
     dim_mults=(1, 2, 4, 8),  # Multipliers for feature dimensions at each level
@@ -197,6 +393,7 @@ def print_params(mode: Literal["TRAINING", "SAMPLING"],num_epochs=EPOCHS, mu=200
     print(f"UNET DIMS: {UNET_DIMS}")
     print(f"TOTAL EPOCHS: {num_epochs}")
     print(f"TOTAL DIFFUSION TIMESTEPS: {TIMESTEPS}")
+    print(f"LEARNING RATE: {LR}")
     print(f"DEVICE: {device.type}")
     print("#############################")
     print("END DIAGNOSTIC PARAMETERS")
