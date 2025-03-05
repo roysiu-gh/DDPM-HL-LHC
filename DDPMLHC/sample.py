@@ -77,7 +77,7 @@ print_params(mode="SAMPLING")
 #     objective = "pred_x0",
 # ).to(device)
 
-save_dir = f"{CWD}/data/ML/Unet{UNET_DIMS}_bins{bins}_mu{mu}"
+save_dir = f"{CWD}/data/ML/Unet{UNET_DIMS}_bins{bins}_mu{mu}_beta0.5"
 
 print("Begin training")
 xd = load_and_train(diffusion, dataloader, num_epochs=0, device=device, save_dir=save_dir)
@@ -116,7 +116,7 @@ class OutData():
     def _batch_sample(self, rescale=False):
         #self.diffusion.reset()
         #self.diffusion.reset_sample()
-        while self.diffusion.begin_sample < self.NG_jet._max_TT_no - 1:
+        while self.diffusion.begin_sample < self.NG_jet._max_TT_no:
             try:
               sampled_images = self.diffusion.sample(batch_size=SAMPLE_BATCH)
               sampled_images = sampled_images * self.NG_jet.max_energy
@@ -134,10 +134,11 @@ class OutData():
     def _calculate_event_level(self):
         print(f"Iterating through dataset, adding noise and letting model denoise...")
         counter = 0
+        
         # sampled_images is a generator because of yield
         # So each "element" in generator is a sample of jets
         self.diffusion.reset_sample()
-        for sampled_images in self._batch_sample(rescale=False):
+        for idx,sampled_images in enumerate(self._batch_sample(rescale=False)):
             all_data = []
 
             if sampled_images is None:
@@ -150,15 +151,17 @@ class OutData():
                 sampled = sampled_images[:4]
                 sampled_scaled = torch.log1p(sampled)
                 save_image(tensor=sampled_scaled, nrow=self.num_saved_row,fp=f"{histogram_path}/saved_denoised_grids{self.num_saved_row}.png", normalize=True)
+                counter =1
             if len(sampled_images.shape) == 4:  # (batch, channel, height, width)
                 sampled_images = sampled_images.squeeze(1)
 
-            counter +=1
+            
             # print(f"rescaled.shape {rescaled.shape}")
             
             # combined = []
-            for idx, grid in enumerate(sampled_images):
-                NG_jet.select_jet(idx)
+            for jidx, grid in enumerate(sampled_images):
+                eventid = 0
+                NG_jet.select_jet(jidx)
                 axis = NG_jet.jet_axis
                 enes, detas, dphis = grid_to_ene_deta_dphi(grid, N=self.bins)
                 detas, dphis = decentre(axis, detas, dphis)
@@ -168,7 +171,7 @@ class OutData():
                 event_mass, event_px, event_py, event_pz, event_eta, event_phi, event_pT = event_quantities
                 
                 event_level = np.array([
-                    idx,
+                    idx*SAMPLE_BATCH + eventid,
                     event_px,
                     event_py,
                     event_pz,
@@ -177,14 +180,12 @@ class OutData():
                     event_mass,
                     event_pT,
                 ])
-                
+                eventid +=1
                 # combined.append(np.copy(event_level))
                 all_data.append(np.copy(event_level)) 
            
             all_data = np.vstack(all_data)
             yield all_data
-
-        print(len(all_data))
         del sampled_images
         gc.collect()
         torch.cuda.empty_cache()
@@ -234,7 +235,7 @@ with torch.inference_mode():
     # sampled_images = diffusion.sample(batch_size=batch_size)
     # rescaled = sampled_images * NG_jet.max_energy
     # tensor_to_data(rescaled)
-    output_folder=f"{CWD}/data/4-reconstruction"
+    output_folder=f"{CWD}/data/4-reconstruction/beta0.5"
     output_filename = f"reconstructed_mu{diffusion.mu}_event_level_from_grid{BMAP_SQUARE_SIDE_LENGTH}_Unet{UNET_DIMS}.csv"
 
     OD = OutData(diffusion, NG_jet, jets_to_sample)
@@ -261,46 +262,47 @@ print("DONE")
 # plt.close()
 
 ##### CODE TO GENERATE RESOLUTION PLOTS #####
-# def generate_event_level_gridded_jets(NG: NoisyGenerator, save_dir=INTERMEDIATE_PATH):
-#     NG.reset()
-#     NG.bins = BMAP_SQUARE_SIDE_LENGTH
-#     gt_file = f"{save_dir}/noisy_mu0_event_level_grid{BMAP_SQUARE_SIDE_LENGTH}.csv"
-#     combined = []
-#     for idx, _ in enumerate(NG):
-#         # next(NG)
-#         grid = NG.get_grid(normalise=False)
-#         # NG.select_jet(idx)
-#         axis = NG.jet_axis
-#         enes, detas, dphis = grid_to_ene_deta_dphi(grid, N=NG.bins)
-#         detas, dphis = decentre(axis, detas, dphis)
-#         pxs, pys, pzs = deta_dphi_to_momenta(enes, detas, dphis)
-#         # print("???")
-#         event_quantities = particle_momenta_to_event_level(enes, pxs, pys, pzs)
-#         event_mass, event_px, event_py, event_pz, event_eta, event_phi, event_pT = event_quantities
+def generate_event_level_gridded_jets(NG: NoisyGenerator, save_dir=INTERMEDIATE_PATH):
+    NG.reset()
+    NG.bins = BMAP_SQUARE_SIDE_LENGTH
+    gt_file = f"{save_dir}/noisy_mu0_event_level_grid{BMAP_SQUARE_SIDE_LENGTH}.csv"
+    combined = []
+    for idx, _ in enumerate(NG):
+        # next(NG)
+        grid = NG.get_grid(normalise=False)
+        # NG.select_jet(idx)
+        axis = NG.jet_axis
+        enes, detas, dphis = grid_to_ene_deta_dphi(grid, N=NG.bins)
+        detas, dphis = decentre(axis, detas, dphis)
+        pxs, pys, pzs = deta_dphi_to_momenta(enes, detas, dphis)
+        # print("???")
+        event_quantities = particle_momenta_to_event_level(enes, pxs, pys, pzs)
+        event_mass, event_px, event_py, event_pz, event_eta, event_phi, event_pT = event_quantities
         
-#         event_level = np.array([
-#             idx,
-#             event_px,
-#             event_py,
-#             event_pz,
-#             event_eta,
-#             event_phi,
-#             event_mass,
-#             event_pT,
-#         ])
+        event_level = np.array([
+            idx,
+            event_px,
+            event_py,
+            event_pz,
+            event_eta,
+            event_phi,
+            event_mass,
+            event_pT,
+        ])
         
-#         combined.append(np.copy(event_level))
+        combined.append(np.copy(event_level))
             
-#     all_data = np.vstack(combined)
-#     np.savetxt(
-#             gt_file,
-#             all_data,
-#             delimiter=",",
-#             header="event_id,px,py,pz,eta,phi,mass,p_T",
-#             comments="",
-#             fmt="%i,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f"
-#     )
-#     return all_data, gt_file
+    all_data = np.vstack(combined)
+    np.savetxt(
+            gt_file,
+            all_data,
+            delimiter=",",
+            header="event_id,px,py,pz,eta,phi,mass,p_T",
+            comments="",
+            fmt="%i,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f"
+    )
+    return all_data, gt_file
+# generate_event_level_gridded_jets(NG_jet)
 # def mass_energy_diff(save_dir=INTERMEDIATE_PATH, mu=200):
 #     """
 #     Finds the relative difference between the model's denoised images and the binned jets as ground truths

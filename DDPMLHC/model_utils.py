@@ -159,12 +159,11 @@ class PUDiffusion(GaussianDiffusion):
         batch, device = shape[0], self.device
         jets = []
         self.puNG.mu = self.mu
-        end_sample = min(self.begin_sample + batch, self.jetNG._max_TT_no-1) 
+        end_sample = min(self.begin_sample + batch, self.jetNG._max_TT_no) 
         for i in range(self.begin_sample, end_sample):
             # random_jet_no = np.random.randint(low=0, high=self.jetNG._max_TT_no, size=None)
             self.jetNG._next_jetID = i
             self.jetNG.select_jet(i)  # or however you select jets
-            print("jet", i) 
             jet = torch.from_numpy(self.jetNG.get_grid()).unsqueeze(0)
             # Now to add pile-up
             # random_pu_no = np.random.randint(low=0, high=self.jetNG._max_TT_no, size=None)
