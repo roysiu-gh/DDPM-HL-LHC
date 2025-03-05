@@ -1,6 +1,7 @@
 # Package imports
 import numpy as np
 import matplotlib as mpl
+import polars as pl
 # Local imports
 from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import *
@@ -14,17 +15,17 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 # MAX_DATA_ROWS = 100_000
 
-# === Read in data
-print("0 :: Loading original data")
-tt = np.genfromtxt(
-    TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-pile_up = np.genfromtxt(
-    PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-tt = EventSelector(tt)
-pile_up = EventSelector(pile_up)
-print("FINISHED loading data\n")
+# # === Read in data
+# print("0 :: Loading original data")
+# tt = np.genfromtxt(
+#     TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+# )
+# pile_up = np.genfromtxt(
+#     PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+# )
+# tt = EventSelector(tt)
+# pile_up = EventSelector(pile_up)
+# print("FINISHED loading data\n")
 
 #################################################################################
 
@@ -53,31 +54,31 @@ print("FINISHED loading data\n")
 
 #################################################################################
 
-mus = [0, 50, 200, 500]
-# mus = [200]
+# mus = [0, 50, 200, 500]
+# # mus = [200]
 
-for mu in mus:
-    generator = NoisyGenerator(tt, pile_up, mu=mu)
-    # next(generator)  # Load jet 0
-    generator.select_jet(0)
-    save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
-    generator.visualise_current_event()
-    generator.visualise_current_event(show_pdgids=True)
+# for mu in mus:
+#     generator = NoisyGenerator(tt, pile_up, mu=mu)
+#     # next(generator)  # Load jet 0
+#     generator.select_jet(0)
+#     save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
+#     generator.visualise_current_event()
+#     generator.visualise_current_event(show_pdgids=True)
 
-    generator.select_jet(1)
-    save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
-    generator.visualise_current_event(particle_scale_factor=1200, )
-    generator.visualise_current_event(particle_scale_factor=1200, show_pdgids=True)
+#     generator.select_jet(1)
+#     save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
+#     generator.visualise_current_event(particle_scale_factor=1200, )
+#     generator.visualise_current_event(particle_scale_factor=1200, show_pdgids=True)
 
-    generator.select_jet(42)
-    save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
-    generator.visualise_current_event()
-    generator.visualise_current_event(show_pdgids=True)
+#     generator.select_jet(42)
+#     save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
+#     generator.visualise_current_event()
+#     generator.visualise_current_event(show_pdgids=True)
 
-    generator.select_jet(493)
-    save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
-    generator.visualise_current_event(particle_scale_factor=2000, )
-    generator.visualise_current_event(particle_scale_factor=2000, show_pdgids=True)
+#     generator.select_jet(493)
+#     save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
+#     generator.visualise_current_event(particle_scale_factor=2000, )
+#     generator.visualise_current_event(particle_scale_factor=2000, show_pdgids=True)
 
 #################################################################################
 
@@ -150,3 +151,46 @@ for mu in mus:
 # create_overlay_plots_debin([8,16,256], pure=True)
 # create_overlay_plots_debin([2,4,8])
 # create_overlay_plots_debin([2,4,8,256], pure=True)
+
+#################################################################################
+
+def relative_resolution(ground_truth, comparison):
+    if len(ground_truth) != len(comparison):
+        raise IndexError(f"Length mismatch: ground_truth ({len(ground_truth)}) != comparison ({len(comparison)})\n using shortest.")
+    if np.any(ground_truth == 0):
+        raise ZeroDivisionError(f"Found zero values in ground truth")
+    return np.abs(comparison - ground_truth) / ground_truth
+
+def mass_resolution_plot():
+    # Load ground truth data
+    gt_file = f"{CWD}/data/2-intermediate/noisy_mu0_event_level.csv"
+    gt_mass = pl.read_csv(gt_file)['mass'].to_numpy()
+    
+    # Load reconstructed jet data
+    csv_file_path = f"{CWD}/data/3-grid/mu0/noisy_mu0_event_level_from_grid{BMAP_SQUARE_SIDE_LENGTH}.csv"
+    reconstructed_mass = pl.read_csv(csv_file_path)['mass'].to_numpy()
+
+    # Remove problematic index with zero mass
+    problem_index = 24716
+    gt_mass = np.delete(gt_mass, problem_index)
+    reconstructed_mass = np.delete(reconstructed_mass, problem_index)
+    
+    mass_res = relative_resolution(gt_mass, reconstructed_mass)
+    
+    # Plot
+    plt.figure(figsize=(10, 6))
+    plt.hist(mass_res[mass_res < 5], bins=50, 
+             label=f"Best case", 
+             edgecolor='black', 
+             alpha=0.7)
+    
+    plt.xlabel(r'$\frac{\left|m_{\mu}^{j} - m_{0}^{j}\right|}{m_{0}^{j}}$')
+    plt.ylabel('Counts')
+    plt.title('Jet Mass Resolution')
+    plt.legend()
+    plt.tight_layout()
+    
+    plt.savefig(f"{CWD}/data/plots/relative_resolutions/mass_resolution_test.pdf")
+    plt.close()
+
+mass_resolution = mass_resolution_plot()
