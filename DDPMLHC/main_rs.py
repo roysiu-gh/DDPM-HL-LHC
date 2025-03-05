@@ -212,9 +212,9 @@ bins = [4, 8, 16, 32]
 save_path = f"{CWD}/data/plots/relative_resolutions/resolution_compare_grids_{'_'.join(map(str, bins))}.pdf"
 
 paths = [f"{CWD}/data/3-grid/mu0/noisy_mu0_event_level_from_grid{bin}.csv" for bin in bins]
-mass_resolutions_grids = { rf"{bin}\\times{bin}" : load_variable_data(paths[i], "mass")
+mass_resolutions_grids = { rf"${bin} \times {bin}$" : load_variable_data(paths[i], "mass")
                           for i, bin in enumerate(bins) }
-pt_resolutions_grids = { rf"{bin}\\times{bin}" : load_variable_data(paths[i], "p_T")
+pt_resolutions_grids = { rf"${bin} \times {bin}$" : load_variable_data(paths[i], "p_T")
                           for i, bin in enumerate(bins) }
 
 plot_resolutions(
@@ -223,4 +223,5 @@ plot_resolutions(
     mass_cutoff=10,
     pt_cutoff=0.2,
     use_log=True,
+    legend_title="",
 )

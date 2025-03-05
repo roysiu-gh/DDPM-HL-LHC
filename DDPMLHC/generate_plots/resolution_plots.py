@@ -46,10 +46,11 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
     for label, res in mass_resolutions.items():
         plot_data = res[res < mass_cutoff]
         ax1.hist(plot_data, 
-                bins=np.linspace(0, mass_cutoff, 50),  # Explicit bin range
+                bins=np.linspace(0, mass_cutoff, 50),
                 label=label, 
                 histtype="step",
-                density=True)  # Normalize to compare shapes
+                density=True,
+                color=colors.get(label) if colors else None)  # Use color if provided
     
     ax1.set_xlabel("(a) mass relative resolution")
     ax1.set_ylabel("Density")
@@ -63,10 +64,11 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
     for label, res in pt_resolutions.items():
         plot_data = res[res < pt_cutoff]
         ax2.hist(plot_data, 
-                bins=np.linspace(0, pt_cutoff, 50),  # Explicit bin range
+                bins=np.linspace(0, pt_cutoff, 50),
                 label=label, 
                 histtype="step",
-                density=True)  # Normalize to compare shapes
+                density=True,
+                color=colors.get(label) if colors else None)  # Use color if provided
     
     ax2.set_xlabel(r"(b) $p_T$ relative resolution")
     if use_log: ax2.set_yscale("log")
