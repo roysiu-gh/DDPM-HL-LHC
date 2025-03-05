@@ -47,7 +47,8 @@ def plot_resolutions(resolutions, colors=None, grid_size=BMAP_SQUARE_SIDE_LENGTH
                 alpha=0.7,
                 histtype="step")
     
-    plt.xlabel(r'$\frac{\left|m_{\mu}^{j} - m_{0}^{j}\right|}{m_{0}^{j}}$')
+    # plt.xlabel(r"$\frac{\left|m_{\mu}^{j} - m_{0}^{j}\right|}{m_{0}^{j}}$")
+    plt.xlabel(r"Relative resolution")
     plt.ylabel("Counts")
     plt.yscale("log")
     

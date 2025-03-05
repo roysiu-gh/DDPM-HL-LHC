@@ -155,7 +155,7 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 #################################################################################
 
-# Comparison agains pure best
+# Comparison against pure cts
 best_case_path = f"{CWD}/data/3-grid/mu0/noisy_mu0_event_level_from_grid{BMAP_SQUARE_SIDE_LENGTH}.csv"
 noisy_path = f"{CWD}/data/2-intermediate/noisy_mu200_event_level.csv"
 reconstructed_path = f"{CWD}/data/4-reconstruction/reconstructed_mu{200}_event_level_from_grid{BMAP_SQUARE_SIDE_LENGTH}_Unet{UNET_DIMS}.csv"
@@ -177,5 +177,28 @@ plot_resolutions(
         "Noisy ($\mu = 200$)": "red",
         "Reconstructed": "blue"
     },
-    save_path = f"{CWD}/data/plots/relative_resolutions/resolution_grid{BMAP_SQUARE_SIDE_LENGTH}_Unet{UNET_DIMS}_mass.pdf"
+    save_path = f"{CWD}/data/plots/relative_resolutions/resolution_grid{BMAP_SQUARE_SIDE_LENGTH}_Unet{UNET_DIMS}_mass_gtORIG.pdf"
+)
+
+###
+
+# Comparison against best case
+# best_case_res = load_mass_data(best_case_path)
+noisy_res = load_mass_data(noisy_path, truth_path=best_case_path)
+reconstructed_res = load_mass_data(reconstructed_path, truth_path=best_case_path)
+
+resolutions = {
+    # "Best case": best_case_res,
+    "Noisy ($\mu = 200$)": noisy_res,
+    "Reconstructed": reconstructed_res
+}
+
+plot_resolutions(
+    resolutions=resolutions,
+    colors={
+        # "Best case": "black",
+        "Noisy ($\mu = 200$)": "red",
+        "Reconstructed": "blue"
+    },
+    save_path = f"{CWD}/data/plots/relative_resolutions/resolution_grid{BMAP_SQUARE_SIDE_LENGTH}_Unet{UNET_DIMS}_mass_gtBEST.pdf"
 )
