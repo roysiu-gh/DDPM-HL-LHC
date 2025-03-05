@@ -12,11 +12,11 @@ def relative_resolution(ground_truth, comparison):
         raise ZeroDivisionError(f"Zero(s) in ground truth")
     return np.abs(comparison - ground_truth) / ground_truth
 
-def load_mass_data(data_path, truth_path=None):
+def load_variable_data(data_path, variable, truth_path=None):
     if truth_path is None:
         truth_path = f"{CWD}/data/2-intermediate/noisy_mu0_event_level.csv"
-    truth = pl.read_csv(truth_path)["mass"].to_numpy()
-    data = pl.read_csv(data_path)["mass"].to_numpy()
+    truth = pl.read_csv(truth_path)[variable].to_numpy()
+    data = pl.read_csv(data_path)[variable].to_numpy()
     
     if len(data) != len(truth):
         print(f"WARNING - Length mismatch in data: truth {len(truth)} != data {len(data)}. Using shortest length.")
@@ -31,31 +31,45 @@ def load_mass_data(data_path, truth_path=None):
 
     return relative_resolution(truth, data)
 
-def plot_resolutions(resolutions, colors=None, grid_size=BMAP_SQUARE_SIDE_LENGTH, save_path=None):
-    """Plot mass resolutions"""
+def plot_resolutions(mass_resolutions, pt_resolutions, colors=None, grid_size=BMAP_SQUARE_SIDE_LENGTH, save_path=None):
+    """Plot mass and pT resolutions side by side"""
     if colors is None:
         colors = {"Best case": "black", "Noisy ($\mu = 200$)": "red", "Reconstructed": "blue"}
     
     # Make plot
-    plt.figure(figsize=(10, 6))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 6))
     
-    for label, res in resolutions.items():
+    # Mass plot
+    for label, res in mass_resolutions.items():
         plot_data = res[res < 5]
-        plt.hist(plot_data, bins=50, 
+        ax1.hist(plot_data, bins=50, 
                 label=label, 
                 edgecolor=colors[label], 
                 alpha=0.7,
                 histtype="step")
     
-    # plt.xlabel(r"$\frac{\left|m_{\mu}^{j} - m_{0}^{j}\right|}{m_{0}^{j}}$")
-    plt.xlabel(r"Relative resolution")
-    plt.ylabel("Counts")
-    plt.yscale("log")
+    ax1.set_xlabel("Mass relative resolution")
+    ax1.set_ylabel("Counts")
+    ax1.set_yscale("log")
+    ax1.legend(title=rf"${grid_size}\times {grid_size}$ grid", loc="upper right")
     
-    plt.legend(title=rf"${grid_size}\times {grid_size}$ grid", loc="upper right")
+    # pT plot
+    for label, res in pt_resolutions.items():
+        plot_data = res[res < 5]
+        ax2.hist(plot_data, bins=50, 
+                label=label, 
+                edgecolor=colors[label], 
+                alpha=0.7,
+                histtype="step")
+    
+    ax2.set_xlabel(r"$p_T$ relative resolution")
+    ax2.set_ylabel("Counts")
+    ax2.set_yscale("log")
+    ax2.legend(title=rf"${grid_size}\times {grid_size}$ grid", loc="upper right")
+    
     plt.tight_layout()
     
     if save_path is None:
-        save_path = f"{CWD}/data/plots/relative_resolutions/mass_resolution_test.pdf"
+        save_path = f"{CWD}/data/plots/relative_resolutions/resolutions_test.pdf"
     plt.savefig(save_path)
     plt.close()
