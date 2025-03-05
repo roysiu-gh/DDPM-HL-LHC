@@ -33,22 +33,11 @@ def load_variable_data(data_path, variable, truth_path=None):
 
 def plot_resolutions(mass_resolutions, pt_resolutions, colors=None, 
                     grid_size=BMAP_SQUARE_SIDE_LENGTH, save_path=None,
-                    mass_cutoff=4, pt_cutoff=2, use_log=False):
-    """
-    Plot mass and pT resolutions side by side
+                    mass_cutoff=4, pt_cutoff=2, use_log=False, legend_title=None):
     
-    Args:
-        mass_resolutions (dict): Mass resolution data
-        pt_resolutions (dict): pT resolution data
-        colors (dict): Colors for each dataset
-        grid_size (int): Grid size for title
-        save_path (str): Where to save the plot
-        mass_cutoff (float): Upper cutoff for mass resolution
-        pt_cutoff (float): Upper cutoff for pT resolution
-        use_log (bool): Whether to use log scale for y-axis
-    """
-    if colors is None:
-        colors = {"Best case": "black", "Noisy ($\mu = 200$)": "red", "Reconstructed": "blue"}
+    # Default legend title if none provided
+    if legend_title is None:
+        legend_title = rf"${grid_size}\times {grid_size}$ grid"
     
     # Make plot
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
@@ -56,29 +45,35 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
     # Mass plot
     for label, res in mass_resolutions.items():
         plot_data = res[res < mass_cutoff]
-        ax1.hist(plot_data, bins=50, 
+        ax1.hist(plot_data, 
+                bins=np.linspace(0, mass_cutoff, 50),  # Explicit bin range
                 label=label, 
-                edgecolor=colors[label], 
-                alpha=0.7,
-                histtype="step")
+                histtype="step",
+                density=True)  # Normalize to compare shapes
     
     ax1.set_xlabel("(a) mass relative resolution")
-    ax1.set_ylabel("Counts")
+    ax1.set_ylabel("Density")
     if use_log: ax1.set_yscale("log")
-    ax1.legend(title=rf"${grid_size}\times {grid_size}$ grid", loc="upper right")
+    if legend_title == "":
+        ax1.legend(loc="upper right")
+    else:
+        ax1.legend(title=legend_title, loc="upper right")
     
     # pT plot
     for label, res in pt_resolutions.items():
         plot_data = res[res < pt_cutoff]
-        ax2.hist(plot_data, bins=50, 
+        ax2.hist(plot_data, 
+                bins=np.linspace(0, pt_cutoff, 50),  # Explicit bin range
                 label=label, 
-                edgecolor=colors[label], 
-                alpha=0.7,
-                histtype="step")
+                histtype="step",
+                density=True)  # Normalize to compare shapes
     
     ax2.set_xlabel(r"(b) $p_T$ relative resolution")
     if use_log: ax2.set_yscale("log")
-    ax2.legend(title=rf"${grid_size}\times {grid_size}$ grid", loc="upper right")
+    if legend_title == "":
+        ax2.legend(loc="upper right")
+    else:
+        ax2.legend(title=legend_title, loc="upper right")
     
     plt.tight_layout()
     

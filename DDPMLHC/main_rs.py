@@ -203,3 +203,24 @@ plot_resolutions(
     },
     save_path = f"{CWD}/data/plots/relative_resolutions/resolution_grid{BMAP_SQUARE_SIDE_LENGTH}_Unet{UNET_DIMS}_mass_gtBEST.pdf"
 )
+
+#################################################################################
+
+# Resplots for impact of gridding, compare against cts pure
+
+bins = [4, 8, 16, 32]
+save_path = f"{CWD}/data/plots/relative_resolutions/resolution_compare_grids_{'_'.join(map(str, bins))}.pdf"
+
+paths = [f"{CWD}/data/3-grid/mu0/noisy_mu0_event_level_from_grid{bin}.csv" for bin in bins]
+mass_resolutions_grids = { rf"{bin}\\times{bin}" : load_variable_data(paths[i], "mass")
+                          for i, bin in enumerate(bins) }
+pt_resolutions_grids = { rf"{bin}\\times{bin}" : load_variable_data(paths[i], "p_T")
+                          for i, bin in enumerate(bins) }
+
+plot_resolutions(
+    mass_resolutions_grids, pt_resolutions_grids,
+    save_path = save_path,
+    mass_cutoff=10,
+    pt_cutoff=0.2,
+    use_log=True,
+)
