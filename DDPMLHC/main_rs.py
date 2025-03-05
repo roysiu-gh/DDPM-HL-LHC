@@ -208,7 +208,7 @@ plot_resolutions(
 
 # Resplots for impact of gridding, compare against cts pure
 
-bins = [4, 8, 16, 32]
+bins = [4, 8, 16, 256]
 save_path = f"{CWD}/data/plots/relative_resolutions/resolution_compare_grids_{'_'.join(map(str, bins))}.pdf"
 
 paths = [f"{CWD}/data/3-grid/mu0/noisy_mu0_event_level_from_grid{bin}.csv" for bin in bins]
