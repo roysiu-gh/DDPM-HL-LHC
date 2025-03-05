@@ -2,7 +2,6 @@
 import numpy as np
 import matplotlib as mpl
 import polars as pl
-import warnings
 # Local imports
 from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import *
@@ -11,6 +10,7 @@ from DDPMLHC.generate_plots.histograms_1d import plot_1d_histograms
 from DDPMLHC.generate_plots.overlaid_1d import create_overlay_plots
 from DDPMLHC.generate_plots.overlaid_debin import create_overlay_plots_debin
 from DDPMLHC.generate_plots.bmap import save_to_bmap
+from DDPMLHC.generate_plots.resolution_plots import *
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
@@ -155,87 +155,51 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 #################################################################################
 
-def relative_resolution(ground_truth, comparison):
-    if len(ground_truth) != len(comparison):
-        raise IndexError(f"Length mismatch: ground_truth ({len(ground_truth)}) != comparison ({len(comparison)})\n using shortest.")
-    if np.any(ground_truth == 0):
-        raise ZeroDivisionError(f"Found zero values in ground truth")
-    return np.abs(comparison - ground_truth) / ground_truth
+# Comparison against pure cts
+best_case_path = f"{CWD}/data/3-grid/mu0/noisy_mu0_event_level_from_grid{BMAP_SQUARE_SIDE_LENGTH}.csv"
+noisy_path = f"{CWD}/data/2-intermediate/noisy_mu200_event_level.csv"
+reconstructed_path = f"{CWD}/data/4-reconstruction/reconstructed_mu{200}_event_level_from_grid{BMAP_SQUARE_SIDE_LENGTH}_Unet{UNET_DIMS}.csv"
 
-def mass_resolution_plot():
-    # Ground truth (pure ttbar, not binned before calcs)
-    gt_file = f"{CWD}/data/2-intermediate/noisy_mu0_event_level.csv"
-    gt_mass = pl.read_csv(gt_file)["mass"].to_numpy()
-    
-    # Direct bin/unbinned best case data
-    csv_file_path_mu0 = f"{CWD}/data/3-grid/mu0/noisy_mu0_event_level_from_grid{BMAP_SQUARE_SIDE_LENGTH}.csv"
-    reconstructed_mass_mu0 = pl.read_csv(csv_file_path_mu0)["mass"].to_numpy()
+# First plot - comparison against pure cts
+mass_resolutions_orig = {
+    "Best case": load_variable_data(best_case_path, "mass"),
+    "Noisy ($\mu = 200$)": load_variable_data(noisy_path, "mass"),
+    "Reconstructed": load_variable_data(reconstructed_path, "mass")
+}
 
-    # Noisy mu=200 data
-    csv_file_path_mu200 = f"{CWD}/data/2-intermediate/noisy_mu200_event_level.csv"
-    reconstructed_mass_mu200 = pl.read_csv(csv_file_path_mu200)["mass"].to_numpy()
+pt_resolutions_orig = {
+    "Best case": load_variable_data(best_case_path, "p_T"),
+    "Noisy ($\mu = 200$)": load_variable_data(noisy_path, "p_T"),
+    "Reconstructed": load_variable_data(reconstructed_path, "p_T")
+}
 
-    # Reconstructed mu=200 data
-    csv_file_path_mu200_reconstructed = f"{CWD}/data/4-reconstruction/reconstructed_mu200_event_level_from_grid{BMAP_SQUARE_SIDE_LENGTH}.csv"
-    reconstructed_mass_mu200_reconstructed = pl.read_csv(csv_file_path_mu200_reconstructed)["mass"].to_numpy()
+plot_resolutions(
+    mass_resolutions_orig, pt_resolutions_orig,
+    colors={
+        "Best case": "black",
+        "Noisy ($\mu = 200$)": "red",
+        "Reconstructed": "blue"
+    },
+    use_log = True,
+    save_path = f"{CWD}/data/plots/relative_resolutions/resolution_grid{BMAP_SQUARE_SIDE_LENGTH}_Unet{UNET_DIMS}_mass_gtORIG.pdf"
+)
 
-    # Use min len if not same len
-    if not (len(reconstructed_mass_mu0) == len(reconstructed_mass_mu200) == len(reconstructed_mass_mu200_reconstructed)):
-        warnings.warn(
-            f"Length mismatch in input arrays:\n"
-            f"best case: {len(reconstructed_mass_mu0)}\n"
-            f"noisy: {len(reconstructed_mass_mu200)}\n"
-            f"reconstructed: {len(reconstructed_mass_mu200_reconstructed)}\n"
-            "Calculations will use the shortest array length.", 
-            UserWarning
-        )
-        min_len = min(len(reconstructed_mass_mu0), len(reconstructed_mass_mu200), len(reconstructed_mass_mu200_reconstructed))
-        gt_mass = gt_mass[:min_len]
-        reconstructed_mass_mu0 = reconstructed_mass_mu0[:min_len]
-        reconstructed_mass_mu200 = reconstructed_mass_mu200[:min_len]
-        reconstructed_mass_mu200_reconstructed = reconstructed_mass_mu200_reconstructed[:min_len]
+# Second plot - comparison against best case
+mass_resolutions_best = {
+    "Noisy ($\mu = 200$)": load_variable_data(noisy_path, "mass", truth_path=best_case_path),
+    "Reconstructed": load_variable_data(reconstructed_path, "mass", truth_path=best_case_path)
+}
 
-    # Remove problematic index with zero mass
-    problem_index = 24716
-    gt_mass = np.delete(gt_mass, problem_index)
-    reconstructed_mass_mu0 = np.delete(reconstructed_mass_mu0, problem_index)
-    reconstructed_mass_mu200 = np.delete(reconstructed_mass_mu200, problem_index)
-    reconstructed_mass_mu200_reconstructed = np.delete(reconstructed_mass_mu200_reconstructed, problem_index)
-    
-    # Calculate mass res'
-    mass_res_mu0 = relative_resolution(gt_mass, reconstructed_mass_mu0)
-    mass_res_mu200 = relative_resolution(gt_mass, reconstructed_mass_mu200)
-    mass_res_mu200_reconstructed = relative_resolution(gt_mass, reconstructed_mass_mu200_reconstructed)
-    
-    # Plot
-    plt.figure(figsize=(10, 6))
-    plt.hist(mass_res_mu0[mass_res_mu0 < 5], bins=50, 
-             label="Best case", 
-             edgecolor="black", 
-             alpha=0.7,
-             histtype="step")
-    
-    plt.hist(mass_res_mu200[mass_res_mu200 < 5], bins=50, 
-             label="Noisy ($\mu = 200$)", 
-             edgecolor="red", 
-             alpha=0.7,
-             histtype="step")
-    
-    plt.hist(mass_res_mu200_reconstructed[mass_res_mu200_reconstructed < 5], bins=50, 
-             label="Reconstructed", 
-             edgecolor="blue", 
-             alpha=0.7,
-             histtype="step")
-    
-    plt.xlabel(r'$\frac{\left|m_{\mu}^{j} - m_{0}^{j}\right|}{m_{0}^{j}}$')
-    plt.ylabel("Counts")
-    plt.yscale("log")
-    
-    # Add legend with image dimensions
-    plt.legend(title=rf"${BMAP_SQUARE_SIDE_LENGTH}\times {BMAP_SQUARE_SIDE_LENGTH}$ grid", loc="upper right")
-    plt.tight_layout()
-    
-    plt.savefig(f"{CWD}/data/plots/relative_resolutions/mass_resolution_test.pdf")
-    plt.close()
+pt_resolutions_best = {
+    "Noisy ($\mu = 200$)": load_variable_data(noisy_path, "p_T", truth_path=best_case_path),
+    "Reconstructed": load_variable_data(reconstructed_path, "p_T", truth_path=best_case_path)
+}
 
-mass_resolution = mass_resolution_plot()
+plot_resolutions(
+    mass_resolutions_best, pt_resolutions_best,
+    colors={
+        "Noisy ($\mu = 200$)": "red",
+        "Reconstructed": "blue"
+    },
+    save_path = f"{CWD}/data/plots/relative_resolutions/resolution_grid{BMAP_SQUARE_SIDE_LENGTH}_Unet{UNET_DIMS}_mass_gtBEST.pdf"
+)
