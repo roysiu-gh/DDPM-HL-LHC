@@ -25,7 +25,7 @@ BMAP_SQUARE_SIDE_LENGTH = 16
 UNET_DIMS = 64
 TIMESTEPS=200
 SAMPLE_BATCH=1000
-EPOCHS=1000
+EPOCHS=800
 BATCH_SIZE=200
 LR=1e-5
 jets_to_sample =1000
@@ -47,6 +47,7 @@ MPL_GLOBAL_PARAMS = {
     'axes.xmargin' : 0,
     'axes.ymargin' : 0,
     'axes.grid' : False,
+    "axes.labelsize": label_fontsize,
     # 'axes.autolimit_mode' : 'round_numbers',
     'xtick.major.pad' : 10,
     'ytick.major.pad' : 10,
@@ -60,5 +61,6 @@ MPL_GLOBAL_PARAMS = {
     'xtick.minor.visible' : True,
     'ytick.minor.visible' : True,
     'axes.prop_cycle': cycler(color = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']*3),
-    'legend.framealpha': None
+    'legend.framealpha': None,
+    "figure.autolayout": True
 }

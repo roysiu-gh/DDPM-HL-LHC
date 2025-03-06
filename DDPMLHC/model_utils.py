@@ -71,7 +71,7 @@ class PUDiffusion(GaussianDiffusion):
         
         self.begin_sample = 0
         # Override beta scheduler with constant scheduler
-        betas = constant_beta_schedule(beta_end=0.5)
+        betas = constant_beta_schedule(beta_end=1)
         # betas = constant_beta_schedule(beta_end=0.0102)
         betas = torch.from_numpy(betas)
         betas = betas.to(self.device)

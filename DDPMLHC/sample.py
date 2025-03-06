@@ -91,7 +91,7 @@ print("Finished training")
 output_path = f"{CWD}/data/3-grid/Unet{UNET_DIMS}_bins{bins}_mu{mu}"
 output_filename = f"noisy_mu{mu}_event_level_from_grid{bins}.csv"
 output_filepath = f"{output_path}/{output_filename}"
-histogram_path = f"{output_path}/grid{bins}_hist"
+histogram_path = f"{output_path}/grid{bins}_hist_beta1"
 # mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 if not(os.path.exists(output_path)):
     os.mkdir(output_path)
@@ -154,11 +154,6 @@ class OutData():
                 counter =1
             if len(sampled_images.shape) == 4:  # (batch, channel, height, width)
                 sampled_images = sampled_images.squeeze(1)
-
-            
-            # print(f"rescaled.shape {rescaled.shape}")
-            
-            # combined = []
             for jidx, grid in enumerate(sampled_images):
                 eventid = 0
                 NG_jet.select_jet(jidx)
@@ -171,7 +166,7 @@ class OutData():
                 event_mass, event_px, event_py, event_pz, event_eta, event_phi, event_pT = event_quantities
                 
                 event_level = np.array([
-                    idx*SAMPLE_BATCH + eventid,
+                    idx*SAMPLE_BATCH + jidx,
                     event_px,
                     event_py,
                     event_pz,
@@ -235,7 +230,7 @@ with torch.inference_mode():
     # sampled_images = diffusion.sample(batch_size=batch_size)
     # rescaled = sampled_images * NG_jet.max_energy
     # tensor_to_data(rescaled)
-    output_folder=f"{CWD}/data/4-reconstruction/beta0.5"
+    output_folder=f"{CWD}/data/4-reconstruction/beta1"
     output_filename = f"reconstructed_mu{diffusion.mu}_event_level_from_grid{BMAP_SQUARE_SIDE_LENGTH}_Unet{UNET_DIMS}.csv"
 
     OD = OutData(diffusion, NG_jet, jets_to_sample)
