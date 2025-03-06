@@ -33,7 +33,7 @@ def load_variable_data(data_path, variable, truth_path=None):
 
 def plot_resolutions(mass_resolutions, pt_resolutions, colors=None, 
                     bins=BMAP_SQUARE_SIDE_LENGTH, save_path=None,
-                    mass_cutoff=(0, 4), pt_cutoff=(-1, 2), use_log=False, legend_title=None):
+                    mass_cutoff=(-1, 4), pt_cutoff=(-1, 2), use_log=False, legend_title=None):
     
     if legend_title is None:
         legend_title = rf"${bins}\times {bins}$ grid"
@@ -50,6 +50,7 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
                 density=True,
                 color=colors.get(label) if colors else None)
     
+    ax1.axvline(x=0, color="black", linestyle="--")  # vertical line
     ax1.set_xlabel("(a) mass response")
     ax1.set_ylabel("Density")
     if use_log: ax1.set_yscale("log")
@@ -68,6 +69,7 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
                 density=True,
                 color=colors.get(label) if colors else None)
     
+    ax2.axvline(x=0, color="black", linestyle="--")  # vertical line
     ax2.set_xlabel(r"(b) $p_T$ response")
     if use_log: ax2.set_yscale("log")
     if legend_title == "":

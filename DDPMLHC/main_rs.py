@@ -164,13 +164,13 @@ reconstructed_path = f"{CWD}/data/4-reconstruction/reconstructed_mu{200}_event_l
 mass_resolutions_orig = {
     "Best case": load_variable_data(best_case_path, "mass"),
     "Noisy ($\mu = 200$)": load_variable_data(noisy_path, "mass"),
-    "Reconstructed": load_variable_data(reconstructed_path, "mass")
+    "Denoised": load_variable_data(reconstructed_path, "mass")
 }
 
 pt_resolutions_orig = {
     "Best case": load_variable_data(best_case_path, "p_T"),
     "Noisy ($\mu = 200$)": load_variable_data(noisy_path, "p_T"),
-    "Reconstructed": load_variable_data(reconstructed_path, "p_T")
+    "Denoised": load_variable_data(reconstructed_path, "p_T")
 }
 
 plot_resolutions(
@@ -178,7 +178,7 @@ plot_resolutions(
     colors={
         "Best case": "black",
         "Noisy ($\mu = 200$)": "red",
-        "Reconstructed": "blue"
+        "Denoised": "blue"
     },
     use_log = True,
     save_path = f"{CWD}/data/plots/relative_resolutions/resolution_grid{BMAP_SQUARE_SIDE_LENGTH}_Unet{UNET_DIMS}_mass_gtORIG.pdf"
@@ -187,19 +187,19 @@ plot_resolutions(
 # Second plot - comparison against best case
 mass_resolutions_best = {
     "Noisy ($\mu = 200$)": load_variable_data(noisy_path, "mass", truth_path=best_case_path),
-    "Reconstructed": load_variable_data(reconstructed_path, "mass", truth_path=best_case_path)
+    "Denoised": load_variable_data(reconstructed_path, "mass", truth_path=best_case_path)
 }
 
 pt_resolutions_best = {
     "Noisy ($\mu = 200$)": load_variable_data(noisy_path, "p_T", truth_path=best_case_path),
-    "Reconstructed": load_variable_data(reconstructed_path, "p_T", truth_path=best_case_path)
+    "Denoised": load_variable_data(reconstructed_path, "p_T", truth_path=best_case_path)
 }
 
 plot_resolutions(
     mass_resolutions_best, pt_resolutions_best,
     colors={
         "Noisy ($\mu = 200$)": "red",
-        "Reconstructed": "blue"
+        "Denoised": "blue"
     },
     save_path = f"{CWD}/data/plots/relative_resolutions/resolution_grid{BMAP_SQUARE_SIDE_LENGTH}_Unet{UNET_DIMS}_mass_gtBEST.pdf"
 )
@@ -222,6 +222,6 @@ plot_resolutions(
     save_path = save_path,
     mass_cutoff=(-1, 4),
     pt_cutoff=(-0.1, 0.1),
-    # use_log=True,
+    use_log=True,
     legend_title="",
 )

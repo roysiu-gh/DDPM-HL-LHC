@@ -32,7 +32,7 @@ jets_to_sample =1000
 
 
 tick_fontsize = 24
-label_fontsize = 16
+label_fontsize = 20
 
 MPL_GLOBAL_PARAMS = {
     'text.usetex' : True,
