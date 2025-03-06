@@ -32,57 +32,48 @@ def load_variable_data(data_path, variable, truth_path=None):
     return relative_resolution(truth, data)
 
 def plot_resolutions(mass_resolutions, pt_resolutions, colors=None, 
-                    grid_size=BMAP_SQUARE_SIDE_LENGTH, save_path=None,
-                    mass_cutoff=4, pt_cutoff=2, use_log=False, title=None):
-    """
-    Plot mass and pT resolutions side by side
+                    bins=BMAP_SQUARE_SIDE_LENGTH, save_path=None,
+                    mass_cutoff=(0, 4), pt_cutoff=(-1, 2), use_log=False, legend_title=None):
     
-    Args:
-        mass_resolutions (dict): Mass resolution data
-        pt_resolutions (dict): pT resolution data
-        colors (dict): Colors for each dataset
-        grid_size (int): Grid size for title
-        save_path (str): Where to save the plot
-        mass_cutoff (float): Upper cutoff for mass resolution
-        pt_cutoff (float): Upper cutoff for pT resolution
-        use_log (bool): Whether to use log scale for y-axis
-    """
-    if title is None:
-        title = rf"${grid_size}\times {grid_size}$ grid"
-
-    if colors is None:
-        colors = {"Ground truth": "black", "Noisy ($\mu = 200$)": "red", "Denoised": "blue"}
+    if legend_title is None:
+        legend_title = rf"${bins}\times {bins}$ grid"
     
-    # Make plot
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
     
     # Mass plot
     for label, res in mass_resolutions.items():
-        plot_data = res[res < mass_cutoff]
-        ax1.hist(plot_data, bins=50, 
+        plot_data = res[(res >= mass_cutoff[0]) & (res < mass_cutoff[1])]
+        ax1.hist(plot_data, 
+                bins=np.linspace(mass_cutoff[0], mass_cutoff[1], 50),
                 label=label, 
-                edgecolor=colors[label], 
-                alpha=0.7,
-                histtype="step")
-        # ax1.set_xlim([-5, 5])
-    # ax1.set_ylim([-1, 5])
-    ax1.set_xlabel("(a) mass relative resolution")
-    ax1.set_ylabel("Counts")
-    # if use_log: ax1.set_yscale("log")
-    ax1.legend(title=title, loc="upper right")
+                histtype="step",
+                density=True,
+                color=colors.get(label) if colors else None)
+    
+    ax1.set_xlabel("(a) mass response")
+    ax1.set_ylabel("Density")
+    if use_log: ax1.set_yscale("log")
+    if legend_title == "":
+        ax1.legend(loc="upper right")
+    else:
+        ax1.legend(title=legend_title, loc="upper right")
     
     # pT plot
     for label, res in pt_resolutions.items():
-        plot_data = res[res < pt_cutoff]
-        ax2.hist(plot_data, bins=50, 
+        plot_data = res[(res >= pt_cutoff[0]) & (res < pt_cutoff[1])]
+        ax2.hist(plot_data, 
+                bins=np.linspace(pt_cutoff[0], pt_cutoff[1], 50),
                 label=label, 
-                edgecolor=colors[label], 
-                alpha=0.7,
-                histtype="step")
+                histtype="step",
+                density=True,
+                color=colors.get(label) if colors else None)
     
-    ax2.set_xlabel(r"(b) $p_T$ relative resolution")
-    # if use_log: ax2.set_yscale("log")
-    ax2.legend(title=title, loc="upper right")
+    ax2.set_xlabel(r"(b) $p_T$ response")
+    if use_log: ax2.set_yscale("log")
+    if legend_title == "":
+        ax2.legend(loc="upper right")
+    else:
+        ax2.legend(title=legend_title, loc="upper right")
     
     plt.tight_layout()
     

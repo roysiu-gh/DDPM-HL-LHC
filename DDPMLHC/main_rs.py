@@ -220,8 +220,8 @@ pt_resolutions_grids = { rf"${bin} \times {bin}$" : load_variable_data(paths[i],
 plot_resolutions(
     mass_resolutions_grids, pt_resolutions_grids,
     save_path = save_path,
-    mass_cutoff=10,
-    pt_cutoff=0.2,
-    use_log=True,
+    mass_cutoff=(-1, 4),
+    pt_cutoff=(-0.1, 0.1),
+    # use_log=True,
     legend_title="",
 )
