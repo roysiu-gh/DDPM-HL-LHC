@@ -76,8 +76,10 @@ print_params(mode="SAMPLING")
 #     timesteps = 200,  # Number of diffusion steps
 #     objective = "pred_x0",
 # ).to(device)
+beta="0.5"
 
-save_dir = f"{CWD}/data/ML/Unet{UNET_DIMS}_bins{bins}_mu{mu}_beta0.5"
+# save_dir = f"{CWD}/data/ML/Unet{UNET_DIMS}_bins{BMAP_SQUARE_SIDE_LENGTH}_mu{mu}"
+save_dir = f"{CWD}/data/ML/Unet{UNET_DIMS}_bins{BMAP_SQUARE_SIDE_LENGTH}_mu{mu}_beta{beta}"
 
 print("Begin training")
 xd = load_and_train(diffusion, dataloader, num_epochs=0, device=device, save_dir=save_dir)
@@ -88,19 +90,19 @@ print("Finished training")
 # # NG_jet.reset()
 # # NG_pu.reset()
 # # sampled_images = diffusion.sample(batch_size=100)
-output_path = f"{CWD}/data/3-grid/Unet{UNET_DIMS}_bins{bins}_mu{mu}"
+output_path = f"{CWD}/data/3-grid/Unet{UNET_DIMS}_bins{bins}_mu{mu}_beta{beta}"
 output_filename = f"noisy_mu{mu}_event_level_from_grid{bins}.csv"
 output_filepath = f"{output_path}/{output_filename}"
-histogram_path = f"{output_path}/grid{bins}_hist_beta1"
+histogram_path = f"{output_path}/grid{bins}_hist_beta{beta}"
 # mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 if not(os.path.exists(output_path)):
-    os.mkdir(output_path)
+    os.makedirs(output_path,exist_ok=True)
 if not(os.path.exists(histogram_path)):
-    os.mkdir(histogram_path)
+    os.makedirs(histogram_path,exist_ok=True)
     
-def tensor_to_data(tensor_images):
-    # tensor_images_cpu = tensor_images.detach().cpu().numpy()
-    save_image(tensor_images, f"{histogram_path}/saved_denoised_grids_new.png")
+# def tensor_to_data(tensor_images):
+#     # tensor_images_cpu = tensor_images.detach().cpu().numpy()
+#     save_image(tensor_images, f"{histogram_path}/saved_denoised_grids_new.png")
 
 
 class OutData():
@@ -116,7 +118,8 @@ class OutData():
     def _batch_sample(self, rescale=False):
         #self.diffusion.reset()
         #self.diffusion.reset_sample()
-        while self.diffusion.begin_sample < self.NG_jet._max_TT_no:
+        # while self.diffusion.begin_sample < self.NG_jet._max_TT_no:
+        while True:
             try:
               sampled_images = self.diffusion.sample(batch_size=SAMPLE_BATCH)
               sampled_images = sampled_images * self.NG_jet.max_energy
@@ -134,11 +137,11 @@ class OutData():
     def _calculate_event_level(self):
         print(f"Iterating through dataset, adding noise and letting model denoise...")
         counter = 0
-        
+        eventid = 0
         # sampled_images is a generator because of yield
         # So each "element" in generator is a sample of jets
         self.diffusion.reset_sample()
-        for idx,sampled_images in enumerate(self._batch_sample(rescale=False)):
+        for sampled_images in self._batch_sample(rescale=False):
             all_data = []
 
             if sampled_images is None:
@@ -150,13 +153,15 @@ class OutData():
             if counter ==0:
                 sampled = sampled_images[:4]
                 sampled_scaled = torch.log1p(sampled)
-                save_image(tensor=sampled_scaled, nrow=self.num_saved_row,fp=f"{histogram_path}/saved_denoised_grids{self.num_saved_row}.png", normalize=True)
+                save_image_larger(tensor=sampled_scaled, nrow=self.num_saved_row,fp=f"{histogram_path}/saved_denoised_grids{self.num_saved_row}.png", normalize=True)
                 counter =1
             if len(sampled_images.shape) == 4:  # (batch, channel, height, width)
                 sampled_images = sampled_images.squeeze(1)
             for jidx, grid in enumerate(sampled_images):
-                eventid = 0
-                NG_jet.select_jet(jidx)
+                # enumerate starts from 0
+                # whereas sampled_images is a batch of grids iterating through jet dataset
+                # Therefore use eventid as a running id to select the jet
+                NG_jet.select_jet(eventid)
                 axis = NG_jet.jet_axis
                 enes, detas, dphis = grid_to_ene_deta_dphi(grid, N=self.bins)
                 detas, dphis = decentre(axis, detas, dphis)
@@ -166,7 +171,7 @@ class OutData():
                 event_mass, event_px, event_py, event_pz, event_eta, event_phi, event_pT = event_quantities
                 
                 event_level = np.array([
-                    idx*SAMPLE_BATCH + jidx,
+                    eventid,
                     event_px,
                     event_py,
                     event_pz,
@@ -230,7 +235,7 @@ with torch.inference_mode():
     # sampled_images = diffusion.sample(batch_size=batch_size)
     # rescaled = sampled_images * NG_jet.max_energy
     # tensor_to_data(rescaled)
-    output_folder=f"{CWD}/data/4-reconstruction/beta1"
+    output_folder=f"{CWD}/data/4-reconstruction/beta{beta}"
     output_filename = f"reconstructed_mu{diffusion.mu}_event_level_from_grid{BMAP_SQUARE_SIDE_LENGTH}_Unet{UNET_DIMS}.csv"
 
     OD = OutData(diffusion, NG_jet, jets_to_sample)

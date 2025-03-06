@@ -167,7 +167,7 @@ class NoisyGenerator(object):
         return self
 
     def __next__(self):
-        if self._next_jetID == self._max_TT_no:
+        if self._next_jetID > self._max_TT_no:
             raise StopIteration#
         # print(self.tt) if isinstance(self.tt, np.ndarray) else None
         self._build_next_noisy_event()

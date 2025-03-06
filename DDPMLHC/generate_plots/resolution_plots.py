@@ -10,7 +10,7 @@ def relative_resolution(ground_truth, comparison):
         raise IndexError(f"Lengths mismatched: ground_truth ({len(ground_truth)}) != comparison ({len(comparison)})")
     if np.any(ground_truth == 0):
         raise ZeroDivisionError(f"Zero(s) in ground truth")
-    return np.abs(comparison - ground_truth) / ground_truth
+    return (comparison - ground_truth) / ground_truth
 
 def load_variable_data(data_path, variable, truth_path=None):
     if truth_path is None:
@@ -51,7 +51,7 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
         title = rf"${grid_size}\times {grid_size}$ grid"
 
     if colors is None:
-        colors = {"Best case": "black", "Noisy ($\mu = 200$)": "red", "Reconstructed": "blue"}
+        colors = {"Ground truth": "black", "Noisy ($\mu = 200$)": "red", "Denoised": "blue"}
     
     # Make plot
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
@@ -64,10 +64,11 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
                 edgecolor=colors[label], 
                 alpha=0.7,
                 histtype="step")
-    
+        # ax1.set_xlim([-5, 5])
+    # ax1.set_ylim([-1, 5])
     ax1.set_xlabel("(a) mass relative resolution")
     ax1.set_ylabel("Counts")
-    if use_log: ax1.set_yscale("log")
+    # if use_log: ax1.set_yscale("log")
     ax1.legend(title=title, loc="upper right")
     
     # pT plot
@@ -80,7 +81,7 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
                 histtype="step")
     
     ax2.set_xlabel(r"(b) $p_T$ relative resolution")
-    if use_log: ax2.set_yscale("log")
+    # if use_log: ax2.set_yscale("log")
     ax2.legend(title=title, loc="upper right")
     
     plt.tight_layout()

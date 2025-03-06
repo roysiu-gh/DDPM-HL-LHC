@@ -2,6 +2,7 @@
 import torch
 from torch import optim
 from torch.utils.data import Subset, Dataset, DataLoader, IterableDataset, TensorDataset
+from torchvision.utils import make_grid
 import torchvision.transforms as T
 import torch.nn.functional as F
 # from torchvision.datasets import CIFAR10
@@ -23,6 +24,7 @@ from collections import namedtuple
 import os
 import re
 from typing import Literal
+from PIL import Image
 CWD = os.getcwd()
 
 # Device stuff
@@ -159,7 +161,11 @@ class PUDiffusion(GaussianDiffusion):
         batch, device = shape[0], self.device
         jets = []
         self.puNG.mu = self.mu
-        end_sample = min(self.begin_sample + batch, self.jetNG._max_TT_no) 
+        end_sample = min(self.begin_sample + batch, self.jetNG._max_TT_no)
+        if end_sample > self.jetNG._max_TT_no:
+            end_sample = self.jetNG._max_TT_no
+        print("self.begin_sample ", self.begin_sample)
+        print("end sample, ", end_sample)
         for i in range(self.begin_sample, end_sample):
             # random_jet_no = np.random.randint(low=0, high=self.jetNG._max_TT_no, size=None)
             self.jetNG._next_jetID = i
@@ -397,3 +403,36 @@ def print_params(mode: Literal["TRAINING", "SAMPLING"],num_epochs=EPOCHS, mu=200
     print("#############################")
     print("END DIAGNOSTIC PARAMETERS")
     print("#############################")
+
+################
+# Custom save_image function since 
+@torch.no_grad()
+def save_image_larger(
+    tensor,
+    fp,
+    format="png",
+    **kwargs,
+) -> None:
+    """
+    Save a given Tensor into an image file.
+
+    Args:
+        tensor (Tensor or list): Image to be saved. If given a mini-batch tensor,
+            saves the tensor as a grid of images by calling ``make_grid``.
+        fp (string or file object): A filename or a file object
+        format(Optional):  If omitted, the format to use is determined from the filename extension.
+            If a file object was used instead of a filename, this parameter should always be used.
+        **kwargs: Other arguments are documented in ``make_grid``.
+    """
+
+    # if not torch.jit.is_scripting() and not torch.jit.is_tracing():
+    #     _log_api_usage_once(save_image)
+    grid = make_grid(tensor, **kwargs)
+    # Add 0.5 after unnormalizing to [0, 255] to round to the nearest integer
+    ndarr = grid.mul(255).add_(0.5).clamp_(0, 255).permute(1, 2, 0).to("cpu", torch.uint8).numpy()
+    im = Image.fromarray(ndarr)
+    width, height = im.size 
+    scale_factor=4
+    # im = im.resize((width*scale_factor, height*scale_factor))
+    im.save(fp, format=format, dpi=(600,600))
+
