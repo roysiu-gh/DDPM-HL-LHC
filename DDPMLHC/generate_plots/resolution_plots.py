@@ -1,7 +1,10 @@
+"""Original code written by Roy Siu. Legend code written by Claude 3.5."""
+
 # Package imports
 import numpy as np
 import polars as pl
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 # Local imports
 from DDPMLHC.config import *
 
@@ -38,58 +41,104 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
     if legend_title is None:
         legend_title = rf"${bins}\times {bins}$ grid"
     
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 4))
     
     # Mass plot
     for label, res in mass_resolutions.items():
         plot_data = res[(res >= mass_cutoff[0]) & (res < mass_cutoff[1])]
-        # Calc stats
         bias = np.mean(plot_data)
         resolution = np.std(plot_data)
         stat_label = f"{label}\n$\zeta={bias:.3f}$\n$\\rho={resolution:.3f}$"
         
+        color = colors.get(label) if colors else None
         ax1.hist(plot_data, 
                 bins=np.linspace(mass_cutoff[0], mass_cutoff[1], 50),
                 label=stat_label, 
                 histtype="step",
                 density=True,
-                color=colors.get(label) if colors else None)
+                color=color)
     
-    ax1.axvline(x=0, color="black", linestyle="--")  # vertical line
+    ax1.axvline(x=0, color="black", linestyle="--")
     ax1.set_xlabel("(a) mass response")
     ax1.set_ylabel("Density")
     if use_log: ax1.set_yscale("log")
-    if legend_title == "":
-        ax1.legend(loc="upper right", labelspacing=1.0)
-    else:
-        ax1.legend(loc="upper right", labelspacing=1.0, title=legend_title)
     
-    # pT plot
-    for label, res in pt_resolutions.items():
-        plot_data = res[(res >= pt_cutoff[0]) & (res < pt_cutoff[1])]
-        # Calc stats
+    # Create custom legend handles
+    handles = []
+    for label, res in mass_resolutions.items():
+        plot_data = res[(res >= mass_cutoff[0]) & (res < mass_cutoff[1])]
         bias = np.mean(plot_data)
         resolution = np.std(plot_data)
         stat_label = f"{label}\n$\zeta={bias:.3f}$\n$\\rho={resolution:.3f}$"
         
+        handles.append(Line2D([0], [0], 
+                            color=colors.get(label) if colors else None,
+                            marker='|', 
+                            markersize=15, 
+                            markeredgewidth=2,
+                            label=stat_label))
+    
+    if legend_title == "":
+        ax1.legend(handles=handles, loc='center left', bbox_to_anchor=(1, 0.5),
+                  labelspacing=1.0,
+                  handlelength=0,
+                  handletextpad=0.5)
+    else:
+        ax1.legend(handles=handles, loc='center left', bbox_to_anchor=(1, 0.5),
+                  labelspacing=1.0,
+                  handlelength=0,
+                  handletextpad=0.5,
+                  title=legend_title)
+    
+    # pT plot
+    for label, res in pt_resolutions.items():
+        plot_data = res[(res >= pt_cutoff[0]) & (res < pt_cutoff[1])]
+        bias = np.mean(plot_data)
+        resolution = np.std(plot_data)
+        stat_label = f"{label}\n$\zeta={bias:.3f}$\n$\\rho={resolution:.3f}$"
+        
+        color = colors.get(label) if colors else None
         ax2.hist(plot_data, 
                 bins=np.linspace(pt_cutoff[0], pt_cutoff[1], 50),
                 label=stat_label, 
                 histtype="step",
                 density=True,
-                color=colors.get(label) if colors else None)
+                color=color)
     
-    ax2.axvline(x=0, color="black", linestyle="--")  # vertical line
+    ax2.axvline(x=0, color="black", linestyle="--")
     ax2.set_xlabel(r"(b) $p_T$ response")
     if use_log: ax2.set_yscale("log")
+    
+    # Create custom legend handles for pT plot
+    handles = []
+    for label, res in pt_resolutions.items():
+        plot_data = res[(res >= pt_cutoff[0]) & (res < pt_cutoff[1])]
+        bias = np.mean(plot_data)
+        resolution = np.std(plot_data)
+        stat_label = f"{label}\n$\zeta={bias:.3f}$\n$\\rho={resolution:.3f}$"
+        
+        handles.append(Line2D([0], [0], 
+                            color=colors.get(label) if colors else None,
+                            marker='|', 
+                            markersize=15, 
+                            markeredgewidth=2,
+                            label=stat_label))
+    
     if legend_title == "":
-        ax2.legend(loc="upper right", labelspacing=1.0)
+        ax2.legend(handles=handles, loc='center left', bbox_to_anchor=(1, 0.5),
+                  labelspacing=1.0,
+                  handlelength=0,
+                  handletextpad=0.5)
     else:
-        ax2.legend(loc="upper right", labelspacing=1.0, title=legend_title)
+        ax2.legend(handles=handles, loc='center left', bbox_to_anchor=(1, 0.5),
+                  labelspacing=1.0,
+                  handlelength=0,
+                  handletextpad=0.5,
+                  title=legend_title)
     
     plt.tight_layout()
     
     if save_path is None:
         save_path = f"{CWD}/data/plots/relative_resolutions/resolutions_test.pdf"
-    plt.savefig(save_path)
+    plt.savefig(save_path, bbox_inches='tight')
     plt.close()
