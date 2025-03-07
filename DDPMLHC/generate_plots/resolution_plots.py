@@ -43,9 +43,14 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
     # Mass plot
     for label, res in mass_resolutions.items():
         plot_data = res[(res >= mass_cutoff[0]) & (res < mass_cutoff[1])]
+        # Calc stats
+        bias = np.mean(plot_data)
+        resolution = np.std(plot_data)
+        stat_label = f"{label}\n$\zeta={bias:.3f}$\n$\\rho={resolution:.3f}$"
+        
         ax1.hist(plot_data, 
                 bins=np.linspace(mass_cutoff[0], mass_cutoff[1], 50),
-                label=label, 
+                label=stat_label, 
                 histtype="step",
                 density=True,
                 color=colors.get(label) if colors else None)
@@ -55,16 +60,21 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
     ax1.set_ylabel("Density")
     if use_log: ax1.set_yscale("log")
     if legend_title == "":
-        ax1.legend(loc="upper right")
+        ax1.legend(loc="upper right", labelspacing=1.0)
     else:
-        ax1.legend(title=legend_title, loc="upper right")
+        ax1.legend(loc="upper right", labelspacing=1.0, title=legend_title)
     
     # pT plot
     for label, res in pt_resolutions.items():
         plot_data = res[(res >= pt_cutoff[0]) & (res < pt_cutoff[1])]
+        # Calc stats
+        bias = np.mean(plot_data)
+        resolution = np.std(plot_data)
+        stat_label = f"{label}\n$\zeta={bias:.3f}$\n$\\rho={resolution:.3f}$"
+        
         ax2.hist(plot_data, 
                 bins=np.linspace(pt_cutoff[0], pt_cutoff[1], 50),
-                label=label, 
+                label=stat_label, 
                 histtype="step",
                 density=True,
                 color=colors.get(label) if colors else None)
@@ -73,9 +83,9 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
     ax2.set_xlabel(r"(b) $p_T$ response")
     if use_log: ax2.set_yscale("log")
     if legend_title == "":
-        ax2.legend(loc="upper right")
+        ax2.legend(loc="upper right", labelspacing=1.0)
     else:
-        ax2.legend(title=legend_title, loc="upper right")
+        ax2.legend(loc="upper right", labelspacing=1.0, title=legend_title)
     
     plt.tight_layout()
     
