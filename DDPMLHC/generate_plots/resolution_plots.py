@@ -41,7 +41,7 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
     if legend_title is None:
         legend_title = rf"${bins}\times {bins}$ grid"
     
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 5))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
     
     # Mass plot
     for label, res in mass_resolutions.items():
@@ -77,18 +77,20 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
                             markersize=15, 
                             markeredgewidth=2,
                             label=stat_label))
-    
+    legend_font=14
     if legend_title == "":
         ax1.legend(handles=handles, loc='center left', bbox_to_anchor=(1, 0.5),
                   labelspacing=1.0,
                   handlelength=0,
-                  handletextpad=0.5)
+                  handletextpad=0.5,
+                   prop={'size': legend_font})
     else:
         ax1.legend(handles=handles, loc='center left', bbox_to_anchor=(1, 0.5),
                   labelspacing=1.0,
                   handlelength=0,
                   handletextpad=0.5,
-                  title=legend_title)
+                  title=legend_title,
+                   prop={'size': legend_font})
     
     # pT plot
     for label, res in pt_resolutions.items():
@@ -128,13 +130,15 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
         ax2.legend(handles=handles, loc='center left', bbox_to_anchor=(1, 0.5),
                   labelspacing=1.0,
                   handlelength=0,
-                  handletextpad=0.5)
+                  handletextpad=0.5,
+                   prop={'size': legend_font})
     else:
         ax2.legend(handles=handles, loc='center left', bbox_to_anchor=(1, 0.5),
                   labelspacing=1.0,
                   handlelength=0,
                   handletextpad=0.5,
-                  title=legend_title)
+                  title=legend_title,
+                   prop={'size': legend_font})
     
     plt.tight_layout()
     
