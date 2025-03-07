@@ -19,5 +19,5 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 # pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 #nvidia-smi --query-gpu=compute_cap --format=csv
 
-python3 -m DDPMLHC.model
-#python3 -m DDPMLHC.sample
+#python3 -m DDPMLHC.model
+python3 -m DDPMLHC.sample

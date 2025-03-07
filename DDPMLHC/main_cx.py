@@ -84,19 +84,20 @@ def generate_event_level_gridded_jets(NG: NoisyGenerator,bins, mu=0, save_dir=IN
 # # Comparison against pure cts
 noisy_path = f"{CWD}/data/2-intermediate/noisy_mu200_event_level.csv"
 
-for x in product([16,32,64], [0.5,1]):
+for x in product([16,32,64], ["1", "0.5", "001"]):
     bins = x[0]
     beta = x[1]
     best_case_path = f"{CWD}/data/2-intermediate/noisy_mu0_event_level_grid{bins}.csv"
-  
+    
     # beta = "0.5"
+    os.makedirs(f"{CWD}/data/plots/relative_resolutions/beta{beta}", exist_ok=True)
     reconstructed_path_beta05 = f"{CWD}/data/4-reconstruction/beta{beta}/reconstructed_mu{200}_event_level_from_grid{bins}_Unet{UNET_DIMS}.csv"
     # reconstructed_path_beta1 = f"{CWD}/data/4-reconstruction/beta1/reconstructed_mu{200}_event_level_from_grid{bins}_Unet{UNET_DIMS}.csv"
     reconstructed_path = reconstructed_path_beta05
     # First plot - comparison against pure cts
     mass_resolutions_orig = {
         "Ground truth": load_variable_data(best_case_path, "mass"),
-        "Noisy ($\mu = 200$)": load_variable_data(noisy_path, "mass"),
+        "Noisy ($\mu = 200$)": load_variable_data(noisy_path, "mass", ),
         "Denoised": load_variable_data(reconstructed_path, "mass")
     }
 
@@ -119,13 +120,14 @@ for x in product([16,32,64], [0.5,1]):
     )
 
     # Second plot - comparison against best case
+    noisy_binned = f"{CWD}/data/2-intermediate/noisy_mu200_event_level_grid{bins}.csv"
     mass_resolutions_best = {
-        "Noisy ($\mu = 200$)": load_variable_data(noisy_path, "mass", truth_path=best_case_path),
+        "Noisy ($\mu = 200$)": load_variable_data(noisy_binned, "mass", truth_path=best_case_path),
         "Denoised": load_variable_data(reconstructed_path, "mass", truth_path=best_case_path)
     }
 
     pt_resolutions_best = {
-        "Noisy ($\mu = 200$)": load_variable_data(noisy_path, "p_T", truth_path=best_case_path),
+        "Noisy ($\mu = 200$)": load_variable_data(noisy_binned, "p_T", truth_path=best_case_path),
         "Denoised": load_variable_data(reconstructed_path, "p_T", truth_path=best_case_path)
     }
 
