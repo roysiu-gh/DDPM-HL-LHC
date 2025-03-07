@@ -84,13 +84,15 @@ def generate_event_level_gridded_jets(NG: NoisyGenerator,bins, mu=0, save_dir=IN
 # # Comparison against pure cts
 noisy_path = f"{CWD}/data/2-intermediate/noisy_mu200_event_level.csv"
 
-for bins in [16,32,64]:
+for x in product([16,32,64], [0.5,1]):
+    bins = x[0]
+    beta = x[1]
     best_case_path = f"{CWD}/data/2-intermediate/noisy_mu0_event_level_grid{bins}.csv"
   
-    reconstructed_path_beta05 = f"{CWD}/data/4-reconstruction/beta0.5/reconstructed_mu{200}_event_level_from_grid{bins}_Unet{UNET_DIMS}.csv"
-    reconstructed_path_beta1 = f"{CWD}/data/4-reconstruction/beta1/reconstructed_mu{200}_event_level_from_grid{bins}_Unet{UNET_DIMS}.csv"
-    beta = "0.5"
-    reconstructed_path = reconstructed_path_beta1
+    # beta = "0.5"
+    reconstructed_path_beta05 = f"{CWD}/data/4-reconstruction/beta{beta}/reconstructed_mu{200}_event_level_from_grid{bins}_Unet{UNET_DIMS}.csv"
+    # reconstructed_path_beta1 = f"{CWD}/data/4-reconstruction/beta1/reconstructed_mu{200}_event_level_from_grid{bins}_Unet{UNET_DIMS}.csv"
+    reconstructed_path = reconstructed_path_beta05
     # First plot - comparison against pure cts
     mass_resolutions_orig = {
         "Ground truth": load_variable_data(best_case_path, "mass"),
@@ -113,7 +115,7 @@ for bins in [16,32,64]:
         },
         use_log = True,
         save_path = f"{CWD}/data/plots/relative_resolutions/beta{beta}/resolution_grid{bins}_Unet{UNET_DIMS}_mass_gtORIG.pdf",
-        title=rf"${bins}\times {bins}$ grid"
+        legend_title=rf"${bins}\times {bins}$ grid"
     )
 
     # Second plot - comparison against best case
@@ -134,5 +136,5 @@ for bins in [16,32,64]:
             "Denoised": "blue"
         },
         save_path = f"{CWD}/data/plots/relative_resolutions/beta{beta}/resolution_grid{bins}_Unet{UNET_DIMS}_mass_gtBEST.pdf",
-        title=rf"${bins}\times {bins}$ grid"
+        legend_title=rf"${bins}\times {bins}$ grid"
     )
