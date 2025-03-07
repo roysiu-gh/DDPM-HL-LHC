@@ -81,9 +81,9 @@ def create_overlay_plots_debin(bin_values, mass_max=250, save_path=None, mu=0, p
     
     # Define hist_params at the beginning
     hist_params = [
-        {"name": "Mass [GeV]", "col": 6, 
+        {"name": "(a) Mass [GeV]", "col": 6, 
          "params": {"bins": 50, "x_min": 0, "x_max": mass_max}},
-        {"name": "Transverse Momentum $p_T$ [GeV]", "col": 7, 
+        {"name": "(b) Transverse Momentum $p_T$ [GeV]", "col": 7, 
          "params": {"xlog": True, "bins": 50, "x_min": 200, "x_max": 500}},
     ]
     

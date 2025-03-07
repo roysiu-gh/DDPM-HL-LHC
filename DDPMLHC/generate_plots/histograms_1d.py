@@ -148,21 +148,21 @@ def plot_1d_histograms(mu, event_stats_path=None, output_path=None):
 
     list_of_params_foobar = [
         {
-            "name": "Mass [GeV]",
+            "name": "(a) Mass [GeV]",
             "data": event_mass,
             "plot_params": {"bins" : mass_bins, "x_max": mass_max},
             "save_filename": "event_mass",
             "save_path": output_path,
         },
         {
-            "name": "Pseudorapidity eta",
+            "name": "(b) Pseudorapidity eta",
             "data": event_eta,
             "plot_params": {"bins": 50},
             "save_filename": "event_eta",
             "save_path": output_path,
         },
         {
-            "name": "Transverse Momentum p_T [GeV]",
+            "name": "(c) Transverse Momentum p_T [GeV]",
             "data": event_pT,
             "plot_params": {"xlog": True, "bins": pT_bins, "x_max": pT_max},
             "save_filename": "event_pT",
