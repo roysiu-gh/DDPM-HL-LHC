@@ -76,8 +76,8 @@ print_params(mode="SAMPLING")
 #     timesteps = 200,  # Number of diffusion steps
 #     objective = "pred_x0",
 # ).to(device)
-beta="0.5"
-
+beta="1"
+print("beta", beta)
 # save_dir = f"{CWD}/data/ML/Unet{UNET_DIMS}_bins{BMAP_SQUARE_SIDE_LENGTH}_mu{mu}"
 save_dir = f"{CWD}/data/ML/Unet{UNET_DIMS}_bins{BMAP_SQUARE_SIDE_LENGTH}_mu{mu}_beta{beta}"
 

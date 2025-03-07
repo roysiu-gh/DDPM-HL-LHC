@@ -73,7 +73,7 @@ class PUDiffusion(GaussianDiffusion):
         
         self.begin_sample = 0
         # Override beta scheduler with constant scheduler
-        betas = constant_beta_schedule(beta_end=1)
+        betas = constant_beta_schedule(beta_end=0.01)
         # betas = constant_beta_schedule(beta_end=0.0102)
         betas = torch.from_numpy(betas)
         betas = betas.to(self.device)
@@ -164,8 +164,6 @@ class PUDiffusion(GaussianDiffusion):
         end_sample = min(self.begin_sample + batch, self.jetNG._max_TT_no)
         if end_sample > self.jetNG._max_TT_no:
             end_sample = self.jetNG._max_TT_no
-        print("self.begin_sample ", self.begin_sample)
-        print("end sample, ", end_sample)
         for i in range(self.begin_sample, end_sample):
             # random_jet_no = np.random.randint(low=0, high=self.jetNG._max_TT_no, size=None)
             self.jetNG._next_jetID = i
