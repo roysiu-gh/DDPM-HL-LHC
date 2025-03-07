@@ -41,7 +41,7 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
     if legend_title is None:
         legend_title = rf"${bins}\times {bins}$ grid"
     
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 4))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 5))
     
     # Mass plot
     for label, res in mass_resolutions.items():
