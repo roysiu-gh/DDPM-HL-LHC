@@ -16,17 +16,17 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 # MAX_DATA_ROWS = 100_000
 
-# === Read in data
-print("0 :: Loading original data")
-tt = np.genfromtxt(
-    TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-pile_up = np.genfromtxt(
-    PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-tt = EventSelector(tt)
-pile_up = EventSelector(pile_up)
-print("FINISHED loading data\n")
+# # === Read in data
+# print("0 :: Loading original data")
+# tt = np.genfromtxt(
+#     TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+# )
+# pile_up = np.genfromtxt(
+#     PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+# )
+# tt = EventSelector(tt)
+# pile_up = EventSelector(pile_up)
+# print("FINISHED loading data\n")
 
 #################################################################################
 
@@ -135,23 +135,23 @@ print("FINISHED loading data\n")
 
 #################################################################################
 
-mu = 0
-output_path = f"{CWD}/data/3-grid/mu{mu}/"
-for bins in [1,2,4,8,16,32,64,128,256]:
-    output_filename = f"noisy_mu{mu}_event_level_from_grid{bins}.csv"
-    output_filepath = f"{output_path}/{output_filename}"
+# mu = 0
+# output_path = f"{CWD}/data/3-grid/mu{mu}/"
+# for bins in [1,2,4,8,16,32,64,128,256]:
+#     output_filename = f"noisy_mu{mu}_event_level_from_grid{bins}.csv"
+#     output_filepath = f"{output_path}/{output_filename}"
 
-    plot_1d_histograms(mu, event_stats_path=output_filepath, output_path=f"{output_path}/grid{bins}")
+#     plot_1d_histograms(mu, event_stats_path=output_filepath, output_path=f"{output_path}/grid{bins}")
 
 #################################################################################
 
-create_overlay_plots_debin([4,8,16,32])
-create_overlay_plots_debin([4,16,64,256])
-create_overlay_plots_debin([4,16,64,256], pure=True)
-create_overlay_plots_debin([4,8,16,256], pure=True)
-create_overlay_plots_debin([8,16,256], pure=True)
-create_overlay_plots_debin([2,4,8])
-create_overlay_plots_debin([2,4,8,256], pure=True)
+# create_overlay_plots_debin([4,8,16,32])
+# create_overlay_plots_debin([4,16,64,256])
+# create_overlay_plots_debin([4,16,64,256], pure=True)
+# create_overlay_plots_debin([4,8,16,256], pure=True)
+# create_overlay_plots_debin([8,16,256], pure=True)
+# create_overlay_plots_debin([2,4,8])
+# create_overlay_plots_debin([2,4,8,256], pure=True)
 
 #################################################################################
 
