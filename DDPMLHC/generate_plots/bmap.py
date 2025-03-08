@@ -40,7 +40,7 @@ def plot_mu_comparison(tt, pile_up, use_log=False, save_path=None):
     # Get mu values
     mu_values = [0, 100, 200]
     vmin, vmax = float('inf'), -float('inf')
-    
+
     # Store random state
     rng_state = np.random.get_state()
     
@@ -75,28 +75,31 @@ def plot_mu_comparison(tt, pile_up, use_log=False, save_path=None):
         combined_grid[:grid_size, grid_size:] = grids[1]
         combined_grid[grid_size:, :grid_size] = grids[2]
         combined_grid[grid_size:, grid_size:] = grids[3]
-        
-        # Add thin white lines between jets
-        combined_grid[grid_size-1:grid_size+1, :] = vmin
-        combined_grid[:, grid_size-1:grid_size+1] = vmin
-        
+
         im = main_axes[idx].imshow(combined_grid, 
-                                 cmap='viridis',
-                                 vmin=vmin,
-                                 vmax=vmax,
-                                 interpolation='nearest')
+                                    cmap='viridis',
+                                    vmin=vmin,
+                                    vmax=vmax,
+                                    norm=None,  # Add this to prevent automatic normalization
+                                    interpolation='nearest')
+        
+        # Add grid lines to separate events
+        main_axes[idx].axhline(y=grid_size-0.5, color='white', linewidth=1)
+        main_axes[idx].axvline(x=grid_size-0.5, color='white', linewidth=1)
         
         # Move mu label to bottom
         main_axes[idx].text(0.5, -0.1, f'{letter} $\mu = {mu}$',
                           transform=main_axes[idx].transAxes,
-                          fontsize=14, ha='center')
+                          fontsize=18, ha='center')
         
         main_axes[idx].axis('off')
     
+    print(f"Maximum energy in any pixel: {max([grid.max() for grids in all_grids for grid in grids]):.4f}")
+
     # Add colorbar with proper spacing
     cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])
     cbar = fig.colorbar(im, cax=cbar_ax)
-    cbar.set_label('log(E + 1)' if use_log else 'Energy', fontsize=12)
+    cbar.set_label('$\ln(1+E)$' if use_log else 'Energy', fontsize=18)
     
     # Save if path provided
     if save_path:
