@@ -9,7 +9,7 @@ import multiprocessing
 from pathlib import Path
 # Local imports
 from DDPMLHC.config import *
-from DDPMLHC.calculate_quantities import p_magnitude
+from DDPMLHC.calculate_quantities import p_magnitude, pseudorapidity
 line_thickness = 3.0
 axes_thickness = 4.0
 leg_size = 30
@@ -173,3 +173,136 @@ def plot_1d_histograms(mu, event_stats_path=None, output_path=None):
     plot_single_histograms(list_of_params_foobar, output_path)
     plot_combined_histograms(list_of_params_foobar, output_path)
     print(f"Done mu = {mu}.\n")
+
+#################################################################################
+
+def plot_particle_level_quantities_comparison(save_path=None):
+    """
+    Original written (and lost) by Roy Siu.
+    New code made with Claude 3.5.
+    Plot momentum, pseudorapidity and transverse momentum distributions.
+    Overlay histograms from two different files.
+    """
+    data_path_tt = TT_PATH
+    data_path_pu = PILEUP_PATH
+
+    # Load both datasets
+    data_tt = np.genfromtxt(data_path_tt, delimiter=",", skip_header=1)
+    data_pu = np.genfromtxt(data_path_pu, delimiter=",", skip_header=1)
+    
+    # Calculate quantities for tt̄ events
+    px_tt, py_tt, pz_tt = data_tt[:, 3], data_tt[:, 4], data_tt[:, 5]
+    p_tt = p_magnitude(px_tt, py_tt, pz_tt)
+    pT_tt = np.sqrt(px_tt**2 + py_tt**2)
+    eta_tt = pseudorapidity(p_tt, pz_tt)
+    
+    # Calculate quantities for pile-up
+    px_pu, py_pu, pz_pu = data_pu[:, 3], data_pu[:, 4], data_pu[:, 5]
+    p_pu = p_magnitude(px_pu, py_pu, pz_pu)
+    pT_pu = np.sqrt(px_pu**2 + py_pu**2)
+    eta_pu = pseudorapidity(p_pu, pz_pu)
+    
+    # Create figure with three subplots
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))
+    
+    # Define plot ranges
+    p_range = (0.8, 6)
+    eta_range = (-3, 3)
+    pt_range = (0.8, 4)
+    
+    # Define colors and styles
+    color_tt = "blue"
+    color_pu = "red"
+    alpha_fill = 0.3
+    alpha_line = 1.0
+    
+    # Plot 1: Momentum
+    sb.histplot(data=p_tt,
+                bins=np.linspace(p_range[0], p_range[1], 50),
+                stat="density",
+                color=color_tt,
+                alpha=alpha_fill,
+                label="$t\\bar t$ events",
+                ax=ax1,
+                edgecolor=color_tt,
+                linewidth=1.5,
+                element="step")
+    sb.histplot(data=p_pu,
+                bins=np.linspace(p_range[0], p_range[1], 50),
+                stat="density",
+                color=color_pu,
+                alpha=alpha_fill,
+                label="pile-up",
+                ax=ax1,
+                edgecolor=color_pu,
+                linewidth=1.5,
+                element="step")
+    ax1.set_xlabel("(a) $p$ [GeV]")
+    ax1.set_ylabel("Frequency Density")
+    ax1.set_xlim(p_range)
+    # ax1.legend(fontsize=14, frameon=True, framealpha=1.0, 
+    #            edgecolor='black', borderpad=0.5)
+    
+    # Plot 2: Pseudorapidity
+    sb.histplot(data=eta_tt,
+                bins=np.linspace(eta_range[0], eta_range[1], 50),
+                stat="density",
+                color=color_tt,
+                alpha=alpha_fill,
+                label="$t\\bar t$ events",
+                ax=ax2,
+                edgecolor=color_tt,
+                linewidth=1.5,
+                element="step")
+    sb.histplot(data=eta_pu,
+                bins=np.linspace(eta_range[0], eta_range[1], 50),
+                stat="density",
+                color=color_pu,
+                alpha=alpha_fill,
+                label="pile-up",
+                ax=ax2,
+                edgecolor=color_pu,
+                linewidth=1.5,
+                element="step")
+    ax2.set_xlabel("(b) $\eta$")
+    ax2.set_ylabel("")
+    ax2.set_xlim(eta_range)
+    # ax2.legend(fontsize=14, frameon=True, framealpha=1.0, 
+            #    edgecolor='black', borderpad=0.5)
+    
+    # Plot 3: Transverse Momentum
+    sb.histplot(data=pT_tt,
+                bins=np.linspace(pt_range[0], pt_range[1], 50),
+                stat="density",
+                color=color_tt,
+                alpha=alpha_fill,
+                label="$t\\bar t$ particles",
+                ax=ax3,
+                edgecolor=color_tt,
+                linewidth=1.5,
+                element="step")
+    sb.histplot(data=pT_pu,
+                bins=np.linspace(pt_range[0], pt_range[1], 50),
+                stat="density",
+                color=color_pu,
+                alpha=alpha_fill,
+                label="Pile-up particles",
+                ax=ax3,
+                edgecolor=color_pu,
+                linewidth=1.5,
+                element="step")
+    ax3.set_xlabel("(c) $p_T$ [GeV]")
+    ax3.set_ylabel("")
+    ax3.set_xlim(pt_range)
+    ax3.legend(fontsize=16, frameon=True, framealpha=1.0, 
+               edgecolor='black', borderpad=0.5)
+    
+    # Adjust layout
+    plt.tight_layout()
+    
+    # Save or show
+    if save_path:
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+        plt.close()
+    else:
+        plt.show()

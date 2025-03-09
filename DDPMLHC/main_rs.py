@@ -6,7 +6,7 @@ import polars as pl
 from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import *
 from DDPMLHC.data_loading import *
-from DDPMLHC.generate_plots.histograms_1d import plot_1d_histograms
+from DDPMLHC.generate_plots.histograms_1d import plot_1d_histograms, plot_particle_level_quantities_comparison
 from DDPMLHC.generate_plots.overlaid_1d import create_overlay_plots
 from DDPMLHC.generate_plots.overlaid_debin import create_overlay_plots_debin
 from DDPMLHC.generate_plots.bmap import plot_mu_comparison, save_to_bmap
@@ -241,11 +241,16 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 #################################################################################
 
-files = [
-    f"{CWD}/data/2-intermediate/noisy_mu0_event_level.csv",
-    f"{CWD}/data/3-grid/mu0/noisy_mu{0}_event_level_from_grid{64}.csv",
-    f"{CWD}/data/2-intermediate/noisy_mu200_event_level.csv",
-    f"{CWD}/data/4-reconstruction/beta001/reconstructed_mu200_event_level_from_grid64_Unet64.csv",
-]
-labels = ["Original", "Best case", "Noisy", "Denoised"]
-create_overlay_plots_general(files, labels, mass_max=350)
+# files = [
+#     f"{CWD}/data/2-intermediate/noisy_mu0_event_level.csv",
+#     f"{CWD}/data/3-grid/mu0/noisy_mu{0}_event_level_from_grid{64}.csv",
+#     f"{CWD}/data/2-intermediate/noisy_mu200_event_level.csv",
+#     f"{CWD}/data/4-reconstruction/beta001/reconstructed_mu200_event_level_from_grid64_Unet64.csv",
+# ]
+# labels = ["Original", "Best case", "Noisy", "Denoised"]
+# create_overlay_plots_general(files, labels, mass_max=350)
+
+#################################################################################
+
+save_path = f"{CWD}/data/plots/particle_level_quantities_comparison.png"
+plot_particle_level_quantities_comparison(save_path)
