@@ -10,23 +10,24 @@ from DDPMLHC.generate_plots.histograms_1d import plot_1d_histograms
 from DDPMLHC.generate_plots.overlaid_1d import create_overlay_plots
 from DDPMLHC.generate_plots.overlaid_debin import create_overlay_plots_debin
 from DDPMLHC.generate_plots.bmap import plot_mu_comparison, save_to_bmap
+from DDPMLHC.generate_plots.overlaid_general import create_overlay_plots_general
 from DDPMLHC.generate_plots.resolution_plots import *
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
-MAX_DATA_ROWS = 100_000
+# MAX_DATA_ROWS = 100_000
 
-# === Read in data
-print("0 :: Loading original data")
-tt = np.genfromtxt(
-    TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-pile_up = np.genfromtxt(
-    PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-tt = EventSelector(tt)
-pile_up = EventSelector(pile_up)
-print("FINISHED loading data\n")
+# # === Read in data
+# print("0 :: Loading original data")
+# tt = np.genfromtxt(
+#     TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+# )
+# pile_up = np.genfromtxt(
+#     PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+# )
+# tt = EventSelector(tt)
+# pile_up = EventSelector(pile_up)
+# print("FINISHED loading data\n")
 
 #################################################################################
 
@@ -228,12 +229,23 @@ print("FINISHED loading data\n")
 
 #################################################################################
 
-output_path = f"{CWD}/data/plots/bmap_comparison/"
+# output_path = f"{CWD}/data/plots/bmap_comparison/"
 
-plot_mu_comparison(tt, pile_up, 
-                  use_log=False,
-                  save_path=f"{output_path}/mu_comparison_linear.png")
+# plot_mu_comparison(tt, pile_up, 
+#                   use_log=False,
+#                   save_path=f"{output_path}/mu_comparison_linear.png")
 
-plot_mu_comparison(tt, pile_up, 
-                  use_log=True,
-                  save_path=f"{output_path}/mu_comparison_log.png")
+# plot_mu_comparison(tt, pile_up, 
+#                   use_log=True,
+#                   save_path=f"{output_path}/mu_comparison_log.png")
+
+#################################################################################
+
+files = [
+    f"{CWD}/data/2-intermediate/noisy_mu0_event_level.csv",
+    f"{CWD}/data/3-grid/mu0/noisy_mu{0}_event_level_from_grid{64}.csv",
+    f"{CWD}/data/2-intermediate/noisy_mu200_event_level.csv",
+    f"{CWD}/data/4-reconstruction/beta001/reconstructed_mu200_event_level_from_grid64_Unet64.csv",
+]
+labels = ["Original", "Best case", "Noisy", "Denoised"]
+create_overlay_plots_general(files, labels, mass_max=350)

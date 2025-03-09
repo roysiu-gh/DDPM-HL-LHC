@@ -34,7 +34,7 @@ def plot_combined_histograms_with_overlay(hist_data_list, labels, save_path):
         
         for hist_data, label, color, alpha in zip(hist_data_list, labels, colors, alphas):
             entry = hist_data[idx]
-            sb.histplot(entry["data"], ax=ax, stat="density",
+            sb.histplot(entry["data"], ax=ax, stat="count",
                        bins=bin_edges, color=color, 
                        label=label, alpha=alpha,
                        edgecolor='black', linewidth=0.2)
@@ -52,10 +52,10 @@ def plot_combined_histograms_with_overlay(hist_data_list, labels, save_path):
         ax.set_xlabel(entry_ref["name"], fontsize=14)
         
         if idx == 0:
-            ax.set_ylabel("Frequency Density ($\\times 10^{-2}$)", fontsize=12)
+            ax.set_ylabel("Frequency", fontsize=12)
         else:
             ax.set_ylabel("")
-            ax.legend(fontsize=14, frameon=False)
+            ax.legend(fontsize=14, frameon=False, bbox_to_anchor=(0.2, 0.6))
     
     plt.tight_layout()
     plt.savefig(f"{save_path}/overlaid_comparison", dpi=600)
@@ -101,14 +101,3 @@ def create_overlay_plots_general(file_paths, labels, mass_max=250, save_path=Non
     } for param in hist_params] for path in file_paths]
     
     plot_combined_histograms_with_overlay(list_of_params_all, labels, save_path)
-
-# Example usage:
-
-
-files = [
-    f"{CWD}/data/2-intermediate/noisy_mu0_event_level.csv",
-    f"{CWD}/data/3-grid/mu0/noisy_mu{0}_event_level_from_grid{64}.csv",
-    f"{CWD}/data/4-reconstruction/beta001/reconstructed_mu200_event_level_from_grid64_Unet64.csv",
-]
-labels = ["Original", "Best case", "Denoised"]
-create_overlay_plots_general(files, labels)
