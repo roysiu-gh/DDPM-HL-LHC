@@ -17,17 +17,17 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 # MAX_DATA_ROWS = 100_000
 
-# # === Read in data
-# print("0 :: Loading original data")
-# tt = np.genfromtxt(
-#     TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-# )
-# pile_up = np.genfromtxt(
-#     PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-# )
-# tt = EventSelector(tt)
-# pile_up = EventSelector(pile_up)
-# print("FINISHED loading data\n")
+# === Read in data
+print("0 :: Loading original data")
+tt = np.genfromtxt(
+    TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+)
+pile_up = np.genfromtxt(
+    PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+)
+tt = EventSelector(tt)
+pile_up = EventSelector(pile_up)
+print("FINISHED loading data\n")
 
 #################################################################################
 
@@ -38,6 +38,13 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 # unique_vals = len(np.unique(pu_ids))
 # print(f"Number of unique values in the first column: {unique_vals}")
 # print( f"Percentage of non-empty pile-ups {(unique_vals/total_pileups)*100}" )
+
+# # Find avg_PU_per_nonzero_event
+# num_non_empty = len(np.unique(pile_up[:, 0]))
+# num_parts = len(pile_up)
+# avg_PU_per_nonzero_event = num_parts / num_non_empty
+# print(f"avg_PU_per_nonzero_event: {avg_PU_per_nonzero_event}")
+# # avg_PU_per_nonzero_event: 7.765886374696351
 
 #################################################################################
 
@@ -229,15 +236,15 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 #################################################################################
 
-# output_path = f"{CWD}/data/plots/bmap_comparison/"
+output_path = f"{CWD}/data/plots/bmap_comparison/"
 
-# plot_mu_comparison(tt, pile_up, 
-#                   use_log=False,
-#                   save_path=f"{output_path}/mu_comparison_linear.png")
+plot_mu_comparison(tt, pile_up, 
+                  use_log=False,
+                  save_path=f"{output_path}/mu_comparison_linear.png")
 
-# plot_mu_comparison(tt, pile_up, 
-#                   use_log=True,
-#                   save_path=f"{output_path}/mu_comparison_log.png")
+plot_mu_comparison(tt, pile_up, 
+                  use_log=True,
+                  save_path=f"{output_path}/mu_comparison_log.png")
 
 #################################################################################
 
@@ -253,4 +260,11 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 #################################################################################
 
 # plot_particle_level_quantities_comparison(f"{CWD}/data/plots/particle_level_quantities_comparison.png")
-plot_event_level_quantities_comparison(f"{CWD}/data/plots/event_level_quantities_comparison.png")
+# plot_event_level_quantities_comparison(tt, pile_up,
+#                                        f"{CWD}/data/plots/event_level_quantities_comparison.png")
+
+#################################################################################
+
+
+
+#################################################################################
