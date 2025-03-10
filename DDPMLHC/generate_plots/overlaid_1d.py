@@ -90,6 +90,6 @@ def create_overlay_plots(mu_values, mass_max=250, save_path=None):
         "save_filename": f"event_{param['name'].lower()}_mu{mu}"
     } for param in hist_params] for mu in mu_values]
 
-    # mu_values = [f"$\mu={i}$" for i in mu_values]
+    mu_values = [f"$\mu={i}$" for i in mu_values]
     
     plot_combined_histograms_with_overlay(list_of_params_all, mu_values, save_path)
