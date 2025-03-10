@@ -36,7 +36,9 @@ def load_variable_data(data_path, variable, truth_path=None):
 
 def plot_resolutions(mass_resolutions, pt_resolutions, colors=None, 
                     bins=BMAP_SQUARE_SIDE_LENGTH, save_path=None,
-                    mass_cutoff=(-1, 4), pt_cutoff=(-1, 2), use_log=False, legend_title=None):
+                    mass_cutoff=(-1, 4), pt_cutoff=(-1, 2), use_log=False, 
+                    legend_title=None, show_subtit=True, 
+                    mass_text=None, pT_text=None):
     
     if legend_title is None:
         legend_title = rf"${bins}\times {bins}$ grid"
@@ -61,9 +63,14 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
         hist_lines.append(line)
     
     ax1.axvline(x=0, color="black", linestyle="--")
-    ax1.set_xlabel("(a) mass response")
+    if show_subtit: ax1.set_xlabel("Mass response")
     ax1.set_ylabel("Density")
     if use_log: ax1.set_yscale("log")
+    
+    # Add text to top right corner
+    if mass_text:
+        ax1.text(0.95, 0.95, mass_text, transform=ax1.transAxes, 
+                 fontsize=24, verticalalignment='top', horizontalalignment='right')
     
     # Create custom legend handles
     handles = []
@@ -73,7 +80,6 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
         resolution = np.std(plot_data)
         stat_label = f"{label}\n$\zeta={bias:.3f}$\n$\\rho={resolution:.3f}$"
         
-        # Get the color from the histogram line
         color = line[2][0].get_edgecolor()
         
         handles.append(Line2D([0], [0], 
@@ -116,8 +122,13 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
         hist_lines.append(line)
     
     ax2.axvline(x=0, color="black", linestyle="--")
-    ax2.set_xlabel(r"(b) $p_T$ response")
+    if show_subtit: ax2.set_xlabel(r"$p_T$ response")
     if use_log: ax2.set_yscale("log")
+    
+    # Add text to top right corner
+    if pT_text:
+        ax2.text(0.95, 0.95, pT_text, transform=ax2.transAxes, 
+                 fontsize=24, verticalalignment='top', horizontalalignment='right')
     
     # Create custom legend handles for pT plot
     handles = []
@@ -127,7 +138,6 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
         resolution = np.std(plot_data)
         stat_label = f"{label}\n$\zeta={bias:.3f}$\n$\\rho={resolution:.3f}$"
         
-        # Get the color from the histogram line
         color = line[2][0].get_edgecolor()
         
         handles.append(Line2D([0], [0], 

@@ -214,25 +214,24 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 #################################################################################
 
-# Resplots for impact of gridding, compare against cts pure
+# # Resplots for impact of gridding, compare against cts pure
+# bins = [4, 8, 16, 256]
+# save_path = f"{CWD}/data/plots/relative_resolutions/resolution_compare_grids_{'_'.join(map(str, bins))}.pdf"
 
-bins = [4, 8, 16, 256]
-save_path = f"{CWD}/data/plots/relative_resolutions/resolution_compare_grids_{'_'.join(map(str, bins))}.pdf"
+# paths = [f"{CWD}/data/3-grid/mu0/noisy_mu0_event_level_from_grid{bin}.csv" for bin in bins]
+# mass_resolutions_grids = { rf"$b={bin}$" : load_variable_data(paths[i], "mass")
+#                           for i, bin in enumerate(bins) }
+# pt_resolutions_grids = { rf"$b={bin}$" : load_variable_data(paths[i], "p_T")
+#                           for i, bin in enumerate(bins) }
 
-paths = [f"{CWD}/data/3-grid/mu0/noisy_mu0_event_level_from_grid{bin}.csv" for bin in bins]
-mass_resolutions_grids = { rf"$b={bin}$" : load_variable_data(paths[i], "mass")
-                          for i, bin in enumerate(bins) }
-pt_resolutions_grids = { rf"$b={bin}$" : load_variable_data(paths[i], "p_T")
-                          for i, bin in enumerate(bins) }
-
-plot_resolutions(
-    mass_resolutions_grids, pt_resolutions_grids,
-    save_path = save_path,
-    mass_cutoff=(-1, 4),
-    pt_cutoff=(-0.1, 0.1),
-    use_log=True,
-    legend_title="",
-)
+# plot_resolutions(
+#     mass_resolutions_grids, pt_resolutions_grids,
+#     save_path = save_path,
+#     mass_cutoff=(-1, 4),
+#     pt_cutoff=(-0.1, 0.1),
+#     use_log=True,
+#     legend_title="",
+# )
 
 #################################################################################
 
@@ -264,6 +263,49 @@ plot_resolutions(
 #                                        f"{CWD}/data/plots/event_level_quantities_comparison.png")
 
 #################################################################################
+
+# Plot model output resplots
+best_case_path = f"{CWD}/data/3-grid/mu0/noisy_mu0_event_level_from_grid{16}.csv"
+
+binsbeta = [
+    (32, "001", False, "(a)", "(b)"),
+    (32, "0.5", False, "(c)", "(d)"),
+    (64, "001", False, "(e)", "(f)"),
+    (64, "0.5", True, "(g)", "(h)"),
+]
+
+for x in binsbeta:
+    bins, beta, show_subtit = x[0], x[1], x[2]
+    mass_text, pT_text = x[3], x[4]
+    
+    reconstructed_path = f"{CWD}/data/4-reconstruction/beta{beta}/reconstructed_mu{200}_event_level_from_grid{bins}_Unet{UNET_DIMS}.csv"
+    
+    # Second plot - comparison against best case
+    noisy_binned = f"{CWD}/data/2-intermediate/noisy_mu200_event_level_grid{bins}.csv"
+    mass_resolutions_best = {
+        "Noisy ($\mu=200$)": load_variable_data(noisy_binned, "mass", truth_path=best_case_path),
+        "Denoised": load_variable_data(reconstructed_path, "mass", truth_path=best_case_path)
+    }
+
+    pt_resolutions_best = {
+        "Noisy ($\mu=200$)": load_variable_data(noisy_binned, "p_T", truth_path=best_case_path),
+        "Denoised": load_variable_data(reconstructed_path, "p_T", truth_path=best_case_path)
+    }
+
+    rt=f"{CWD}/data/plots/relative_resolutions/rs_ver/"
+    os.makedirs(rt, exist_ok=True)
+    plot_resolutions(
+        mass_resolutions_best, pt_resolutions_best,
+        colors={
+            "Noisy ($\mu=200$)": "red",
+            "Denoised": "blue"
+        },
+        save_path = f"{rt}/resolution_grid{bins}_Unet{UNET_DIMS}_mass_beta{beta}.pdf",
+        legend_title=f"Parameters\n$b={bins}$, $\\beta={beta}$",
+        show_subtit=show_subtit,
+        mass_text=mass_text,
+        pT_text=pT_text,
+    )
 
 
 
