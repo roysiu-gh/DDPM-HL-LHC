@@ -32,10 +32,10 @@ jets_to_sample =1000
 
 
 tick_fontsize = 24
-label_fontsize = 20
+label_fontsize = 24
 
 MPL_GLOBAL_PARAMS = {
-    'text.usetex' : True,
+    'text.usetex' : False,
     'text.latex.preamble' : r'\usepackage{stix}',
     'font.family' : 'STIXGeneral',
     'mathtext.fontset': 'stix',
