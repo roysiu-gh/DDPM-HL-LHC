@@ -8,10 +8,11 @@ from DDPMLHC.config import *
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
-def plot_combined_histograms_with_overlay(hist_data_list, labels, save_path):
+def plot_combined_histograms_with_overlay(hist_data_list, labels, save_path, stat="density", FOOBAR=False):
     """Plot mass and p_T for multiple datasets with custom labels."""
     colors = ['blue', 'orange', 'green', 'red', 'purple'][:len(labels)]
     alphas = np.linspace(0.7, 0.3, len(labels))
+    hatch_patterns = ['/', '\\', '|', '-', '+'][:len(labels)]  # Different hatching patterns
     
     fig, axes = plt.subplots(1, 2, figsize=(11, 5))
     first_dataset = hist_data_list[0]
@@ -32,12 +33,13 @@ def plot_combined_histograms_with_overlay(hist_data_list, labels, save_path):
         else:
             bin_edges = np.linspace(x_min, x_max, bins)
         
-        for hist_data, label, color, alpha in zip(hist_data_list, labels, colors, alphas):
+        for hist_data, label, color, alpha, hatch in zip(hist_data_list, labels, colors, alphas, hatch_patterns):
             entry = hist_data[idx]
-            sb.histplot(entry["data"], ax=ax, stat="count",
+            sb.histplot(entry["data"], ax=ax, stat=stat,
                        bins=bin_edges, color=color, 
                        label=label, alpha=alpha,
-                       edgecolor='black', linewidth=0.2)
+                       edgecolor='black', linewidth=0.2,
+                       hatch=hatch, element="step")  # Add hatching
         
         if xlog:
             ax.set_xscale("log")
@@ -52,13 +54,21 @@ def plot_combined_histograms_with_overlay(hist_data_list, labels, save_path):
         ax.set_xlabel(entry_ref["name"], fontsize=14)
         
         if idx == 0:
-            ax.set_ylabel("Frequency", fontsize=12)
+            if stat == "count":
+                ax.set_ylabel("Frequency", fontsize=12)
+            elif stat == "density":
+                ax.set_ylabel("Frequency Density", fontsize=12)
+            else:
+                raise ValueError
         else:
             ax.set_ylabel("")
-            ax.legend(fontsize=14, frameon=False, bbox_to_anchor=(0.2, 0.6))
+            if FOOBAR:
+                ax.legend(fontsize=14, frameon=False, bbox_to_anchor=(0.2, 0.6))
+            else:
+                ax.legend(fontsize=14, frameon=False)
     
     plt.tight_layout()
-    plt.savefig(f"{save_path}/overlaid_comparison", dpi=600)
+    plt.savefig(f"{save_path}", dpi=600)
     plt.close(fig)
 
 def create_overlay_plots_general(file_paths, labels, mass_max=250, save_path=None):
@@ -79,8 +89,7 @@ def create_overlay_plots_general(file_paths, labels, mass_max=250, save_path=Non
     if len(file_paths) > 5:
         raise ValueError("Maximum 5 datasets supported")
     
-    save_path = save_path or f"{CWD}/data/plots/1D_histograms/overlaid_from_model"
-    Path(save_path).mkdir(parents=True, exist_ok=True)
+    save_path = save_path or f"{CWD}/data/plots/1D_histograms/overlaid_from_model/overlaid_comparison.png"
     
     # Load all datasets
     events_data = {path: np.genfromtxt(path,
@@ -100,4 +109,5 @@ def create_overlay_plots_general(file_paths, labels, mass_max=250, save_path=Non
         "plot_params": param["params"],
     } for param in hist_params] for path in file_paths]
     
-    plot_combined_histograms_with_overlay(list_of_params_all, labels, save_path)
+    plot_combined_histograms_with_overlay(list_of_params_all, labels, save_path, FOOBAR=True, stat="count")
+

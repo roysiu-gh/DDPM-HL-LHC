@@ -56,10 +56,10 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 #################################################################################
 
-# create_overlay_plots([0, 5, 10, 15, 30])
-# create_overlay_plots([0, 10, 30, 50])
-# create_overlay_plots([0, 25, 50, 75, 100], mass_max=300)
-# create_overlay_plots([0, 50, 100, 150, 200], mass_max=400)
+create_overlay_plots([0, 5, 10, 15, 30])
+create_overlay_plots([0, 10, 30, 50])
+create_overlay_plots([0, 25, 50, 75, 100], mass_max=300)
+create_overlay_plots([0, 50, 100, 150, 200], mass_max=400)
 
 #################################################################################
 
@@ -153,13 +153,13 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 #################################################################################
 
-# create_overlay_plots_debin([4,8,16,32])
-# create_overlay_plots_debin([4,16,64,256])
-# create_overlay_plots_debin([4,16,64,256], pure=True)
-# create_overlay_plots_debin([4,8,16,256], pure=True)
-# create_overlay_plots_debin([8,16,256], pure=True)
-# create_overlay_plots_debin([2,4,8])
-# create_overlay_plots_debin([2,4,8,256], pure=True)
+create_overlay_plots_debin([4,8,16,32])
+create_overlay_plots_debin([4,16,64,256])
+create_overlay_plots_debin([4,16,64,256], pure=True)
+create_overlay_plots_debin([4,8,16,256], pure=True)
+create_overlay_plots_debin([8,16,256], pure=True)
+create_overlay_plots_debin([2,4,8])
+create_overlay_plots_debin([2,4,8,256], pure=True)
 
 #################################################################################
 
@@ -247,14 +247,14 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 #################################################################################
 
-# files = [
-#     f"{CWD}/data/2-intermediate/noisy_mu0_event_level.csv",
-#     f"{CWD}/data/3-grid/mu0/noisy_mu{0}_event_level_from_grid{64}.csv",
-#     f"{CWD}/data/2-intermediate/noisy_mu200_event_level.csv",
-#     f"{CWD}/data/4-reconstruction/beta001/reconstructed_mu200_event_level_from_grid64_Unet64.csv",
-# ]
-# labels = ["Original", "Best case", "Noisy", "Denoised"]
-# create_overlay_plots_general(files, labels, mass_max=350)
+files = [
+    f"{CWD}/data/2-intermediate/noisy_mu0_event_level.csv",
+    f"{CWD}/data/3-grid/mu0/noisy_mu{0}_event_level_from_grid{64}.csv",
+    f"{CWD}/data/2-intermediate/noisy_mu200_event_level.csv",
+    f"{CWD}/data/4-reconstruction/beta001/reconstructed_mu200_event_level_from_grid64_Unet64.csv",
+]
+labels = ["Original", "Best case", "Noisy", "Denoised"]
+create_overlay_plots_general(files, labels, mass_max=350)
 
 #################################################################################
 
@@ -264,49 +264,47 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 #################################################################################
 
-# Plot model output resplots
-best_case_path = f"{CWD}/data/3-grid/mu0/noisy_mu0_event_level_from_grid{16}.csv"
+# # Plot model output resplots
+# best_case_path = f"{CWD}/data/3-grid/mu0/noisy_mu0_event_level_from_grid{16}.csv"
 
-binsbeta = [
-    (32, "001", False, "(a)", "(b)"),
-    (32, "0.5", False, "(c)", "(d)"),
-    (64, "001", False, "(e)", "(f)"),
-    (64, "0.5", True, "(g)", "(h)"),
-]
+# binsbeta = [
+#     (32, "001", False, "(a)", "(b)"),
+#     (32, "0.5", False, "(c)", "(d)"),
+#     (64, "001", False, "(e)", "(f)"),
+#     (64, "0.5", True, "(g)", "(h)"),
+# ]
 
-for x in binsbeta:
-    bins, beta, show_subtit = x[0], x[1], x[2]
-    mass_text, pT_text = x[3], x[4]
+# for x in binsbeta:
+#     bins, beta, show_subtit = x[0], x[1], x[2]
+#     mass_text, pT_text = x[3], x[4]
     
-    reconstructed_path = f"{CWD}/data/4-reconstruction/beta{beta}/reconstructed_mu{200}_event_level_from_grid{bins}_Unet{UNET_DIMS}.csv"
+#     reconstructed_path = f"{CWD}/data/4-reconstruction/beta{beta}/reconstructed_mu{200}_event_level_from_grid{bins}_Unet{UNET_DIMS}.csv"
     
-    # Second plot - comparison against best case
-    noisy_binned = f"{CWD}/data/2-intermediate/noisy_mu200_event_level_grid{bins}.csv"
-    mass_resolutions_best = {
-        "Noisy ($\mu=200$)": load_variable_data(noisy_binned, "mass", truth_path=best_case_path),
-        "Denoised": load_variable_data(reconstructed_path, "mass", truth_path=best_case_path)
-    }
+#     # Second plot - comparison against best case
+#     noisy_binned = f"{CWD}/data/2-intermediate/noisy_mu200_event_level_grid{bins}.csv"
+#     mass_resolutions_best = {
+#         "Noisy ($\mu=200$)": load_variable_data(noisy_binned, "mass", truth_path=best_case_path),
+#         "Denoised": load_variable_data(reconstructed_path, "mass", truth_path=best_case_path)
+#     }
 
-    pt_resolutions_best = {
-        "Noisy ($\mu=200$)": load_variable_data(noisy_binned, "p_T", truth_path=best_case_path),
-        "Denoised": load_variable_data(reconstructed_path, "p_T", truth_path=best_case_path)
-    }
+#     pt_resolutions_best = {
+#         "Noisy ($\mu=200$)": load_variable_data(noisy_binned, "p_T", truth_path=best_case_path),
+#         "Denoised": load_variable_data(reconstructed_path, "p_T", truth_path=best_case_path)
+#     }
 
-    rt=f"{CWD}/data/plots/relative_resolutions/rs_ver/"
-    os.makedirs(rt, exist_ok=True)
-    plot_resolutions(
-        mass_resolutions_best, pt_resolutions_best,
-        colors={
-            "Noisy ($\mu=200$)": "red",
-            "Denoised": "blue"
-        },
-        save_path = f"{rt}/resolution_grid{bins}_Unet{UNET_DIMS}_mass_beta{beta}.pdf",
-        legend_title=f"Parameters\n$b={bins}$, $\\beta={beta}$",
-        show_subtit=show_subtit,
-        mass_text=mass_text,
-        pT_text=pT_text,
-    )
-
-
+#     rt=f"{CWD}/data/plots/relative_resolutions/rs_ver/"
+#     os.makedirs(rt, exist_ok=True)
+#     plot_resolutions(
+#         mass_resolutions_best, pt_resolutions_best,
+#         colors={
+#             "Noisy ($\mu=200$)": "red",
+#             "Denoised": "blue"
+#         },
+#         save_path = f"{rt}/resolution_grid{bins}_Unet{UNET_DIMS}_mass_beta{beta}.pdf",
+#         legend_title=f"Parameters\n$b={bins}$, $\\beta={beta}$",
+#         show_subtit=show_subtit,
+#         mass_text=mass_text,
+#         pT_text=pT_text,
+#     )
 
 #################################################################################
