@@ -110,4 +110,3 @@ def create_overlay_plots_general(file_paths, labels, mass_max=250, save_path=Non
     } for param in hist_params] for path in file_paths]
     
     plot_combined_histograms_with_overlay(list_of_params_all, labels, save_path, FOOBAR=True, stat="count")
-

@@ -56,10 +56,10 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 #################################################################################
 
-create_overlay_plots([0, 5, 10, 15, 30])
-create_overlay_plots([0, 10, 30, 50])
-create_overlay_plots([0, 25, 50, 75, 100], mass_max=300)
-create_overlay_plots([0, 50, 100, 150, 200], mass_max=400)
+# create_overlay_plots([0, 5, 10, 15, 30])
+# create_overlay_plots([0, 10, 30, 50])
+# create_overlay_plots([0, 25, 50, 75, 100], mass_max=300)
+# create_overlay_plots([0, 50, 100, 150, 200], mass_max=400)
 
 #################################################################################
 
@@ -247,14 +247,14 @@ create_overlay_plots_debin([2,4,8,256], pure=True)
 
 #################################################################################
 
-files = [
-    f"{CWD}/data/2-intermediate/noisy_mu0_event_level.csv",
-    f"{CWD}/data/3-grid/mu0/noisy_mu{0}_event_level_from_grid{64}.csv",
-    f"{CWD}/data/2-intermediate/noisy_mu200_event_level.csv",
-    f"{CWD}/data/4-reconstruction/beta001/reconstructed_mu200_event_level_from_grid64_Unet64.csv",
-]
-labels = ["Original", "Best case", "Noisy", "Denoised"]
-create_overlay_plots_general(files, labels, mass_max=350)
+# files = [
+#     f"{CWD}/data/2-intermediate/noisy_mu0_event_level.csv",
+#     f"{CWD}/data/3-grid/mu0/noisy_mu{0}_event_level_from_grid{64}.csv",
+#     f"{CWD}/data/2-intermediate/noisy_mu200_event_level.csv",
+#     f"{CWD}/data/4-reconstruction/beta001/reconstructed_mu200_event_level_from_grid64_Unet64.csv",
+# ]
+# labels = ["Original", "Best case", "Noisy", "Denoised"]
+# create_overlay_plots_general(files, labels, mass_max=350)
 
 #################################################################################
 
