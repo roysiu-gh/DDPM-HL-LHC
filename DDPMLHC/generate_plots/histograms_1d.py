@@ -9,7 +9,7 @@ import multiprocessing
 from pathlib import Path
 # Local imports
 from DDPMLHC.config import *
-from DDPMLHC.calculate_quantities import p_magnitude, pseudorapidity
+from DDPMLHC.calculate_quantities import p_magnitude, particle_momenta_to_event_level, pseudorapidity
 line_thickness = 3.0
 axes_thickness = 4.0
 leg_size = 30
@@ -206,7 +206,7 @@ def plot_particle_level_quantities_comparison(save_path=None):
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))
     
     # Define plot ranges
-    p_range = (0.8, 6)
+    p_range = (0, 8)
     eta_range = (-3, 3)
     pt_range = (0.8, 4)
     
@@ -301,6 +301,103 @@ def plot_particle_level_quantities_comparison(save_path=None):
     plt.tight_layout()
     
     # Save or show
+    if save_path:
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+        plt.close()
+    else:
+        plt.show()
+
+def plot_event_level_quantities_comparison(data_tt, data_pu, save_path=None):
+    """
+    Original written (and lost) by Roy Siu.
+    New code made with Claude 3.5.
+    Plot event-level momentum, pseudorapidity and transverse momentum distributions.
+    Overlay histograms from tt̄ and pile-up events.
+    """
+    # Group by event and calculate event-level quantities for tt̄ events
+    unique_events_tt = np.unique(data_tt[:, 0])
+    event_quantities_tt = []
+    for event in unique_events_tt:
+        event_mask = data_tt[:, 0] == event
+        event_data = data_tt[event_mask]
+        
+        enes = np.sqrt(event_data[:, 3]**2 + event_data[:, 4]**2 + event_data[:, 5]**2 + 1)
+        pxs = event_data[:, 3]
+        pys = event_data[:, 4]
+        pzs = event_data[:, 5]
+        
+        event_quantities = particle_momenta_to_event_level(enes, pxs, pys, pzs)
+        event_quantities_tt.append(event_quantities)
+    
+    # Do the same for pile-up events
+    unique_events_pu = np.unique(data_pu[:, 0])
+    event_quantities_pu = []
+    for event in unique_events_pu:
+        event_mask = data_pu[:, 0] == event
+        event_data = data_pu[event_mask]
+        
+        enes = np.sqrt(event_data[:, 3]**2 + event_data[:, 4]**2 + event_data[:, 5]**2 + 1)
+        pxs = event_data[:, 3]
+        pys = event_data[:, 4]
+        pzs = event_data[:, 5]
+        
+        event_quantities = particle_momenta_to_event_level(enes, pxs, pys, pzs)
+        event_quantities_pu.append(event_quantities)
+    
+    # Convert to numpy arrays for plotting
+    event_quantities_tt = np.array(event_quantities_tt)
+    event_quantities_pu = np.array(event_quantities_pu)
+    
+    # Extract specific quantities
+    mass_tt, px_tt, py_tt, pz_tt, eta_tt, phi_tt, pT_tt = event_quantities_tt.T
+    mass_pu, px_pu, py_pu, pz_pu, eta_pu, phi_pu, pT_pu = event_quantities_pu.T
+    
+    # Create figure with three subplots
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))
+    
+    # Define plot ranges
+    mass_range = (50, 250)
+    eta_range = (-3, 3)
+    pt_range = (0, 500)
+    
+    # Plot 1: Mass
+    sb.histplot(data=mass_tt, bins=np.linspace(mass_range[0], mass_range[1], 50),
+                stat="density", color="blue", alpha=0.3, label="$t\\bar t$ events", ax=ax1,
+                edgecolor="blue", linewidth=1.5, element="step")
+    sb.histplot(data=mass_pu, bins=np.linspace(mass_range[0], mass_range[1], 50),
+                stat="density", color="red", alpha=0.3, label="pile-up", ax=ax1,
+                edgecolor="red", linewidth=1.5, element="step")
+    ax1.set_xlabel("(a) Event Mass [GeV]")
+    ax1.set_ylabel("Frequency Density")
+    ax1.set_xlim(mass_range)
+    ax1.legend(fontsize=14, frameon=True, framealpha=1.0, edgecolor='black', borderpad=0.5)
+    
+    # Plot 2: Pseudorapidity
+    sb.histplot(data=eta_tt, bins=np.linspace(eta_range[0], eta_range[1], 50),
+                stat="density", color="blue", alpha=0.3, label="$t\\bar t$ events", ax=ax2,
+                edgecolor="blue", linewidth=1.5, element="step")
+    sb.histplot(data=eta_pu, bins=np.linspace(eta_range[0], eta_range[1], 50),
+                stat="density", color="red", alpha=0.3, label="pile-up", ax=ax2,
+                edgecolor="red", linewidth=1.5, element="step")
+    ax2.set_xlabel("(b) Event $\eta$")
+    ax2.set_ylabel("")
+    ax2.set_xlim(eta_range)
+    ax2.legend(fontsize=14, frameon=True, framealpha=1.0, edgecolor='black', borderpad=0.5)
+    
+    # Plot 3: Transverse Momentum
+    sb.histplot(data=pT_tt, bins=np.linspace(pt_range[0], pt_range[1], 50),
+                stat="density", color="blue", alpha=0.3, label="$t\\bar t$ events", ax=ax3,
+                edgecolor="blue", linewidth=1.5, element="step")
+    sb.histplot(data=pT_pu, bins=np.linspace(pt_range[0], pt_range[1], 50),
+                stat="density", color="red", alpha=0.3, label="pile-up", ax=ax3,
+                edgecolor="red", linewidth=1.5, element="step")
+    ax3.set_xlabel("(c) Event $p_T$ [GeV]")
+    ax3.set_ylabel("")
+    ax3.set_xlim(pt_range)
+    ax3.legend(fontsize=16, frameon=True, framealpha=1.0, edgecolor='black', borderpad=0.5)
+    
+    # Adjust layout and save
+    plt.tight_layout()
     if save_path:
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
         plt.close()

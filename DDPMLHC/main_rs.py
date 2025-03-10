@@ -6,7 +6,7 @@ import polars as pl
 from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import *
 from DDPMLHC.data_loading import *
-from DDPMLHC.generate_plots.histograms_1d import plot_1d_histograms, plot_particle_level_quantities_comparison
+from DDPMLHC.generate_plots.histograms_1d import plot_1d_histograms, plot_event_level_quantities_comparison, plot_particle_level_quantities_comparison
 from DDPMLHC.generate_plots.overlaid_1d import create_overlay_plots
 from DDPMLHC.generate_plots.overlaid_debin import create_overlay_plots_debin
 from DDPMLHC.generate_plots.bmap import plot_mu_comparison, save_to_bmap
@@ -252,5 +252,5 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 #################################################################################
 
-save_path = f"{CWD}/data/plots/particle_level_quantities_comparison.png"
-plot_particle_level_quantities_comparison(save_path)
+# plot_particle_level_quantities_comparison(f"{CWD}/data/plots/particle_level_quantities_comparison.png")
+plot_event_level_quantities_comparison(f"{CWD}/data/plots/event_level_quantities_comparison.png")
