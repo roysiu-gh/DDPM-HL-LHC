@@ -17,17 +17,17 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 # MAX_DATA_ROWS = 100_000
 
-# === Read in data
-print("0 :: Loading original data")
-tt = np.genfromtxt(
-    TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-pile_up = np.genfromtxt(
-    PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-tt = EventSelector(tt)
-pile_up = EventSelector(pile_up)
-print("FINISHED loading data\n")
+# # === Read in data
+# print("0 :: Loading original data")
+# tt = np.genfromtxt(
+#     TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+# )
+# pile_up = np.genfromtxt(
+#     PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+# )
+# tt = EventSelector(tt)
+# pile_up = EventSelector(pile_up)
+# print("FINISHED loading data\n")
 
 #################################################################################
 
@@ -214,37 +214,37 @@ print("FINISHED loading data\n")
 
 #################################################################################
 
-# # Resplots for impact of gridding, compare against cts pure
+# Resplots for impact of gridding, compare against cts pure
 
-# bins = [4, 8, 16, 256]
-# save_path = f"{CWD}/data/plots/relative_resolutions/resolution_compare_grids_{'_'.join(map(str, bins))}.pdf"
+bins = [4, 8, 16, 256]
+save_path = f"{CWD}/data/plots/relative_resolutions/resolution_compare_grids_{'_'.join(map(str, bins))}.pdf"
 
-# paths = [f"{CWD}/data/3-grid/mu0/noisy_mu0_event_level_from_grid{bin}.csv" for bin in bins]
-# mass_resolutions_grids = { rf"$b={bin}$" : load_variable_data(paths[i], "mass")
-#                           for i, bin in enumerate(bins) }
-# pt_resolutions_grids = { rf"$b={bin}$" : load_variable_data(paths[i], "p_T")
-#                           for i, bin in enumerate(bins) }
+paths = [f"{CWD}/data/3-grid/mu0/noisy_mu0_event_level_from_grid{bin}.csv" for bin in bins]
+mass_resolutions_grids = { rf"$b={bin}$" : load_variable_data(paths[i], "mass")
+                          for i, bin in enumerate(bins) }
+pt_resolutions_grids = { rf"$b={bin}$" : load_variable_data(paths[i], "p_T")
+                          for i, bin in enumerate(bins) }
 
-# plot_resolutions(
-#     mass_resolutions_grids, pt_resolutions_grids,
-#     save_path = save_path,
-#     mass_cutoff=(-1, 4),
-#     pt_cutoff=(-0.1, 0.1),
-#     use_log=True,
-#     legend_title="",
-# )
+plot_resolutions(
+    mass_resolutions_grids, pt_resolutions_grids,
+    save_path = save_path,
+    mass_cutoff=(-1, 4),
+    pt_cutoff=(-0.1, 0.1),
+    use_log=True,
+    legend_title="",
+)
 
 #################################################################################
 
-output_path = f"{CWD}/data/plots/bmap_comparison/"
+# output_path = f"{CWD}/data/plots/bmap_comparison/"
 
-plot_mu_comparison(tt, pile_up, 
-                  use_log=False,
-                  save_path=f"{output_path}/mu_comparison_linear.png")
+# plot_mu_comparison(tt, pile_up, 
+#                   use_log=False,
+#                   save_path=f"{output_path}/mu_comparison_linear.png")
 
-plot_mu_comparison(tt, pile_up, 
-                  use_log=True,
-                  save_path=f"{output_path}/mu_comparison_log.png")
+# plot_mu_comparison(tt, pile_up, 
+#                   use_log=True,
+#                   save_path=f"{output_path}/mu_comparison_log.png")
 
 #################################################################################
 

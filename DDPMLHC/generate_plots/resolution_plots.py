@@ -44,6 +44,7 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
     
     # Mass plot
+    hist_lines = []
     for label, res in mass_resolutions.items():
         plot_data = res[(res >= mass_cutoff[0]) & (res < mass_cutoff[1])]
         bias = np.mean(plot_data)
@@ -51,12 +52,13 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
         stat_label = f"{label}\n$\zeta={bias:.3f}$\n$\\rho={resolution:.3f}$"
         
         color = colors.get(label) if colors else None
-        ax1.hist(plot_data, 
-                bins=np.linspace(mass_cutoff[0], mass_cutoff[1], 50),
-                label=stat_label, 
-                histtype="step",
-                density=True,
-                color=color)
+        line = ax1.hist(plot_data, 
+                        bins=np.linspace(mass_cutoff[0], mass_cutoff[1], 50),
+                        label=stat_label, 
+                        histtype="step",
+                        density=True,
+                        color=color)
+        hist_lines.append(line)
     
     ax1.axvline(x=0, color="black", linestyle="--")
     ax1.set_xlabel("(a) mass response")
@@ -65,18 +67,22 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
     
     # Create custom legend handles
     handles = []
-    for label, res in mass_resolutions.items():
+    for (label, res), line in zip(mass_resolutions.items(), hist_lines):
         plot_data = res[(res >= mass_cutoff[0]) & (res < mass_cutoff[1])]
         bias = np.mean(plot_data)
         resolution = np.std(plot_data)
         stat_label = f"{label}\n$\zeta={bias:.3f}$\n$\\rho={resolution:.3f}$"
         
+        # Get the color from the histogram line
+        color = line[2][0].get_edgecolor()
+        
         handles.append(Line2D([0], [0], 
-                            color=colors.get(label) if colors else None,
+                            color=color,
                             marker='|', 
-                            markersize=15, 
+                            markersize=45, 
                             markeredgewidth=2,
                             label=stat_label))
+    
     legend_font=14
     if legend_title == "":
         ax1.legend(handles=handles, loc='center left', bbox_to_anchor=(1, 0.5),
@@ -92,7 +98,8 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
                   title=legend_title,
                    prop={'size': legend_font})
     
-    # pT plot
+    # pT plot (similar approach)
+    hist_lines = []
     for label, res in pt_resolutions.items():
         plot_data = res[(res >= pt_cutoff[0]) & (res < pt_cutoff[1])]
         bias = np.mean(plot_data)
@@ -100,12 +107,13 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
         stat_label = f"{label}\n$\zeta={bias:.3f}$\n$\\rho={resolution:.3f}$"
         
         color = colors.get(label) if colors else None
-        ax2.hist(plot_data, 
-                bins=np.linspace(pt_cutoff[0], pt_cutoff[1], 50),
-                label=stat_label, 
-                histtype="step",
-                density=True,
-                color=color)
+        line = ax2.hist(plot_data, 
+                        bins=np.linspace(pt_cutoff[0], pt_cutoff[1], 50),
+                        label=stat_label, 
+                        histtype="step",
+                        density=True,
+                        color=color)
+        hist_lines.append(line)
     
     ax2.axvline(x=0, color="black", linestyle="--")
     ax2.set_xlabel(r"(b) $p_T$ response")
@@ -113,16 +121,19 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
     
     # Create custom legend handles for pT plot
     handles = []
-    for label, res in pt_resolutions.items():
+    for (label, res), line in zip(pt_resolutions.items(), hist_lines):
         plot_data = res[(res >= pt_cutoff[0]) & (res < pt_cutoff[1])]
         bias = np.mean(plot_data)
         resolution = np.std(plot_data)
         stat_label = f"{label}\n$\zeta={bias:.3f}$\n$\\rho={resolution:.3f}$"
         
+        # Get the color from the histogram line
+        color = line[2][0].get_edgecolor()
+        
         handles.append(Line2D([0], [0], 
-                            color=colors.get(label) if colors else None,
+                            color=color,
                             marker='|', 
-                            markersize=15, 
+                            markersize=45, 
                             markeredgewidth=2,
                             label=stat_label))
     
