@@ -22,8 +22,8 @@ TTBAR_NUM = 70903
 MAX_DATA_ROWS = None
 
 BMAP_SQUARE_SIDE_LENGTH = 64
-label_fontsize = 24
-tick_fontsize = 24
+label_fontsize = 20
+tick_fontsize = 20
 
     # 'font.family' : r'Computer Modern Roman',
 MPL_GLOBAL_PARAMS = {
