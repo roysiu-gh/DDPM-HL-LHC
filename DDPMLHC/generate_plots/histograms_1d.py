@@ -18,7 +18,6 @@ leg_size = 30
 custom_params ={'axes.grid' : False}
 sb.set_theme(style="ticks", rc=custom_params)
 # plt.rcParams["text.usetex"] = False  # Use LaTeX for rendering text
-plt.rcParams["font.size"] = 16  # Set default font size (optional)
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
@@ -48,12 +47,12 @@ def plot_1D_hist(name, data, xlog=False, plot_params=DEFAULT_PLOT_PARAMS, save_p
     
     sb.histplot(data, ax=ax, log_scale=(xlog, False), **plot_params)
 
-    ax.set_xlabel(name, fontsize=16)
+    ax.set_xlabel(name, fontsize=LABEL_FONTSIZE)
     ax.set_xlim(left=x_min, right=x_max)
     set_y_2p = Set2DP()
     ax.yaxis.set_major_formatter(set_y_2p)
     if plot_ylabel:  # Show y-label only for leftmost plots
-        ax.set_ylabel("Frequency Density", fontsize=16)
+        ax.set_ylabel("Frequency Density", fontsize=LABEL_FONTSIZE)
     else:  # No ylabel for other plots
         ax.set_ylabel("")
     
@@ -176,28 +175,22 @@ def plot_1d_histograms(mu, event_stats_path=None, output_path=None):
 
 #################################################################################
 
-def plot_particle_level_quantities_comparison(save_path=None):
+def plot_particle_level_quantities_comparison(tt, pileup, save_path=None):
     """
     Original written (and lost) by Roy Siu.
     New code made with Claude 3.5.
     Plot momentum, pseudorapidity and transverse momentum distributions.
     Overlay histograms from two different files.
     """
-    data_path_tt = TT_PATH
-    data_path_pu = PILEUP_PATH
-
-    # Load both datasets
-    data_tt = np.genfromtxt(data_path_tt, delimiter=",", skip_header=1)
-    data_pu = np.genfromtxt(data_path_pu, delimiter=",", skip_header=1)
     
     # Calculate quantities for tt̄ events
-    px_tt, py_tt, pz_tt = data_tt[:, 3], data_tt[:, 4], data_tt[:, 5]
+    px_tt, py_tt, pz_tt = tt[:, 3], tt[:, 4], tt[:, 5]
     p_tt = p_magnitude(px_tt, py_tt, pz_tt)
     pT_tt = np.sqrt(px_tt**2 + py_tt**2)
     eta_tt = pseudorapidity(p_tt, pz_tt)
     
     # Calculate quantities for pile-up
-    px_pu, py_pu, pz_pu = data_pu[:, 3], data_pu[:, 4], data_pu[:, 5]
+    px_pu, py_pu, pz_pu = pileup[:, 3], pileup[:, 4], pileup[:, 5]
     p_pu = p_magnitude(px_pu, py_pu, pz_pu)
     pT_pu = np.sqrt(px_pu**2 + py_pu**2)
     eta_pu = pseudorapidity(p_pu, pz_pu)
@@ -240,7 +233,7 @@ def plot_particle_level_quantities_comparison(save_path=None):
     ax1.set_xlabel("(a) $p$ [GeV]")
     ax1.set_ylabel("Frequency Density")
     ax1.set_xlim(p_range)
-    # ax1.legend(fontsize=14, frameon=True, framealpha=1.0, 
+    # ax1.legend(fontsize=TICK_AND_LEGEND_FONTSIZE, frameon=True, framealpha=1.0, 
     #            edgecolor='black', borderpad=0.5)
     
     # Plot 2: Pseudorapidity
@@ -267,7 +260,7 @@ def plot_particle_level_quantities_comparison(save_path=None):
     ax2.set_xlabel("(b) $\eta$")
     ax2.set_ylabel("")
     ax2.set_xlim(eta_range)
-    # ax2.legend(fontsize=14, frameon=True, framealpha=1.0, 
+    # ax2.legend(fontsize=TICK_AND_LEGEND_FONTSIZE, frameon=True, framealpha=1.0, 
             #    edgecolor='black', borderpad=0.5)
     
     # Plot 3: Transverse Momentum
@@ -294,7 +287,7 @@ def plot_particle_level_quantities_comparison(save_path=None):
     ax3.set_xlabel("(c) $p_T$ [GeV]")
     ax3.set_ylabel("")
     ax3.set_xlim(pt_range)
-    ax3.legend(fontsize=16, frameon=True, framealpha=1.0, 
+    ax3.legend(fontsize=TICK_AND_LEGEND_FONTSIZE, frameon=False, framealpha=1.0, 
                edgecolor='black', borderpad=0.5)
     
     # Adjust layout
@@ -370,7 +363,7 @@ def plot_event_level_quantities_comparison(data_tt, data_pu, save_path=None):
     ax1.set_xlabel("(a) Event Mass [GeV]")
     ax1.set_ylabel("Frequency Density")
     ax1.set_xlim(mass_range)
-    ax1.legend(fontsize=14, frameon=True, framealpha=1.0, edgecolor='black', borderpad=0.5)
+    ax1.legend(fontsize=TICK_AND_LEGEND_FONTSIZE, frameon=False, framealpha=1.0, edgecolor='black', borderpad=0.5)
     
     # Plot 2: Pseudorapidity
     sb.histplot(data=eta_tt, bins=np.linspace(eta_range[0], eta_range[1], 50),
@@ -382,7 +375,7 @@ def plot_event_level_quantities_comparison(data_tt, data_pu, save_path=None):
     ax2.set_xlabel("(b) Event $\eta$")
     ax2.set_ylabel("")
     ax2.set_xlim(eta_range)
-    ax2.legend(fontsize=14, frameon=True, framealpha=1.0, edgecolor='black', borderpad=0.5)
+    ax2.legend(fontsize=TICK_AND_LEGEND_FONTSIZE, frameon=False, framealpha=1.0, edgecolor='black', borderpad=0.5)
     
     # Plot 3: Transverse Momentum
     sb.histplot(data=pT_tt, bins=np.linspace(pt_range[0], pt_range[1], 50),
@@ -394,7 +387,63 @@ def plot_event_level_quantities_comparison(data_tt, data_pu, save_path=None):
     ax3.set_xlabel("(c) Event $p_T$ [GeV]")
     ax3.set_ylabel("")
     ax3.set_xlim(pt_range)
-    ax3.legend(fontsize=16, frameon=True, framealpha=1.0, edgecolor='black', borderpad=0.5)
+    ax3.legend(fontsize=TICK_AND_LEGEND_FONTSIZE, frameon=False, framealpha=1.0, edgecolor='black', borderpad=0.5)
+    
+    # Adjust layout and save
+    plt.tight_layout()
+    if save_path:
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+        plt.close()
+    else:
+        plt.show()
+
+def plot_particle_level_quantities_ttbar_only(save_path=None):
+    """
+    Plot event-level momentum, pseudorapidity, and transverse momentum distributions for tt̄ events.
+    """
+    # Load precomputed event-level quantities from CSV
+    data_path = f"{CWD}/data/2-intermediate/noisy_mu0_event_level.csv"
+    data = np.genfromtxt(data_path, delimiter=",", skip_header=1)
+    
+    # Extract specific quantities
+    mass_tt = data[:, 0]  # Assuming mass is in column 0
+    eta_tt = data[:, 1]   # Assuming eta is in column 1
+    pT_tt = data[:, 2]    # Assuming pT is in column 2
+    
+    # Create figure with three subplots
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))
+    
+    # Define plot ranges
+    mass_range = (50, 250)
+    eta_range = (-3, 3)
+    pt_range = (0, 500)
+    
+    # Plot 1: Mass
+    sb.histplot(data=mass_tt, bins=np.linspace(mass_range[0], mass_range[1], 50),
+                stat="density", color="blue", alpha=0.3, label="$t\\bar t$ events", ax=ax1,
+                edgecolor="blue", linewidth=1.5, element="step")
+    ax1.set_xlabel("(a) Event Mass [GeV]")
+    ax1.set_ylabel("Frequency Density")
+    ax1.set_xlim(mass_range)
+    ax1.legend(fontsize=TICK_AND_LEGEND_FONTSIZE, frameon=False, framealpha=1.0, edgecolor='black', borderpad=0.5)
+    
+    # Plot 2: Pseudorapidity
+    sb.histplot(data=eta_tt, bins=np.linspace(eta_range[0], eta_range[1], 50),
+                stat="density", color="blue", alpha=0.3, label="$t\\bar t$ events", ax=ax2,
+                edgecolor="blue", linewidth=1.5, element="step")
+    ax2.set_xlabel("(b) Event $\eta$")
+    ax2.set_ylabel("")
+    ax2.set_xlim(eta_range)
+    ax2.legend(fontsize=TICK_AND_LEGEND_FONTSIZE, frameon=False, framealpha=1.0, edgecolor='black', borderpad=0.5)
+    
+    # Plot 3: Transverse Momentum
+    sb.histplot(data=pT_tt, bins=np.linspace(pt_range[0], pt_range[1], 50),
+                stat="density", color="blue", alpha=0.3, label="$t\\bar t$ events", ax=ax3,
+                edgecolor="blue", linewidth=1.5, element="step")
+    ax3.set_xlabel("(c) Event $p_T$ [GeV]")
+    ax3.set_ylabel("")
+    ax3.set_xlim(pt_range)
+    ax3.legend(fontsize=TICK_AND_LEGEND_FONTSIZE, frameon=False, framealpha=1.0, edgecolor='black', borderpad=0.5)
     
     # Adjust layout and save
     plt.tight_layout()
