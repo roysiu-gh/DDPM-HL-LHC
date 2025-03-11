@@ -38,7 +38,8 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
                     bins=BMAP_SQUARE_SIDE_LENGTH, save_path=None,
                     mass_cutoff=(-1, 4), pt_cutoff=(-1, 2), use_log=False, fig_vinch=4,
                     legend_title=None, show_subtit=True, 
-                    mass_text=None, pT_text=None):
+                    mass_text=None, pT_text=None,
+                    vert_line_colour="black",):
     
     if legend_title is None:
         legend_title = rf"${bins}\times {bins}$ grid"
@@ -62,7 +63,7 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
                         color=color)
         hist_lines.append(line)
     
-    ax1.axvline(x=0, color="black", linestyle="--")
+    ax1.axvline(x=0, color=vert_line_colour, linestyle="--")
     if show_subtit: ax1.set_xlabel("Mass response")
     ax1.set_ylabel("Frequency density")
     if use_log: ax1.set_yscale("log")
@@ -123,7 +124,7 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
                         color=color)
         hist_lines.append(line)
     
-    ax2.axvline(x=0, color="black", linestyle="--")
+    ax2.axvline(x=0, color=vert_line_colour, linestyle="--")
     if show_subtit: ax2.set_xlabel(r"$p_T$ response")
     if use_log: ax2.set_yscale("log")
     
