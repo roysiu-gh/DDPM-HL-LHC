@@ -44,8 +44,17 @@ from DDPMLHC.data_loading import *
 from DDPMLHC.generate_plots.bmap import *
 from DDPMLHC.generate_plots.histograms_1d import *
 from DDPMLHC.model_utils import *
-# from 
+from DDPMLHC.generate_plots.resolution_plots import *
 
+# from 
+# tt = np.genfromtxt(
+#     TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+# )
+# pile_up = np.genfromtxt(
+#     PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+# )
+# tt = EventSelector(tt)
+# pile_up = EventSelector(pu)
 
 # Some functions from denoising_diffusion_pytorch that are required but couldn't import
 def extract(a, t, x_shape):
@@ -75,7 +84,7 @@ mu = 200
 # # Sampling: only load checkpoint
 # num_epochs = 0
 
-print_params(mode="SAMPLING")
+# print_params(mode="SAMPLING")
 # # this one is to be passed into DataLoader for training
 # ng_for_dataloader = NGenForDataloader(NG_jet)
 # dataloader = DataLoader(ng_for_dataloader, batch_size=train_batch_size, num_workers=2, shuffle = True, pin_memory = True)
@@ -88,13 +97,13 @@ print_params(mode="SAMPLING")
 #     objective = "pred_x0",
 # ).to(device)
 beta="001"
-print("beta", beta)
-# save_dir = f"{CWD}/data/ML/Unet{UNET_DIMS}_bins{BMAP_SQUARE_SIDE_LENGTH}_mu{mu}"
-save_dir = f"{CWD}/data/ML/Unet{UNET_DIMS}_bins{BMAP_SQUARE_SIDE_LENGTH}_mu{mu}_beta{beta}"
+# print("beta", beta)
+# # save_dir = f"{CWD}/data/ML/Unet{UNET_DIMS}_bins{BMAP_SQUARE_SIDE_LENGTH}_mu{mu}"
+# save_dir = f"{CWD}/data/ML/Unet{UNET_DIMS}_bins{BMAP_SQUARE_SIDE_LENGTH}_mu{mu}_beta{beta}"
 
-print("Begin training")
-xd = load_and_train(diffusion, dataloader, num_epochs=0, device=device, save_dir=save_dir)
-print("Finished training")
+# print("Begin training")
+# xd = load_and_train(diffusion, dataloader, num_epochs=0, device=device, save_dir=save_dir)
+# print("Finished training")
 
 # # %%
 # # Generate samples
@@ -522,117 +531,151 @@ def generate_event_level_gridded_jets(NG: NoisyGenerator, save_dir=INTERMEDIATE_
 
 
 # %%
-import numpy as np
-import matplotlib.pyplot as plt
+# import numpy as np
+# import matplotlib.pyplot as plt
 
-data_arrays = []
-vmin, vmax =0,0
+# data_arrays = []
+# vmin, vmax =0,0
 
-rng_state = np.random.get_state()
-np.random.set_state(rng_state)
-use_log=True
-NG = NoisyGenerator(tt, pu, mu=mu)
-NG.reset()
-NG.mu = 0
-for _ in range(4):
-    next(NG)
-    grid = NG.get_grid(normalise=False)
-    if use_log:
-        grid = np.log1p(grid)
-    vmin = min(vmin, grid.min())
-    vmax = max(vmax, grid.max())
-    # mu_grids.append(grid)
-    data_arrays.append(grid)
-# gets mu = 200 grids
-NG.reset()
-NG.mu = mu
-for _ in range(4):
-    next(NG)
-    grid = NG.get_grid(normalise=False)
-    if use_log:
-        grid = np.log1p(grid)
-    vmin = min(vmin, grid.min())
-    vmax = max(vmax, grid.max())
-    data_arrays.append(grid)
+# rng_state = np.random.get_state()
+# np.random.set_state(rng_state)
+# use_log=True
+# NG = NoisyGenerator(tt, pu, mu=mu)
+# NG.reset()
+# NG.mu = 0
+# for _ in range(4):
+#     next(NG)
+#     grid = NG.get_grid(normalise=False)
+#     if use_log:
+#         grid = np.log1p(grid)
+#     vmin = min(vmin, grid.min())
+#     vmax = max(vmax, grid.max())
+#     # mu_grids.append(grid)
+#     data_arrays.append(grid)
+# # gets mu = 200 grids
+# NG.reset()
+# NG.mu = mu
+# for _ in range(4):
+#     next(NG)
+#     grid = NG.get_grid(normalise=False)
+#     if use_log:
+#         grid = np.log1p(grid)
+#     vmin = min(vmin, grid.min())
+#     vmax = max(vmax, grid.max())
+#     data_arrays.append(grid)
 
-print("lem  data arrays before tensors", len(data_arrays))
-with torch.inference_mode():
-    model.eval()
-    diffusion.eval()
-    # sampled_images = diffusion.sample(batch_size=batch_size)
-    # rescaled = sampled_images * NG_jet.max_energy
-    # tensor_to_data(rescaled)
-    output_folder=f"{CWD}/data/4-reconstruction/beta{beta}"
-    output_filename = f"reconstructed_mu{diffusion.mu}_event_level_from_grid{BMAP_SQUARE_SIDE_LENGTH}_Unet{UNET_DIMS}.csv"
+# print("lem  data arrays before tensors", len(data_arrays))
+# with torch.inference_mode():
+#     model.eval()
+#     diffusion.eval()
+#     # sampled_images = diffusion.sample(batch_size=batch_size)
+#     # rescaled = sampled_images * NG_jet.max_energy
+#     # tensor_to_data(rescaled)
+#     output_folder=f"{CWD}/data/4-reconstruction/beta{beta}"
+#     output_filename = f"reconstructed_mu{diffusion.mu}_event_level_from_grid{BMAP_SQUARE_SIDE_LENGTH}_Unet{UNET_DIMS}.csv"
 
-    OD = OutData(diffusion, NG_jet, 4)
-    output_path = OD.save_event_level(output_folder=output_folder, output_filename=output_filename)
-    jets_to_plot = OD.jets_to_plot
-    # print("???",jets_to_plot)
-    denoised_jets = jets_to_plot.detach().cpu().numpy()
-    # print(denoised_kets.shape)
-    denoised_jets = np.squeeze(denoised_jets, axis=1)
-    print(denoised_jets.shape)
-    for jet in denoised_jets:
-        print("single jet", jet.shape)
-        # print("grid?", jet)
-        data_arrays.append(jet)
+#     OD = OutData(diffusion, NG_jet, 4)
+#     output_path = OD.save_event_level(output_folder=output_folder, output_filename=output_filename)
+#     jets_to_plot = OD.jets_to_plot
+#     # print("???",jets_to_plot)
+#     denoised_jets = jets_to_plot.detach().cpu().numpy()
+#     # print(denoised_kets.shape)
+#     denoised_jets = np.squeeze(denoised_jets, axis=1)
+#     print(denoised_jets.shape)
+#     for jet in denoised_jets:
+#         print("single jet", jet.shape)
+#         # print("grid?", jet)
+#         data_arrays.append(jet)
 
-    # compare_denoised(jets_to_plot)
+#     # compare_denoised(jets_to_plot)
 
-torch.cuda.empty_cache()
-
-
-
-# print(data_arrays[9])# print(data_arrays)
-print("DONE")
-# for grid in data_arrays:
-    # print("grid?", grid)
-
-# Assume you have 12 2D arrays (1 row × 3 columns, each with 4 plots)
-# Replace this with your actual data
-# data_arrays = [np.random.rand(64, 64) for _ in range(12)]
+# torch.cuda.empty_cache()
 
 
 
-# %%
-# Create a figure with 1 row, 3 columns
-fig, axs = plt.subplots(1, 3, figsize=(15, 5))
+# # print(data_arrays[9])# print(data_arrays)
+# print("DONE")
+# # for grid in data_arrays:
+#     # print("grid?", grid)
 
-# Loop through each subplot (column)
-for subplot_idx in range(3):
-    # Create a 2x2 grid within the current subplot
-    for i in range(2):
-        for j in range(2):
-            # Calculate the position in the grid
-            plot_idx = i * 2 + j
+# # Assume you have 12 2D arrays (1 row × 3 columns, each with 4 plots)
+# # Replace this with your actual data
+# # data_arrays = [np.random.rand(64, 64) for _ in range(12)]
+
+
+
+# # %%
+# # Create a figure with 1 row, 3 columns
+# fig, axs = plt.subplots(1, 3, figsize=(15, 5))
+
+# # Loop through each subplot (column)
+# for subplot_idx in range(3):
+#     # Create a 2x2 grid within the current subplot
+#     for i in range(2):
+#         for j in range(2):
+#             # Calculate the position in the grid
+#             plot_idx = i * 2 + j
             
-            # Create an axis for each grid position with small padding
-            ax = axs[subplot_idx].inset_axes([
-                j*0.5 + 0.01,   # Add small horizontal padding
-                1-(i+1)*0.5 + 0.01,  # Add small vertical padding
-                0.48,  # Reduce width slightly to account for padding
-                0.48   # Reduce height slightly to account for padding
-            ])
+#             # Create an axis for each grid position with small padding
+#             ax = axs[subplot_idx].inset_axes([
+#                 j*0.5 + 0.01,   # Add small horizontal padding
+#                 1-(i+1)*0.5 + 0.01,  # Add small vertical padding
+#                 0.48,  # Reduce width slightly to account for padding
+#                 0.48   # Reduce height slightly to account for padding
+#             ])
             
-            # Get the corresponding data array
-            data = data_arrays[subplot_idx * 4 + plot_idx]
+#             # Get the corresponding data array
+#             data = data_arrays[subplot_idx * 4 + plot_idx]
             
-            # Plot the 2D array using imshow
-            im = ax.imshow(data, cmap='viridis', aspect='auto')
-            ax.axis('off')  # Hide axes
+#             # Plot the 2D array using imshow
+#             im = ax.imshow(data, cmap='viridis', aspect='auto')
+#             ax.axis('off')  # Hide axes
 
-# Remove all whitespace and borders
-plt.subplots_adjust(wspace=0.1, hspace=0, left=0, right=0.9, top=1, bottom=0)
+# # Remove all whitespace and borders
+# plt.subplots_adjust(wspace=0.1, hspace=0, left=0, right=0.9, top=1, bottom=0)
 
-# Remove all axes and borders
-for ax in axs:
-    ax.axis('off')
-# plt.colorbar(im, cax=axs[-1])
-cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])
-cbar = fig.colorbar(im, cax=cbar_ax)
-cbar.set_label(r'\ln(1+E)' if use_log else r'Energy', fontsize=18)
-# plt.show()
-plt.savefig(f"{CWD}/storage/physics/phuftc/DDPM-HL-LHC/data/plots/bmap_comparison/comparison_log1p.png")
+# # Remove all axes and borders
+# for ax in axs:
+#     ax.axis('off')
+# # plt.colorbar(im, cax=axs[-1])
+# cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])
+# cbar = fig.colorbar(im, cax=cbar_ax)
+# cbar.set_label(r'\ln(1+E)' if use_log else r'Energy', fontsize=18)
+# # plt.show()
+# plt.savefig(f"{CWD}/storage/physics/phuftc/DDPM-HL-LHC/data/plots/bmap_comparison/comparison_log1p.png")
 
+
+from DDPMLHC.generate_plots.histograms_1d import *
+from itertools import product
+
+# plot_event_level_quantities_comparison(save_path=f"{CWD}/data/plots/event_level_quantities_comparison.png")
+# plot_particle_level_quantities_comparison(tt, pile_up, f"{CWD}/data/plots/particle_level_quantities_comparison.png")
+# plot_particle_level_quantities_ttbar_only(f"{CWD}/data/plots/particle_level_ttbar.png")
+for x in product([16,32,64],["0.5", "001"]):
+    bins  = x[0]
+    beta = x[1]
+    best_case_path = f"{CWD}/data/2-intermediate/noisy_mu0_event_level_grid{bins}.csv"
+    noisy_path = f"{CWD}/data/2-intermediate/noisy_mu200_event_level_grid{bins}.csv"
+    reconstructed_path = f"{CWD}/data/4-reconstruction/beta{beta}/reconstructed_mu{200}_event_level_from_grid{bins}_Unet{UNET_DIMS}.csv"
+    mass_resolutions_best = {
+        "Noisy, $\mu = 200$": load_variable_data(noisy_path, "mass", truth_path=best_case_path),
+        "Denoised": load_variable_data(reconstructed_path, "mass", truth_path=best_case_path)
+    }
+
+    pt_resolutions_best = {
+        "Noisy, $\mu = 200$": load_variable_data(noisy_path, "p_T", truth_path=best_case_path),
+        "Denoised": load_variable_data(reconstructed_path, "p_T", truth_path=best_case_path)
+    }
+
+    plot_resolutions(
+        mass_resolutions_best, pt_resolutions_best,
+        colors={
+            "Noisy, $\mu = 200$": "red",
+            "Denoised": "blue"
+        },
+        save_path = f"{CWD}/data/plots/relative_resolutions/beta{beta}/resolution_grid{bins}_Unet{UNET_DIMS}_mass_gtBEST.pdf",
+        show_subtit=True,
+        mass_text="",
+        pT_text=""
+    )
 

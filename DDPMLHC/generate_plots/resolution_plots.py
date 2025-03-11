@@ -41,8 +41,8 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
                     mass_text=None, pT_text=None,
                     vert_line_colour="black",):
     
-    if legend_title is None:
-        legend_title = rf"${bins}\times {bins}$ grid"
+    # if legend_title is None:
+    #     legend_title = rf"${bins}\times {bins}$ grid"
     
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, fig_vinch))
     
@@ -64,12 +64,12 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
         hist_lines.append(line)
     
     ax1.axvline(x=0, color=vert_line_colour, linestyle="--")
-    if show_subtit: ax1.set_xlabel("Mass response")
+    if show_subtit: ax1.set_xlabel(r"$\Delta m_r$")
     ax1.set_ylabel("Frequency density")
     if use_log: ax1.set_yscale("log")
     
     # Add text to top right corner
-    if mass_text:
+    if mass_text is not None:
         ax1.text(0.95, 0.95, mass_text, transform=ax1.transAxes, 
                  fontsize=LABEL_FONTSIZE, verticalalignment='top', horizontalalignment='right')
     
@@ -89,7 +89,7 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
                             markersize=45, 
                             markeredgewidth=2,
                             label=stat_label))
-    
+    ax1.set_xticks(np.arange(start=mass_cutoff[0], stop=mass_cutoff[1]+1, step=1))
     # legend_font=TICK_AND_LEGEND_FONTSIZE
     if legend_title == "":
         ax1.legend(handles=handles, loc='center left', bbox_to_anchor=(1, 0.5),
@@ -125,11 +125,11 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
         hist_lines.append(line)
     
     ax2.axvline(x=0, color=vert_line_colour, linestyle="--")
-    if show_subtit: ax2.set_xlabel(r"$p_T$ response")
+    if show_subtit: ax2.set_xlabel(r"$\Delta p_{T,r}$")
     if use_log: ax2.set_yscale("log")
     
     # Add text to top right corner
-    if pT_text:
+    if pT_text is not None:
         ax2.text(0.95, 0.95, pT_text, transform=ax2.transAxes, 
                  fontsize=LABEL_FONTSIZE, verticalalignment='top', horizontalalignment='right')
     
