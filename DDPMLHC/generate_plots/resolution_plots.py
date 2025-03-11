@@ -36,14 +36,14 @@ def load_variable_data(data_path, variable, truth_path=None):
 
 def plot_resolutions(mass_resolutions, pt_resolutions, colors=None, 
                     bins=BMAP_SQUARE_SIDE_LENGTH, save_path=None,
-                    mass_cutoff=(-1, 4), pt_cutoff=(-1, 2), use_log=False, 
+                    mass_cutoff=(-1, 4), pt_cutoff=(-1, 2), use_log=False, fig_vinch=4,
                     legend_title=None, show_subtit=True, 
                     mass_text=None, pT_text=None):
     
     if legend_title is None:
         legend_title = rf"${bins}\times {bins}$ grid"
     
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, fig_vinch))
     
     # Mass plot
     hist_lines = []
@@ -70,7 +70,7 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
     # Add text to top right corner
     if mass_text:
         ax1.text(0.95, 0.95, mass_text, transform=ax1.transAxes, 
-                 fontsize=24, verticalalignment='top', horizontalalignment='right')
+                 fontsize=LABEL_FONTSIZE, verticalalignment='top', horizontalalignment='right')
     
     # Create custom legend handles
     handles = []
@@ -89,20 +89,22 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
                             markeredgewidth=2,
                             label=stat_label))
     
-    legend_font=14
+    # legend_font=TICK_AND_LEGEND_FONTSIZE
     if legend_title == "":
         ax1.legend(handles=handles, loc='center left', bbox_to_anchor=(1, 0.5),
                   labelspacing=1.0,
                   handlelength=0,
                   handletextpad=0.5,
-                   prop={'size': legend_font})
+                  frameon=False,
+                  prop={'size': TICK_AND_LEGEND_FONTSIZE})
     else:
         ax1.legend(handles=handles, loc='center left', bbox_to_anchor=(1, 0.5),
                   labelspacing=1.0,
                   handlelength=0,
                   handletextpad=0.5,
                   title=legend_title,
-                   prop={'size': legend_font})
+                  frameon=False,
+                  prop={'size': TICK_AND_LEGEND_FONTSIZE})
     
     # pT plot (similar approach)
     hist_lines = []
@@ -128,7 +130,7 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
     # Add text to top right corner
     if pT_text:
         ax2.text(0.95, 0.95, pT_text, transform=ax2.transAxes, 
-                 fontsize=24, verticalalignment='top', horizontalalignment='right')
+                 fontsize=LABEL_FONTSIZE, verticalalignment='top', horizontalalignment='right')
     
     # Create custom legend handles for pT plot
     handles = []
@@ -152,14 +154,16 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
                   labelspacing=1.0,
                   handlelength=0,
                   handletextpad=0.5,
-                   prop={'size': legend_font})
+                  frameon=False,
+                  prop={'size': TICK_AND_LEGEND_FONTSIZE})
     else:
         ax2.legend(handles=handles, loc='center left', bbox_to_anchor=(1, 0.5),
                   labelspacing=1.0,
                   handlelength=0,
                   handletextpad=0.5,
                   title=legend_title,
-                   prop={'size': legend_font})
+                  frameon=False,
+                  prop={'size': TICK_AND_LEGEND_FONTSIZE})
     
     plt.tight_layout()
     
