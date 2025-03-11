@@ -10,6 +10,8 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 def plot_combined_histograms_with_overlay(hist_data_list, labels, save_path, stat="density", FOOBAR=False):
     """Plot mass and p_T for multiple datasets with custom labels."""
+    FOOBAR=False
+    fontsize = 18
     colors = ['blue', 'orange', 'green', 'red', 'purple'][:len(labels)]
     hatch_patterns = ['O', 'o', '.', '/', '\\'][:len(labels)]  # Different hatching patterns
     hatch_patterns = hatch_patterns[::-1]
@@ -51,21 +53,21 @@ def plot_combined_histograms_with_overlay(hist_data_list, labels, save_path, sta
         ax.set_xlim(left=x_min, right=x_max)
         ax.ticklabel_format(axis="y", style="sci", scilimits=(0,0), useMathText=True)
         ax.yaxis.offsetText.set_visible(False)
-        ax.set_xlabel(entry_ref["name"], fontsize=14)
+        ax.set_xlabel(entry_ref["name"], fontsize=LABEL_FONTSIZE)
         
         if idx == 0:
             if stat == "count":
-                ax.set_ylabel("Frequency", fontsize=12)
+                ax.set_ylabel("Frequency", fontsize=LABEL_FONTSIZE)
             elif stat == "density":
-                ax.set_ylabel("Frequency Density", fontsize=12)
+                ax.set_ylabel("Frequency Density", fontsize=LABEL_FONTSIZE)
             else:
                 raise ValueError
         else:
             ax.set_ylabel("")
             if FOOBAR:
-                ax.legend(fontsize=14, frameon=False, bbox_to_anchor=(0.2, 0.6))
+                ax.legend(fontsize=TICK_AND_LEGEND_FONTSIZE, frameon=False, bbox_to_anchor=(0.2, 0.6))
             else:
-                ax.legend(fontsize=14, frameon=False)
+                ax.legend(fontsize=TICK_AND_LEGEND_FONTSIZE, frameon=False)
     
     plt.tight_layout()
     plt.savefig(f"{save_path}", dpi=600)
@@ -89,7 +91,7 @@ def create_overlay_plots_general(file_paths, labels, mass_max=250, save_path=Non
     if len(file_paths) > 5:
         raise ValueError("Maximum 5 datasets supported")
     
-    save_path = save_path or f"{CWD}/data/plots/1D_histograms/overlaid_from_model/overlaid_comparison.png"
+    save_path = save_path or f"{CWD}/data/plots/test.png"
     
     # Load all datasets
     events_data = {path: np.genfromtxt(path,
@@ -100,7 +102,7 @@ def create_overlay_plots_general(file_paths, labels, mass_max=250, save_path=Non
         {"name": "(a) Mass [GeV]", "col": 6, 
          "params": {"bins": 50, "x_min": 0, "x_max": mass_max}},
         {"name": "(b) Transverse Momentum $p_T$ [GeV]", "col": 7, 
-         "params": {"xlog": True, "bins": 50, "x_min": 250, "x_max": 700}},
+         "params": {"bins": 50, "x_min": 200, "x_max": 700}},
     ]
     
     list_of_params_all = [[{
@@ -109,4 +111,4 @@ def create_overlay_plots_general(file_paths, labels, mass_max=250, save_path=Non
         "plot_params": param["params"],
     } for param in hist_params] for path in file_paths]
     
-    plot_combined_histograms_with_overlay(list_of_params_all, labels, save_path, FOOBAR=True, stat="count")
+    plot_combined_histograms_with_overlay(list_of_params_all, labels, save_path, FOOBAR=True, stat="density")

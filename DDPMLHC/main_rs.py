@@ -254,7 +254,8 @@ files = [
     f"{CWD}/data/4-reconstruction/beta001/reconstructed_mu200_event_level_from_grid64_Unet64.csv",
 ]
 labels = ["Original", "Best case", "Noisy", "Denoised"]
-create_overlay_plots_general(files, labels, mass_max=350)
+save_path = f"{CWD}/data/plots/1D_histograms/overlaid_from_model/overlaid_comparison_b64_beta001_unet64.png"
+create_overlay_plots_general(files, labels, mass_max=350, save_path=save_path)
 
 #################################################################################
 

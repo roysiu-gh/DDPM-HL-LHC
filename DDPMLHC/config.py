@@ -31,8 +31,8 @@ LR=1e-5
 jets_to_sample =1000
 
 
-tick_fontsize = 24
-label_fontsize = 24
+TICK_AND_LEGEND_FONTSIZE = 14
+LABEL_FONTSIZE = 18
 
 MPL_GLOBAL_PARAMS = {
     'text.usetex' : False,
@@ -47,12 +47,12 @@ MPL_GLOBAL_PARAMS = {
     'axes.xmargin' : 0,
     'axes.ymargin' : 0,
     'axes.grid' : False,
-    "axes.labelsize": label_fontsize,
+    "axes.labelsize": LABEL_FONTSIZE,
     # 'axes.autolimit_mode' : 'round_numbers',
     'xtick.major.pad' : 10,
     'ytick.major.pad' : 10,
-    'xtick.labelsize': tick_fontsize,
-    'ytick.labelsize': label_fontsize,
+    'xtick.labelsize': TICK_AND_LEGEND_FONTSIZE,
+    'ytick.labelsize': TICK_AND_LEGEND_FONTSIZE,
     'lines.linewidth' : 1.3,
     'xtick.direction' : 'in',
     'ytick.direction' : 'in',
