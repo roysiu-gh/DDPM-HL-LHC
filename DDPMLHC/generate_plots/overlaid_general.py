@@ -11,8 +11,8 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 def plot_combined_histograms_with_overlay(hist_data_list, labels, save_path, stat="density", FOOBAR=False):
     """Plot mass and p_T for multiple datasets with custom labels."""
     colors = ['blue', 'orange', 'green', 'red', 'purple'][:len(labels)]
-    alphas = np.linspace(0.7, 0.3, len(labels))
-    hatch_patterns = ['/', '\\', '|', '-', '+'][:len(labels)]  # Different hatching patterns
+    hatch_patterns = ['O', 'o', '.', '/', '\\'][:len(labels)]  # Different hatching patterns
+    hatch_patterns = hatch_patterns[::-1]
     
     fig, axes = plt.subplots(1, 2, figsize=(11, 5))
     first_dataset = hist_data_list[0]
@@ -33,13 +33,13 @@ def plot_combined_histograms_with_overlay(hist_data_list, labels, save_path, sta
         else:
             bin_edges = np.linspace(x_min, x_max, bins)
         
-        for hist_data, label, color, alpha, hatch in zip(hist_data_list, labels, colors, alphas, hatch_patterns):
+        for hist_data, label, color, hatch in zip(hist_data_list, labels, colors, hatch_patterns):
             entry = hist_data[idx]
-            sb.histplot(entry["data"], ax=ax, stat=stat,
-                       bins=bin_edges, color=color, 
-                       label=label, alpha=alpha,
-                       edgecolor='black', linewidth=0.2,
-                       hatch=hatch, element="step")  # Add hatching
+            ax.hist(entry["data"], bins=bin_edges, 
+                    label=label, edgecolor=color, 
+                    facecolor='none', hatch=hatch, 
+                    linewidth=1, density=(stat=="density"),
+                    histtype="stepfilled")  # Use stepfilled for outer shape
         
         if xlog:
             ax.set_xscale("log")
