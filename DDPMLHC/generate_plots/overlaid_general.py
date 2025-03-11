@@ -59,7 +59,7 @@ def plot_combined_histograms_with_overlay(hist_data_list, labels, save_path, sta
             if stat == "count":
                 ax.set_ylabel("Frequency", fontsize=LABEL_FONTSIZE)
             elif stat == "density":
-                ax.set_ylabel("Frequency Density", fontsize=LABEL_FONTSIZE)
+                ax.set_ylabel("Frequency density", fontsize=LABEL_FONTSIZE)
             else:
                 raise ValueError
         else:
@@ -101,7 +101,7 @@ def create_overlay_plots_general(file_paths, labels, mass_max=250, save_path=Non
     hist_params = [
         {"name": "(a) Mass [GeV]", "col": 6, 
          "params": {"bins": 50, "x_min": 0, "x_max": mass_max}},
-        {"name": "(b) Transverse Momentum $p_T$ [GeV]", "col": 7, 
+        {"name": "(b) Transverse momentum $p_T$ [GeV]", "col": 7, 
          "params": {"bins": 50, "x_min": 200, "x_max": 700}},
     ]
     

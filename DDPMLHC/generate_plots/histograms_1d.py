@@ -161,7 +161,7 @@ def plot_1d_histograms(mu, event_stats_path=None, output_path=None):
             "save_path": output_path,
         },
         {
-            "name": "(c) Transverse Momentum p_T [GeV]",
+            "name": "(c) Transverse momentum p_T [GeV]",
             "data": event_pT,
             "plot_params": {"xlog": True, "bins": pT_bins, "x_max": pT_max},
             "save_filename": "event_pT",

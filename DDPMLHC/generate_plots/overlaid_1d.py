@@ -79,7 +79,7 @@ def create_overlay_plots(mu_values, mass_max=250, save_path=None):
     hist_params = [
         {"name": "(a) Mass [GeV]", "col": 6, 
          "params": {"bins": 50, "x_min": 0, "x_max": mass_max}},
-        {"name": "(b) Transverse Momentum $p_T$ [GeV]", "col": 7, 
+        {"name": "(b) Transverse momentum $p_T$ [GeV]", "col": 7, 
          "params": {"xlog": True, "bins": 50, "x_min": 250, "x_max": 700}},
     ]
     
