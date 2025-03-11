@@ -10,7 +10,7 @@ PILEUP_PATH = f"{CWD}/data/1-initial/pileup.csv"
 TT_PATH = f"{CWD}/data/1-initial/ttbar.csv"
 
 # 2 intermediate paths
-INTERMEDIATE_PATH = f"{CWD}/data/2-intermediate/"
+INTERMEDIATE_PATH = f"{CWD}/data/2-intermediate"
 # Remove the following?
 PILEUP_EXT_PATH = f"{CWD}/data/2-intermediate/pileup_extended.csv"
 TT_EXT_PATH = f"{CWD}/data/2-intermediate/ttbar_extended.csv"
@@ -22,14 +22,15 @@ TTBAR_NUM = 70903
 MAX_DATA_ROWS = None
 
 BMAP_SQUARE_SIDE_LENGTH = 64
-label_fontsize = 16
+label_fontsize = 24
 tick_fontsize = 24
 
     # 'font.family' : r'Computer Modern Roman',
 MPL_GLOBAL_PARAMS = {
     'text.usetex' : True, # use latex text
-    'text.latex.preamble' : r'\usepackage{type1cm}\usepackage{braket}\usepackage{amssymb}\usepackage{amsmath}\usepackage{txfonts}', # latex packages
+    'text.latex.preamble' : r'\usepackage{stix}', # latex packages
     'font.size' : 24,
+    "font.family": "STIXGeneral",
     'figure.dpi' : 600,
     'figure.figsize' : (8, 6),
     'figure.autolayout' : True, # tight layout (True) or not (False)
@@ -43,6 +44,7 @@ MPL_GLOBAL_PARAMS = {
     'ytick.major.pad' : 10,
     'xtick.labelsize': label_fontsize,
     'ytick.labelsize': label_fontsize,
+    "axes.labelsize": label_fontsize,
     'lines.linewidth' : 1.3,
     'xtick.direction' : 'in',
     'ytick.direction' : 'in',

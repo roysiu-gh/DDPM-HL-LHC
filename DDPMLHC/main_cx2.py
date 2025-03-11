@@ -6,23 +6,28 @@ import sys
 # Local imports
 from DDPMLHC.config import *
 from DDPMLHC.calculate_quantities import *
+from DDPMLHC.data_loading import *
 import multiprocessing
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 MAX_DATA_ROWS = None
 import polars as pl
 
-# tt = np.genfromtxt(
+#tt = np.genfromtxt(
 #     TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-# )
+#)
+#pu = np.genfromtxt(
+#     PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+#)
 # print("FINISHED loading data\n")
-mus = [0, 1, 3, 5, 10, 15, 30, 50, 75, 100, 125, 150, 175, 200]
+mus = [0]
 # mus = [0, 1, 3, 5, 10, 15, 30, 50]
-# tt = EventSelector(tt)
-# pile_up = EventSelector(pile_up)
-# for mu in mus:
-#     cur_generator = NoisyGenerator(tt, pile_up, mu=mu)
+#tt = EventSelector(tt)
+#pu = EventSelector(pu)
+#for mu in mus:
+#     cur_generator = NoisyGenerator(tt, pu, mu=mu)
 #     cur_generator.save_event_level_data()
     # plot_1d_histograms(mu=mu)
+#sys.exit()
 csv_file_paths = [f"{INTERMEDIATE_PATH}/noisy_mu{mu}_event_level.csv" for mu in mus]
 
 # Get jet data to compute differences
@@ -39,7 +44,7 @@ jets_mass = np.concatenate((jets_mass[0:24716], jets_mass[24717:]))
 # print("jet mass 24716", jets_mass[24716])
 # print("jet_mass zeros loc", np.where(jets_mass == 0))
 # # print(jets_mass)
-jet_energy = (jets_px ** 2) + (jets_py ** 2) + (jets_pz ** 2)
+jet_energy = (jets_px ** 2) + (jets_py ** 2)
 jet_energy = jet_energy.to_numpy()
 jet_energy = np.concatenate((jet_energy[0:24716], jet_energy[24717:]))
 
@@ -127,12 +132,15 @@ print("Doing count vs energy response for fixed mu")
 
 mus = [1, 50, 200]
 csv_file_paths = [f"{INTERMEDIATE_PATH}/noisy_mu{mu}_event_level.csv" for mu in mus]
-fig,axs = plt.subplots(nrows=len(csv_file_paths),ncols=2, figsize=(10,15))
+fig,axs = plt.subplots(nrows=1,ncols=2, figsize=(10,5))
 #  = axs
+colours = ["blue",  "orange", "green"]
 energy_counts = []
 mass_counts = []
 mean_mass_diffs = []
 std_mass_diffs = []
+max_ye = 0
+max_ym = 0
 data_array = [pl.read_csv(csv_file_path) for csv_file_path in csv_file_paths]
 for idx,data in enumerate(data_array):
     df = data
@@ -144,7 +152,7 @@ for idx,data in enumerate(data_array):
     mass = df['mass']
     mass = mass.to_numpy()
     mass = np.concatenate((mass[0:24716], mass[24717:]))
-    energy = (px ** 2) + (py ** 2) + (pz ** 2)
+    energy = (px ** 2) + (py ** 2) # p_T
     energy = energy.to_numpy()
     energy = np.concatenate((energy[0:24716], energy[24717:]))
 
@@ -160,13 +168,19 @@ for idx,data in enumerate(data_array):
     # en_bins = np.mgrid[np.min(energy_diffs):np.max(energy_diffs):(len(energy_diffs)+1)*1j]
     # mass_bins = np.mgrid[np.min(mass_diffs2):np.max(mass_diffs2):(len(mass_diffs2)+1)*1j]
     # mass_bins = np.mgrid[0:mass_max:(mass_num_bins+1)*1j]
-    axs[idx][0].hist(energy_diffs, bins = 50, label=f"$\\mu = {mus[idx]}$", edgecolor="black")
-    axs[idx][1].hist(mass_diffs2[mass_diffs2<5], bins = 50,label=f"$\\mu = {mus[idx]}$", edgecolor="black")
-    axs[idx][0].set_ylabel(r"Counts")
+    mass_diffs2 = mass_diffs2[mass_diffs2<5]
+    weights_mass = np.ones_like(mass_diffs2) / len(mass_diffs2)
+    weights_energy = np.ones_like(energy_diffs) / len(energy_diffs)
+    #bins = 50 if mus[idx] != 1 else 4
+    ne, _, _ = axs[1].hist(energy_diffs, weights=weights_energy, bins = 50, label=f"$\\mu = {mus[idx]}$", edgecolor=f"{colours[idx]}",histtype=u'step')
+    nm, _, _ = axs[0].hist(mass_diffs2, weights=weights_mass,bins = 50,label=f"$\\mu = {mus[idx]}$", edgecolor=f"{colours[idx]}",histtype=u'step')
+    axs[0].set_ylabel(r"Counts")
+    if mus[idx] == 50:
+        max_ye = np.max(ne)
+        max_ym = np.max(nm)
     # axs[idx][0].set_ylabel(r"Counts")
-
-    axs[idx][0].legend(prop={'size': 14})
-    axs[idx][1].legend(prop={'size': 14})
+    axs[0].legend(prop={'size': 14})
+    axs[1].legend(prop={'size': 14})
     # std_energy_diff = np.std(energy_diffs)
     # print(std_energy_diff)
     # print(mean_energy_diff)
@@ -178,10 +192,14 @@ for idx,data in enumerate(data_array):
     # std_energy_diffs.append(std_energy_diff)
     # mean_mass_diffs.append(mean_mass_diff)
     # std_mass_diffs.append(std_mass_diff)
-axs[-1][0].set_xlabel(r"$\frac{E_{\mu}^{j} - E_{0}^{j}}{E_{0}^{j}}$")
-axs[-1][1].set_xlabel(r"$\frac{m_{\mu}^{j} - m_{0}^{j}}{m_{0}^{j}}$")
-plt.savefig(f"{CWD}/data/plots/hist_energymasscounts.pdf", format="pdf")
-plt.savefig(f"{CWD}/data/plots/hist_energymasscounts.png", format="png", dpi=600)
+axs[1].set_xlabel(r"$\Delta p_{T,r}$")
+axs[0].set_xlabel(r"$\Delta m_r$")
+axs[0].set_ylim([0,np.round(max_ym*10) / 10])
+axs[1].set_ylim([0,np.round(max_ye*10) / 10])
+axs[1].set_yticks([0,0.02,0.04,0.06,0.08,0.10])
+plt.tight_layout()
+plt.savefig(f"{CWD}/data/plots/hist_energymasscounts.pdf", format="pdf", bbox_inches="tight")
+plt.savefig(f"{CWD}/data/plots/hist_energymasscounts.png", format="png", dpi=600, bbox_inches="tight")
 plt.close()
 
 print("DONE ALL.")
