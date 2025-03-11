@@ -64,7 +64,7 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
         hist_lines.append(line)
     
     ax1.axvline(x=0, color=vert_line_colour, linestyle="--")
-    if show_subtit: ax1.set_xlabel(r"$\Delta m_r$")
+    if show_subtit: ax1.set_xlabel(r"(a) $\Delta m_r$")
     ax1.set_ylabel("Frequency density")
     if use_log: ax1.set_yscale("log")
     
@@ -125,7 +125,7 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
         hist_lines.append(line)
     
     ax2.axvline(x=0, color=vert_line_colour, linestyle="--")
-    if show_subtit: ax2.set_xlabel(r"$\Delta p_{T,r}$")
+    if show_subtit: ax2.set_xlabel(r"(b) $\Delta p_{T,r}$")
     if use_log: ax2.set_yscale("log")
     
     # Add text to top right corner

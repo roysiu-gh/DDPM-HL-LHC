@@ -356,7 +356,7 @@ def plot_event_level_quantities_comparison(event_level_path=None, save_path=None
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))
     
     # Define plot ranges
-    mass_range = (50, 250)
+    mass_range = (0, 250)
     eta_range = (-2.5, 2.5)
     pt_range = (250, 500)
     
@@ -367,7 +367,7 @@ def plot_event_level_quantities_comparison(event_level_path=None, save_path=None
     # sb.histplot(data=mass_pu, bins=np.linspace(mass_range[0], mass_range[1], 50),
     #             stat="density", color="red", alpha=0.3, label="pile-up", ax=ax1,
     #             edgecolor="red", linewidth=1.5, element="step")
-    ax1.set_xlabel("(a) Event Mass [GeV]")
+    ax1.set_xlabel("(d) Event Mass [GeV]")
     ax1.set_ylabel("Frequency Density")
     ax1.set_xlim(mass_range)
     # ax1.legend(fontsize=TICK_AND_LEGEND_FONTSIZE, frameon=False, framealpha=1.0, edgecolor='black', borderpad=0.5)
@@ -379,7 +379,7 @@ def plot_event_level_quantities_comparison(event_level_path=None, save_path=None
     # sb.histplot(data=eta_pu, bins=np.linspace(eta_range[0], eta_range[1], 50),
     #             stat="density", color="red", alpha=0.3, label="pile-up", ax=ax2,
     #             edgecolor="red", linewidth=1.5, element="step")
-    ax2.set_xlabel("(b) Event $\eta$")
+    ax2.set_xlabel("(e) Event $\eta$")
     ax2.set_ylabel("")
     ax2.set_xlim(eta_range)
     # ax2.legend(fontsize=TICK_AND_LEGEND_FONTSIZE, frameon=False, framealpha=1.0, edgecolor='black', borderpad=0.5)
@@ -391,7 +391,7 @@ def plot_event_level_quantities_comparison(event_level_path=None, save_path=None
     # sb.histplot(data=pT_pu, bins=np.linspace(pt_range[0], pt_range[1], 50),
     #             stat="density", color="red", alpha=0.3, label="pile-up", ax=ax3,
     #             edgecolor="red", linewidth=1.5, element="step")
-    ax3.set_xlabel("(c) Event $p_T$ [GeV]")
+    ax3.set_xlabel("(f) Event $p_T$ [GeV]")
     ax3.set_ylabel("")
     ax3.set_xlim(pt_range)
     # ax3.legend(fontsize=TICK_AND_LEGEND_FONTSIZE, frameon=False, framealpha=1.0, edgecolor='black', borderpad=0.5)
