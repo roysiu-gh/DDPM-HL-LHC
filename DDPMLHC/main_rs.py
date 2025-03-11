@@ -15,19 +15,19 @@ from DDPMLHC.generate_plots.resolution_plots import *
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
-# MAX_DATA_ROWS = 100_000
+MAX_DATA_ROWS = 100_000
 
-# # === Read in data
-# print("0 :: Loading original data")
-# tt = np.genfromtxt(
-#     TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-# )
-# pile_up = np.genfromtxt(
-#     PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-# )
-# tt = EventSelector(tt)
-# pile_up = EventSelector(pile_up)
-# print("FINISHED loading data\n")
+# === Read in data
+print("0 :: Loading original data")
+tt = np.genfromtxt(
+    TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+)
+pile_up = np.genfromtxt(
+    PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+)
+tt = EventSelector(tt)
+pile_up = EventSelector(pile_up)
+print("FINISHED loading data\n")
 
 #################################################################################
 
@@ -153,13 +153,13 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 #################################################################################
 
-create_overlay_plots_debin([4,8,16,32])
-create_overlay_plots_debin([4,16,64,256])
-create_overlay_plots_debin([4,16,64,256], pure=True)
-create_overlay_plots_debin([4,8,16,256], pure=True)
-create_overlay_plots_debin([8,16,256], pure=True)
-create_overlay_plots_debin([2,4,8])
-create_overlay_plots_debin([2,4,8,256], pure=True)
+# create_overlay_plots_debin([4,8,16,32])
+# create_overlay_plots_debin([4,16,64,256])
+# create_overlay_plots_debin([4,16,64,256], pure=True)
+# create_overlay_plots_debin([4,8,16,256], pure=True)
+# create_overlay_plots_debin([8,16,256], pure=True)
+# create_overlay_plots_debin([2,4,8])
+# create_overlay_plots_debin([2,4,8,256], pure=True)
 
 #################################################################################
 
@@ -235,15 +235,15 @@ create_overlay_plots_debin([2,4,8,256], pure=True)
 
 #################################################################################
 
-# output_path = f"{CWD}/data/plots/bmap_comparison/"
+output_path = f"{CWD}/data/plots/bmap_comparison/"
 
-# plot_mu_comparison(tt, pile_up, 
-#                   use_log=False,
-#                   save_path=f"{output_path}/mu_comparison_linear.png")
+plot_mu_comparison(tt, pile_up, 
+                  use_log=False,
+                  save_path=f"{output_path}/mu_comparison_b{BMAP_SQUARE_SIDE_LENGTH}_linear.png")
 
-# plot_mu_comparison(tt, pile_up, 
-#                   use_log=True,
-#                   save_path=f"{output_path}/mu_comparison_log.png")
+plot_mu_comparison(tt, pile_up, 
+                  use_log=True,
+                  save_path=f"{output_path}/mu_comparison_b{BMAP_SQUARE_SIDE_LENGTH}_log.png")
 
 #################################################################################
 

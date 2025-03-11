@@ -99,7 +99,7 @@ def plot_mu_comparison(tt, pile_up, use_log=False, save_path=None):
     # Add colorbar with proper spacing
     cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])
     cbar = fig.colorbar(im, cax=cbar_ax)
-    cbar.set_label('$\ln\left(1+E/\\textrm{GeV}\\right)$' if use_log else 'Energy', fontsize=18)
+    cbar.set_label('$\ln\left(1+E/\\text{GeV}\\right)$' if use_log else 'Energy', fontsize=18)
     
     # Save if path provided
     if save_path:
