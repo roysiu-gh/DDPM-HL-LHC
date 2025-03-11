@@ -119,7 +119,7 @@ def create_overlay_plots_debin(bin_values, mass_max=250, save_path=None, mu=0, p
         } for param in hist_params]
         list_of_params_all.append(dataset)
     
-    labels = ["Ground truth"] + [ f"${bin}\\times {bin}$" for bin in bin_values ]
+    labels = ["Unpixelised"] + [ f"${bin}\\times {bin}$" for bin in bin_values ]
     
     plot_combined_histograms_with_overlay(
         list_of_params_all, 

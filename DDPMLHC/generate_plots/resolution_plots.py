@@ -64,7 +64,7 @@ def plot_resolutions(mass_resolutions, pt_resolutions, colors=None,
     
     ax1.axvline(x=0, color="black", linestyle="--")
     if show_subtit: ax1.set_xlabel("Mass response")
-    ax1.set_ylabel("Density")
+    ax1.set_ylabel("Frequency Density")
     if use_log: ax1.set_yscale("log")
     
     # Add text to top right corner
