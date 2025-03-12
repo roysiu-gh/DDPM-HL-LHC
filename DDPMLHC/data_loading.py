@@ -313,10 +313,16 @@ class NoisyGenerator(object):
         if save_path is None:
             save_path = f"{CWD}/data/plots/visualise"
         
+        axis_fontsize = LABEL_FONTSIZE
+        legend_fontsize = TICK_AND_LEGEND_FONTSIZE
+        axis_fontsize = 12
+        legend_fontsize = 12
+        
         # Setup plot
         fig, ax = plt.subplots(figsize=(8, 6))
-        ax.set_xlabel("$\Delta\eta$", fontsize=16)
-        ax.set_ylabel("$\Delta\phi$", fontsize=16)
+        ax.set_xlabel("$\Delta\eta$", fontsize=axis_fontsize)
+        ax.set_ylabel("$\Delta\phi$", fontsize=axis_fontsize)
+        ax.xaxis.set_tick_params(labelsize=axis_fontsize)
         
         # Configure y-axis ticks
         def pi_formatter(x, pos):
@@ -395,7 +401,7 @@ class NoisyGenerator(object):
         text_box_style = dict(
             facecolor="white",
             edgecolor="black",
-            alpha=0.7,
+            alpha=1,
             pad=0.5,
             boxstyle="round"
         )
@@ -409,7 +415,7 @@ class NoisyGenerator(object):
                 f"$\eta_0 = {self.event_eta:.2f}$",
                 transform=ax.transAxes,
                 verticalalignment="top",
-                fontsize=12,
+                fontsize=legend_fontsize,
                 bbox=text_box_style,
                 )
         
@@ -419,8 +425,8 @@ class NoisyGenerator(object):
         reference_size_1 = particle_scale_factor * reference_mass_1 / np.max(self.masses)
         reference_size_2 = particle_scale_factor * reference_mass_2 / np.max(self.masses)
         # Position circles
-        ax.scatter(-0.68, -0.9, s=reference_size_1, facecolor="green", edgecolor="none", alpha=0.7)
-        ax.scatter(-0.85, -0.8, s=reference_size_2, facecolor="orange", edgecolor="none", alpha=0.7)
+        ax.scatter(0.68, -0.9, s=reference_size_1, facecolor="green", edgecolor="none", alpha=1)
+        ax.scatter(0.85, -0.8, s=reference_size_2, facecolor="orange", edgecolor="none", alpha=1)
         # Add to legend handles
         handles.append(Line2D([0], [0], marker='o', color='w', 
                             markerfacecolor='green',
@@ -439,9 +445,9 @@ class NoisyGenerator(object):
             box = ax.get_position()
             ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
             legend = ax.legend(handles=handles, loc="center left", 
-                            bbox_to_anchor=(1, 0.5), fontsize=12)
+                            bbox_to_anchor=(1, 0.5), fontsize=legend_fontsize)
         else:
-            legend = ax.legend(handles=handles, fontsize=12, 
+            legend = ax.legend(handles=handles, fontsize=legend_fontsize, 
                             bbox_to_anchor=(1, 1),
                             loc="upper right", 
                             bbox_transform=ax.transAxes)
@@ -450,7 +456,7 @@ class NoisyGenerator(object):
         frame = legend.get_frame()
         frame.set_facecolor("white")
         frame.set_edgecolor("black")
-        frame.set_alpha(0.7)
+        frame.set_alpha(1)
 
         plt.tight_layout()
         

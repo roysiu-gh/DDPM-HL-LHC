@@ -15,19 +15,19 @@ from DDPMLHC.generate_plots.resolution_plots import *
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
-# MAX_DATA_ROWS = 100_000
+MAX_DATA_ROWS = 100_000
 
-# # === Read in data
-# print("0 :: Loading original data")
-# tt = np.genfromtxt(
-#     TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-# )
-# pile_up = np.genfromtxt(
-#     PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-# )
-# tt = EventSelector(tt)
-# pile_up = EventSelector(pile_up)
-# print("FINISHED loading data\n")
+# === Read in data
+print("0 :: Loading original data")
+tt = np.genfromtxt(
+    TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+)
+pile_up = np.genfromtxt(
+    PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+)
+tt = EventSelector(tt)
+pile_up = EventSelector(pile_up)
+print("FINISHED loading data\n")
 
 #################################################################################
 
@@ -103,31 +103,31 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 #################################################################################
 
-# mus = [0, 50, 200, 500]
-# # mus = [200]
+mus = [0, 50, 200, 500]
+mus = [200]
 
-# for mu in mus:
-#     generator = NoisyGenerator(tt, pile_up, mu=mu)
-#     # next(generator)  # Load jet 0
-#     generator.select_jet(0)
-#     save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
-#     generator.visualise_current_event()
-#     generator.visualise_current_event(show_pdgids=True)
+for mu in mus:
+    generator = NoisyGenerator(tt, pile_up, mu=mu)
+    # # next(generator)  # Load jet 0
+    # generator.select_jet(0)
+    # save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
+    # generator.visualise_current_event()
+    # generator.visualise_current_event(show_pdgids=True)
 
-#     generator.select_jet(1)
-#     save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
-#     generator.visualise_current_event(particle_scale_factor=1200, )
-#     generator.visualise_current_event(particle_scale_factor=1200, show_pdgids=True)
+    # generator.select_jet(1)
+    # save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
+    # generator.visualise_current_event(particle_scale_factor=1200, )
+    # generator.visualise_current_event(particle_scale_factor=1200, show_pdgids=True)
 
-#     generator.select_jet(42)
-#     save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
-#     generator.visualise_current_event()
-#     generator.visualise_current_event(show_pdgids=True)
+    # generator.select_jet(42)
+    # save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
+    # generator.visualise_current_event()
+    # generator.visualise_current_event(show_pdgids=True)
 
-#     generator.select_jet(493)
-#     save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
-#     generator.visualise_current_event(particle_scale_factor=2000, )
-#     generator.visualise_current_event(particle_scale_factor=2000, show_pdgids=True)
+    generator.select_jet(493)
+    save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
+    generator.visualise_current_event(particle_scale_factor=2000, )
+    generator.visualise_current_event(particle_scale_factor=2000, show_pdgids=True)
 
 #################################################################################
 
@@ -135,8 +135,6 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 # output_path = f"{CWD}/data/3-grid/mu{mu}/"
 # output_filename = f"noisy_mu{mu}_event_level_from_grid{BMAP_SQUARE_SIDE_LENGTH}.csv"
 # output_filepath = f"{output_path}/{output_filename}"
-
-# ###
 
 # generator = NoisyGenerator(tt, pile_up, mu=mu)
 # combined = []
@@ -254,35 +252,35 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 #################################################################################
 
-# Resplots for impact of gridding, compare against cts pure
-bins = [4, 8, 16, 256]
-save_path = f"{CWD}/data/plots/relative_resolutions/resolution_compare_grids_{'_'.join(map(str, bins))}.pdf"
+# # Resplots for impact of gridding, compare against cts pure
+# bins = [4, 8, 16, 256]
+# save_path = f"{CWD}/data/plots/relative_resolutions/resolution_compare_grids_{'_'.join(map(str, bins))}.pdf"
 
-paths = [f"{CWD}/data/3-grid/mu0/noisy_mu0_event_level_from_grid{bin}.csv" for bin in bins]
-mass_resolutions_grids = { rf"$b={bin}$" : load_variable_data(paths[i], "mass")
-                          for i, bin in enumerate(bins) }
-pt_resolutions_grids = { rf"$b={bin}$" : load_variable_data(paths[i], "p_T")
-                          for i, bin in enumerate(bins) }
+# paths = [f"{CWD}/data/3-grid/mu0/noisy_mu0_event_level_from_grid{bin}.csv" for bin in bins]
+# mass_resolutions_grids = { rf"$b={bin}$" : load_variable_data(paths[i], "mass")
+#                           for i, bin in enumerate(bins) }
+# pt_resolutions_grids = { rf"$b={bin}$" : load_variable_data(paths[i], "p_T")
+#                           for i, bin in enumerate(bins) }
 
-colors={
-        f"$b={bins[0]}$": PLOT_COLOURS[1],
-        f"$b={bins[1]}$": PLOT_COLOURS[2],
-        f"$b={bins[2]}$": PLOT_COLOURS[3],
-        f"$b={bins[3]}$": PLOT_COLOURS[4],
-    }
+# colors={
+#         f"$b={bins[0]}$": PLOT_COLOURS[1],
+#         f"$b={bins[1]}$": PLOT_COLOURS[2],
+#         f"$b={bins[2]}$": PLOT_COLOURS[3],
+#         f"$b={bins[3]}$": PLOT_COLOURS[4],
+#     }
 
 
-plot_resolutions(
-    mass_resolutions_grids, pt_resolutions_grids,
-    save_path = save_path,
-    mass_cutoff=(-1, 4),
-    pt_cutoff=(-0.1, 0.1),
-    use_log=True,
-    legend_title="",
-    fig_vinch=4.5,
-    colors=colors,
-    vert_line_colour="blue",
-)
+# plot_resolutions(
+#     mass_resolutions_grids, pt_resolutions_grids,
+#     save_path = save_path,
+#     mass_cutoff=(-1, 4),
+#     pt_cutoff=(-0.1, 0.1),
+#     use_log=True,
+#     legend_title="",
+#     fig_vinch=4.5,
+#     colors=colors,
+#     vert_line_colour="blue",
+# )
 
 #################################################################################
 
@@ -298,20 +296,20 @@ plot_resolutions(
 
 #################################################################################
 
-files = [
-    f"{CWD}/data/2-intermediate/noisy_mu0_event_level.csv",
-    f"{CWD}/data/3-grid/mu0/noisy_mu{0}_event_level_from_grid{64}.csv",
-    f"{CWD}/data/2-intermediate/noisy_mu200_event_level.csv",
-    f"{CWD}/data/4-reconstruction/beta001/reconstructed_mu200_event_level_from_grid64_Unet64.csv",
-]
-labels = ["Original", "Best case", "Noisy", "Denoised"]
-save_path = f"{CWD}/data/plots/1D_histograms/overlaid_from_model/overlaid_comparison_b64_beta001_unet64.png"
-create_overlay_plots_general(files, labels, mass_max=350, save_path=save_path)
+# files = [
+#     f"{CWD}/data/2-intermediate/noisy_mu0_event_level.csv",
+#     f"{CWD}/data/3-grid/mu0/noisy_mu{0}_event_level_from_grid{64}.csv",
+#     f"{CWD}/data/2-intermediate/noisy_mu200_event_level.csv",
+#     f"{CWD}/data/4-reconstruction/beta001/reconstructed_mu200_event_level_from_grid64_Unet64.csv",
+# ]
+# labels = ["Original", "Best case", "Noisy", "Denoised"]
+# save_path = f"{CWD}/data/plots/1D_histograms/overlaid_from_model/overlaid_comparison_b64_beta001_unet64.png"
+# create_overlay_plots_general(files, labels, mass_max=350, save_path=save_path)
 
 #################################################################################
 
 # plot_event_level_quantities_comparison(tt, pile_up, f"{CWD}/data/plots/event_level_quantities_comparison.png")
-plot_particle_level_quantities_comparison(tt, pile_up, f"{CWD}/data/plots/particle_level_quantities_comparison.png")
+# plot_particle_level_quantities_comparison(tt, pile_up, f"{CWD}/data/plots/particle_level_quantities_comparison.png")
 # plot_particle_level_quantities_ttbar_only(f"{CWD}/data/plots/particle_level_ttbar.png")
 
 #################################################################################
