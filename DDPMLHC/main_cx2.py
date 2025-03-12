@@ -174,7 +174,7 @@ for idx,data in enumerate(data_array):
     #bins = 50 if mus[idx] != 1 else 4
     ne, _, _ = axs[1].hist(energy_diffs, weights=weights_energy, bins = 50, label=f"$\\mu = {mus[idx]}$", edgecolor=f"{colours[idx]}",histtype=u'step')
     nm, _, _ = axs[0].hist(mass_diffs2, weights=weights_mass,bins = 50,label=f"$\\mu = {mus[idx]}$", edgecolor=f"{colours[idx]}",histtype=u'step')
-    axs[0].set_ylabel(r"Counts")
+    axs[0].set_ylabel(r"Normalised Counts")
     if mus[idx] == 50:
         max_ye = np.max(ne)
         max_ym = np.max(nm)
@@ -192,8 +192,10 @@ for idx,data in enumerate(data_array):
     # std_energy_diffs.append(std_energy_diff)
     # mean_mass_diffs.append(mean_mass_diff)
     # std_mass_diffs.append(std_mass_diff)
-axs[1].set_xlabel(r"$\Delta p_{T,r}$")
-axs[0].set_xlabel(r"$\Delta m_r$")
+axs[1].set_xlabel(r"(a) $\Delta p_{T,r}$")
+axs[0].set_xlabel(r"(b) $\Delta m_r$")
+axs[0].set_xlim([0,4])
+axs[1].set_xlim([0,1])
 axs[0].set_ylim([0,np.round(max_ym*10) / 10])
 axs[1].set_ylim([0,np.round(max_ye*10) / 10])
 axs[1].set_yticks([0,0.02,0.04,0.06,0.08,0.10])

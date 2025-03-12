@@ -29,7 +29,7 @@ tick_fontsize = 20
 MPL_GLOBAL_PARAMS = {
     'text.usetex' : True, # use latex text
     'text.latex.preamble' : r'\usepackage{stix}', # latex packages
-    'font.size' : 24,
+    'font.size' :20,
     "font.family": "STIXGeneral",
     'figure.dpi' : 600,
     'figure.figsize' : (8, 6),
