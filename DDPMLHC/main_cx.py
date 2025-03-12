@@ -383,8 +383,8 @@ def compare_denoised(denoised_array, use_log=True):
 ##### CODE TO GENERATE RESOLUTION PLOTS #####
 def generate_event_level_gridded_jets(NG: NoisyGenerator, save_dir=INTERMEDIATE_PATH):
     NG.reset()
-    NG.bins = BMAP_SQUARE_SIDE_LENGTH
-    gt_file = f"{save_dir}/noisy_mu0_event_level_grid{BMAP_SQUARE_SIDE_LENGTH}.csv"
+    # NG.bins = BMAP_SQUARE_SIDE_LENGTH
+    gt_file = f"{save_dir}/noisy_mu0_event_level_grid{NG.bins}.csv"
     combined = []
     for idx, _ in enumerate(NG):
         # next(NG)
@@ -421,7 +421,12 @@ def generate_event_level_gridded_jets(NG: NoisyGenerator, save_dir=INTERMEDIATE_
             fmt="%i,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f"
     )
     return all_data, gt_file
-# generate_event_level_gridded_jets(NG_jet)
+# generate_event_level_gridded_jets(NoisyGenerator(tt, pu, bins=4, mu=0))
+# generate_event_level_gridded_jets(NoisyGenerator(tt, pu, bins=8, mu=0))
+# generate_event_level_gridded_jets(NoisyGenerator(tt, pu, bins=64, mu=0))
+# generate_event_level_gridded_jets(NoisyGenerator(tt, pu, bins=256, mu=0))
+# sys.exit()
+# print("Done generating grid")
 # def mass_energy_diff(save_dir=INTERMEDIATE_PATH, mu=200):
 #     """
 #     Finds the relative difference between the model's denoised images and the binned jets as ground truths
@@ -645,37 +650,71 @@ def generate_event_level_gridded_jets(NG: NoisyGenerator, save_dir=INTERMEDIATE_
 # plt.savefig(f"{CWD}/storage/physics/phuftc/DDPM-HL-LHC/data/plots/bmap_comparison/comparison_log1p.png")
 
 
-from DDPMLHC.generate_plots.histograms_1d import *
-from itertools import product
+# from DDPMLHC.generate_plots.histograms_1d import *
+# from itertools import product
 
-# plot_event_level_quantities_comparison(save_path=f"{CWD}/data/plots/event_level_quantities_comparison.png")
-# plot_particle_level_quantities_comparison(tt, pile_up, f"{CWD}/data/plots/particle_level_quantities_comparison.png")
-# plot_particle_level_quantities_ttbar_only(f"{CWD}/data/plots/particle_level_ttbar.png")
-for x in product([16,32,64],["0.5", "001"]):
-    bins  = x[0]
-    beta = x[1]
-    best_case_path = f"{CWD}/data/2-intermediate/noisy_mu0_event_level_grid{bins}.csv"
-    noisy_path = f"{CWD}/data/2-intermediate/noisy_mu200_event_level_grid{bins}.csv"
-    reconstructed_path = f"{CWD}/data/4-reconstruction/beta{beta}/reconstructed_mu{200}_event_level_from_grid{bins}_Unet{UNET_DIMS}.csv"
-    mass_resolutions_best = {
-        "Noisy, $\mu = 200$": load_variable_data(noisy_path, "mass", truth_path=best_case_path),
-        "Denoised": load_variable_data(reconstructed_path, "mass", truth_path=best_case_path)
-    }
+# # plot_event_level_quantities_comparison(save_path=f"{CWD}/data/plots/event_level_quantities_comparison.png")
+# # plot_particle_level_quantities_comparison(tt, pile_up, f"{CWD}/data/plots/particle_level_quantities_comparison.png")
+# # plot_particle_level_quantities_ttbar_only(f"{CWD}/data/plots/particle_level_ttbar.png")
+# # for x in product([16,32,64],["0.5", "001"]):
+# #     bins  = x[0]
+# #     beta = x[1]
+# #     best_case_path = f"{CWD}/data/2-intermediate/noisy_mu0_event_level_grid{bins}.csv"
+# #     noisy_path = f"{CWD}/data/2-intermediate/noisy_mu200_event_level_grid{bins}.csv"
+# #     reconstructed_path = f"{CWD}/data/4-reconstruction/beta{beta}/reconstructed_mu{200}_event_level_from_grid{bins}_Unet{UNET_DIMS}.csv"
+# #     mass_resolutions_best = {
+# #         "Noisy, $\mu = 200$": load_variable_data(noisy_path, "mass", truth_path=best_case_path),
+# #         "Denoised": load_variable_data(reconstructed_path, "mass", truth_path=best_case_path)
+# #     }
 
-    pt_resolutions_best = {
-        "Noisy, $\mu = 200$": load_variable_data(noisy_path, "p_T", truth_path=best_case_path),
-        "Denoised": load_variable_data(reconstructed_path, "p_T", truth_path=best_case_path)
-    }
+# #     pt_resolutions_best = {
+# #         "Noisy, $\mu = 200$": load_variable_data(noisy_path, "p_T", truth_path=best_case_path),
+# #         "Denoised": load_variable_data(reconstructed_path, "p_T", truth_path=best_case_path)
+# #     }
 
-    plot_resolutions(
-        mass_resolutions_best, pt_resolutions_best,
-        colors={
-            "Noisy, $\mu = 200$": "red",
-            "Denoised": "blue"
-        },
-        save_path = f"{CWD}/data/plots/relative_resolutions/beta{beta}/resolution_grid{bins}_Unet{UNET_DIMS}_mass_gtBEST.pdf",
-        show_subtit=True,
-        mass_text="",
-        pT_text=""
-    )
+# #     plot_resolutions(
+# #         mass_resolutions_best, pt_resolutions_best,
+# #         colors={
+# #             "Noisy, $\mu = 200$": "red",
+# #             "Denoised": "blue"
+# #         },
+# #         save_path = f"{CWD}/data/plots/relative_resolutions/beta{beta}/resolution_grid{bins}_Unet{UNET_DIMS}_mass_gtBEST.pdf",
+# #         show_subtit=True,
+# #         mass_text="",
+# #         pT_text=""
+# #     )
+
+
+
+# # # Resplots for impact of gridding, compare against cts pure
+# NG = NoisyGenerator(tt, pu, mu=0)
+# bins = [4, 8, 16, 256]
+# save_path = f"{CWD}/data/plots/relative_resolutions/resolution_compare_grids_{'_'.join(map(str, bins))}.pdf"
+
+# paths = [f"{CWD}/data/2-intermediate/noisy_mu0_event_level_grid{bin}.csv" for bin in bins]
+# mass_resolutions_grids = { rf"$b={bin}$" : load_variable_data(paths[i], "mass")
+#                           for i, bin in enumerate(bins) }
+# pt_resolutions_grids = { rf"$b={bin}$" : load_variable_data(paths[i], "p_T")
+#                           for i, bin in enumerate(bins) }
+
+# colors={
+#         f"$b={bins[0]}$": PLOT_COLOURS[1],
+#         f"$b={bins[1]}$": PLOT_COLOURS[2],
+#         f"$b={bins[2]}$": PLOT_COLOURS[3],
+#         f"$b={bins[3]}$": PLOT_COLOURS[4],
+#     }
+
+
+# plot_resolutions(
+#     mass_resolutions_grids, pt_resolutions_grids,
+#     save_path = save_path,
+#     mass_cutoff=(-1, 4),
+#     pt_cutoff=(-0.1, 0.1),
+#     use_log=True,
+#     legend_title="",
+#     fig_vinch=4.5,
+#     colors=colors,
+#     vert_line_colour="black",
+# )
+
 
