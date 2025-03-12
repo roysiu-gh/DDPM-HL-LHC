@@ -63,43 +63,43 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 #################################################################################
 
-mu_values = [0, 50, 100, 150, 200]
-colours = ['blue', 'orange', 'green', 'red', 'purple']
-filepaths = [f"{CWD}/data/2-intermediate/noisy_mu{mu}_event_level.csv" for mu in mu_values]
-best_case_path = filepaths[0]
+# mu_values = [0, 50, 100, 150, 200]
+# colours = PLOT_COLOURS
+# filepaths = [f"{CWD}/data/2-intermediate/noisy_mu{mu}_event_level.csv" for mu in mu_values]
+# best_case_path = filepaths[0]
 
-# Second plot - comparison against best case
-mass_resolutions_best = {
-    "$\mu=50$": load_variable_data(filepaths[1], "mass", truth_path=best_case_path),
-    "$\mu=100$": load_variable_data(filepaths[2], "mass", truth_path=best_case_path),
-    "$\mu=150$": load_variable_data(filepaths[3], "mass", truth_path=best_case_path),
-    "$\mu=200$": load_variable_data(filepaths[4], "mass", truth_path=best_case_path),
-}
+# # Second plot - comparison against best case
+# mass_resolutions_best = {
+#     "$\mu=50$": load_variable_data(filepaths[1], "mass", truth_path=best_case_path),
+#     "$\mu=100$": load_variable_data(filepaths[2], "mass", truth_path=best_case_path),
+#     "$\mu=150$": load_variable_data(filepaths[3], "mass", truth_path=best_case_path),
+#     "$\mu=200$": load_variable_data(filepaths[4], "mass", truth_path=best_case_path),
+# }
 
-pt_resolutions_best = {
-    "$\mu=50$": load_variable_data(filepaths[1], "p_T", truth_path=best_case_path),
-    "$\mu=100$": load_variable_data(filepaths[2], "p_T", truth_path=best_case_path),
-    "$\mu=150$": load_variable_data(filepaths[3], "p_T", truth_path=best_case_path),
-    "$\mu=200$": load_variable_data(filepaths[4], "p_T", truth_path=best_case_path),
-}
+# pt_resolutions_best = {
+#     "$\mu=50$": load_variable_data(filepaths[1], "p_T", truth_path=best_case_path),
+#     "$\mu=100$": load_variable_data(filepaths[2], "p_T", truth_path=best_case_path),
+#     "$\mu=150$": load_variable_data(filepaths[3], "p_T", truth_path=best_case_path),
+#     "$\mu=200$": load_variable_data(filepaths[4], "p_T", truth_path=best_case_path),
+# }
 
-colors={
-        "$\mu=50$": colours[1],
-        "$\mu=100$": colours[2],
-        "$\mu=150$": colours[3],
-        "$\mu=200$": colours[4],
-    }
+# colors={
+#         "$\mu=50$": colours[1],
+#         "$\mu=100$": colours[2],
+#         "$\mu=150$": colours[3],
+#         "$\mu=200$": colours[4],
+#     }
 
-plot_resolutions(
-    mass_resolutions_best, pt_resolutions_best,
-    colors=colors,
-    save_path = f"{CWD}/data/plots/mu_comp_resplot",
-    mass_cutoff=(-0.5, 3),
-    pt_cutoff=(-0.1, 1),
-    legend_title="",
-    fig_vinch=4.5,
-    vert_line_colour="blue",
-)
+# plot_resolutions(
+#     mass_resolutions_best, pt_resolutions_best,
+#     colors=colors,
+#     save_path = f"{CWD}/data/plots/mu_comp_resplot",
+#     mass_cutoff=(-0.5, 3),
+#     pt_cutoff=(-0.1, 1),
+#     legend_title="",
+#     fig_vinch=4.5,
+#     vert_line_colour="blue",
+# )
 
 #################################################################################
 
@@ -254,25 +254,35 @@ plot_resolutions(
 
 #################################################################################
 
-# # Resplots for impact of gridding, compare against cts pure
-# bins = [4, 8, 16, 256]
-# save_path = f"{CWD}/data/plots/relative_resolutions/resolution_compare_grids_{'_'.join(map(str, bins))}.pdf"
+# Resplots for impact of gridding, compare against cts pure
+bins = [4, 8, 16, 256]
+save_path = f"{CWD}/data/plots/relative_resolutions/resolution_compare_grids_{'_'.join(map(str, bins))}.pdf"
 
-# paths = [f"{CWD}/data/3-grid/mu0/noisy_mu0_event_level_from_grid{bin}.csv" for bin in bins]
-# mass_resolutions_grids = { rf"$b={bin}$" : load_variable_data(paths[i], "mass")
-#                           for i, bin in enumerate(bins) }
-# pt_resolutions_grids = { rf"$b={bin}$" : load_variable_data(paths[i], "p_T")
-#                           for i, bin in enumerate(bins) }
+paths = [f"{CWD}/data/3-grid/mu0/noisy_mu0_event_level_from_grid{bin}.csv" for bin in bins]
+mass_resolutions_grids = { rf"$b={bin}$" : load_variable_data(paths[i], "mass")
+                          for i, bin in enumerate(bins) }
+pt_resolutions_grids = { rf"$b={bin}$" : load_variable_data(paths[i], "p_T")
+                          for i, bin in enumerate(bins) }
 
-# plot_resolutions(
-#     mass_resolutions_grids, pt_resolutions_grids,
-#     save_path = save_path,
-#     mass_cutoff=(-1, 4),
-#     pt_cutoff=(-0.1, 0.1),
-#     use_log=True,
-#     legend_title="",
-#     fig_vinch=4.5,
-# )
+colors={
+        f"$b={bins[0]}$": PLOT_COLOURS[1],
+        f"$b={bins[1]}$": PLOT_COLOURS[2],
+        f"$b={bins[2]}$": PLOT_COLOURS[3],
+        f"$b={bins[3]}$": PLOT_COLOURS[4],
+    }
+
+
+plot_resolutions(
+    mass_resolutions_grids, pt_resolutions_grids,
+    save_path = save_path,
+    mass_cutoff=(-1, 4),
+    pt_cutoff=(-0.1, 0.1),
+    use_log=True,
+    legend_title="",
+    fig_vinch=4.5,
+    colors=colors,
+    vert_line_colour="blue",
+)
 
 #################################################################################
 
@@ -288,20 +298,20 @@ plot_resolutions(
 
 #################################################################################
 
-# files = [
-#     f"{CWD}/data/2-intermediate/noisy_mu0_event_level.csv",
-#     f"{CWD}/data/3-grid/mu0/noisy_mu{0}_event_level_from_grid{64}.csv",
-#     f"{CWD}/data/2-intermediate/noisy_mu200_event_level.csv",
-#     f"{CWD}/data/4-reconstruction/beta001/reconstructed_mu200_event_level_from_grid64_Unet64.csv",
-# ]
-# labels = ["Original", "Best case", "Noisy", "Denoised"]
-# save_path = f"{CWD}/data/plots/1D_histograms/overlaid_from_model/overlaid_comparison_b64_beta001_unet64.png"
-# create_overlay_plots_general(files, labels, mass_max=350, save_path=save_path)
+files = [
+    f"{CWD}/data/2-intermediate/noisy_mu0_event_level.csv",
+    f"{CWD}/data/3-grid/mu0/noisy_mu{0}_event_level_from_grid{64}.csv",
+    f"{CWD}/data/2-intermediate/noisy_mu200_event_level.csv",
+    f"{CWD}/data/4-reconstruction/beta001/reconstructed_mu200_event_level_from_grid64_Unet64.csv",
+]
+labels = ["Original", "Best case", "Noisy", "Denoised"]
+save_path = f"{CWD}/data/plots/1D_histograms/overlaid_from_model/overlaid_comparison_b64_beta001_unet64.png"
+create_overlay_plots_general(files, labels, mass_max=350, save_path=save_path)
 
 #################################################################################
 
 # plot_event_level_quantities_comparison(tt, pile_up, f"{CWD}/data/plots/event_level_quantities_comparison.png")
-# plot_particle_level_quantities_comparison(tt, pile_up, f"{CWD}/data/plots/particle_level_quantities_comparison.png")
+plot_particle_level_quantities_comparison(tt, pile_up, f"{CWD}/data/plots/particle_level_quantities_comparison.png")
 # plot_particle_level_quantities_ttbar_only(f"{CWD}/data/plots/particle_level_ttbar.png")
 
 #################################################################################

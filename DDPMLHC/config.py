@@ -34,6 +34,8 @@ jets_to_sample =1000
 TICK_AND_LEGEND_FONTSIZE = 14
 LABEL_FONTSIZE = 18
 
+PLOT_COLOURS = ['blue', 'orange', 'green', 'red', 'purple']
+
 MPL_GLOBAL_PARAMS = {
     'text.usetex' : False,
     'text.latex.preamble' : r'\usepackage{stix}',

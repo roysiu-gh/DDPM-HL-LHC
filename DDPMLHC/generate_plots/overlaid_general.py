@@ -12,7 +12,7 @@ def plot_combined_histograms_with_overlay(hist_data_list, labels, save_path, sta
     """Plot mass and p_T for multiple datasets with custom labels."""
     FOOBAR=False
     fontsize = 18
-    colors = ['blue', 'orange', 'green', 'red', 'purple'][:len(labels)]
+    colors = PLOT_COLOURS[:len(labels)]
     hatch_patterns = ['O', 'o', '.', '/', '\\'][:len(labels)]  # Different hatching patterns
     hatch_patterns = hatch_patterns[::-1]
     
