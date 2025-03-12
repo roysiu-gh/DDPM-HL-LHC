@@ -56,50 +56,50 @@ mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
 #################################################################################
 
-create_overlay_plots([0, 5, 10, 15, 30])
-create_overlay_plots([0, 10, 30, 50])
-create_overlay_plots([0, 25, 50, 75, 100], mass_max=300)
-create_overlay_plots([0, 50, 100, 150, 200], mass_max=400)
+# create_overlay_plots([0, 5, 10, 15, 30])
+# create_overlay_plots([0, 10, 30, 50])
+# create_overlay_plots([0, 25, 50, 75, 100], mass_max=300)
+# create_overlay_plots([0, 50, 100, 150, 200], mass_max=400)
 
 #################################################################################
 
-# mu_values = [0, 50, 100, 150, 200]
-# colours = ['blue', 'orange', 'green', 'red', 'purple']
-# filepaths = [f"{CWD}/data/2-intermediate/noisy_mu{mu}_event_level.csv" for mu in mu_values]
-# best_case_path = filepaths[0]
+mu_values = [0, 50, 100, 150, 200]
+colours = ['blue', 'orange', 'green', 'red', 'purple']
+filepaths = [f"{CWD}/data/2-intermediate/noisy_mu{mu}_event_level.csv" for mu in mu_values]
+best_case_path = filepaths[0]
 
-# # Second plot - comparison against best case
-# mass_resolutions_best = {
-#     "$\mu=1$": load_variable_data(filepaths[1], "mass", truth_path=best_case_path),
-#     "$\mu=2$": load_variable_data(filepaths[2], "mass", truth_path=best_case_path),
-#     "$\mu=3$": load_variable_data(filepaths[3], "mass", truth_path=best_case_path),
-#     "$\mu=4$": load_variable_data(filepaths[4], "mass", truth_path=best_case_path),
-# }
+# Second plot - comparison against best case
+mass_resolutions_best = {
+    "$\mu=50$": load_variable_data(filepaths[1], "mass", truth_path=best_case_path),
+    "$\mu=100$": load_variable_data(filepaths[2], "mass", truth_path=best_case_path),
+    "$\mu=150$": load_variable_data(filepaths[3], "mass", truth_path=best_case_path),
+    "$\mu=200$": load_variable_data(filepaths[4], "mass", truth_path=best_case_path),
+}
 
-# pt_resolutions_best = {
-#     "$\mu=1$": load_variable_data(filepaths[1], "p_T", truth_path=best_case_path),
-#     "$\mu=2$": load_variable_data(filepaths[2], "p_T", truth_path=best_case_path),
-#     "$\mu=3$": load_variable_data(filepaths[3], "p_T", truth_path=best_case_path),
-#     "$\mu=4$": load_variable_data(filepaths[4], "p_T", truth_path=best_case_path),
-# }
+pt_resolutions_best = {
+    "$\mu=50$": load_variable_data(filepaths[1], "p_T", truth_path=best_case_path),
+    "$\mu=100$": load_variable_data(filepaths[2], "p_T", truth_path=best_case_path),
+    "$\mu=150$": load_variable_data(filepaths[3], "p_T", truth_path=best_case_path),
+    "$\mu=200$": load_variable_data(filepaths[4], "p_T", truth_path=best_case_path),
+}
 
-# colors={
-#         "$\mu=1$": colours[1],
-#         "$\mu=2$": colours[2],
-#         "$\mu=3$": colours[3],
-#         "$\mu=4$": colours[4],
-#     }
+colors={
+        "$\mu=50$": colours[1],
+        "$\mu=100$": colours[2],
+        "$\mu=150$": colours[3],
+        "$\mu=200$": colours[4],
+    }
 
-# plot_resolutions(
-#     mass_resolutions_best, pt_resolutions_best,
-#     colors=colors,
-#     save_path = f"{CWD}/data/plots/mu_comp_resplot",
-#     mass_cutoff=(-0.5, 3),
-#     pt_cutoff=(-0.1, 1),
-#     legend_title="",
-#     fig_vinch=4.5,
-#     vert_line_colour="blue",
-# )
+plot_resolutions(
+    mass_resolutions_best, pt_resolutions_best,
+    colors=colors,
+    save_path = f"{CWD}/data/plots/mu_comp_resplot",
+    mass_cutoff=(-0.5, 3),
+    pt_cutoff=(-0.1, 1),
+    legend_title="",
+    fig_vinch=4.5,
+    vert_line_colour="blue",
+)
 
 #################################################################################
 
@@ -193,13 +193,13 @@ create_overlay_plots([0, 50, 100, 150, 200], mass_max=400)
 
 #################################################################################
 
-create_overlay_plots_debin([4,8,16,32])
-create_overlay_plots_debin([4,16,64,256])
-create_overlay_plots_debin([4,16,64,256], pure=True)
-create_overlay_plots_debin([4,8,16,256], pure=True)
-create_overlay_plots_debin([8,16,256], pure=True)
-create_overlay_plots_debin([2,4,8])
-create_overlay_plots_debin([2,4,8,256], pure=True)
+# create_overlay_plots_debin([4,8,16,32])
+# create_overlay_plots_debin([4,16,64,256])
+# create_overlay_plots_debin([4,16,64,256], pure=True)
+# create_overlay_plots_debin([4,8,16,256], pure=True)
+# create_overlay_plots_debin([8,16,256], pure=True)
+# create_overlay_plots_debin([2,4,8])
+# create_overlay_plots_debin([2,4,8,256], pure=True)
 
 #################################################################################
 
@@ -288,15 +288,15 @@ create_overlay_plots_debin([2,4,8,256], pure=True)
 
 #################################################################################
 
-files = [
-    f"{CWD}/data/2-intermediate/noisy_mu0_event_level.csv",
-    f"{CWD}/data/3-grid/mu0/noisy_mu{0}_event_level_from_grid{64}.csv",
-    f"{CWD}/data/2-intermediate/noisy_mu200_event_level.csv",
-    f"{CWD}/data/4-reconstruction/beta001/reconstructed_mu200_event_level_from_grid64_Unet64.csv",
-]
-labels = ["Original", "Best case", "Noisy", "Denoised"]
-save_path = f"{CWD}/data/plots/1D_histograms/overlaid_from_model/overlaid_comparison_b64_beta001_unet64.png"
-create_overlay_plots_general(files, labels, mass_max=350, save_path=save_path)
+# files = [
+#     f"{CWD}/data/2-intermediate/noisy_mu0_event_level.csv",
+#     f"{CWD}/data/3-grid/mu0/noisy_mu{0}_event_level_from_grid{64}.csv",
+#     f"{CWD}/data/2-intermediate/noisy_mu200_event_level.csv",
+#     f"{CWD}/data/4-reconstruction/beta001/reconstructed_mu200_event_level_from_grid64_Unet64.csv",
+# ]
+# labels = ["Original", "Best case", "Noisy", "Denoised"]
+# save_path = f"{CWD}/data/plots/1D_histograms/overlaid_from_model/overlaid_comparison_b64_beta001_unet64.png"
+# create_overlay_plots_general(files, labels, mass_max=350, save_path=save_path)
 
 #################################################################################
 
