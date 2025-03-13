@@ -22,14 +22,14 @@ TTBAR_NUM = 70903
 MAX_DATA_ROWS = None
 
 BMAP_SQUARE_SIDE_LENGTH = 64
-label_fontsize = 20
-tick_fontsize = 20
+label_fontsize = 16
+tick_fontsize = 16
 
     # 'font.family' : r'Computer Modern Roman',
 MPL_GLOBAL_PARAMS = {
     'text.usetex' : True, # use latex text
     'text.latex.preamble' : r'\usepackage{stix}', # latex packages
-    'font.size' :20,
+    'font.size' :16,
     "font.family": "STIXGeneral",
     'figure.dpi' : 600,
     'figure.figsize' : (8, 6),
