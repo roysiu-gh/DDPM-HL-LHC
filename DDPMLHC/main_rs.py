@@ -15,19 +15,19 @@ from DDPMLHC.generate_plots.resolution_plots import *
 
 mpl.rcParams.update(MPL_GLOBAL_PARAMS)
 
-MAX_DATA_ROWS = 100_000
+# MAX_DATA_ROWS = 100_000
 
-# === Read in data
-print("0 :: Loading original data")
-tt = np.genfromtxt(
-    TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-pile_up = np.genfromtxt(
-    PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-)
-tt = EventSelector(tt)
-pile_up = EventSelector(pile_up)
-print("FINISHED loading data\n")
+# # === Read in data
+# print("0 :: Loading original data")
+# tt = np.genfromtxt(
+#     TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+# )
+# pile_up = np.genfromtxt(
+#     PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+# )
+# tt = EventSelector(tt)
+# pile_up = EventSelector(pile_up)
+# print("FINISHED loading data\n")
 
 #################################################################################
 
@@ -63,71 +63,71 @@ print("FINISHED loading data\n")
 
 #################################################################################
 
-# mu_values = [0, 50, 100, 150, 200]
-# colours = PLOT_COLOURS
-# filepaths = [f"{CWD}/data/2-intermediate/noisy_mu{mu}_event_level.csv" for mu in mu_values]
-# best_case_path = filepaths[0]
+mu_values = [0, 50, 100, 150, 200]
+colours = PLOT_COLOURS
+filepaths = [f"{CWD}/data/2-intermediate/noisy_mu{mu}_event_level.csv" for mu in mu_values]
+best_case_path = filepaths[0]
 
-# # Second plot - comparison against best case
-# mass_resolutions_best = {
-#     "$\mu=50$": load_variable_data(filepaths[1], "mass", truth_path=best_case_path),
-#     "$\mu=100$": load_variable_data(filepaths[2], "mass", truth_path=best_case_path),
-#     "$\mu=150$": load_variable_data(filepaths[3], "mass", truth_path=best_case_path),
-#     "$\mu=200$": load_variable_data(filepaths[4], "mass", truth_path=best_case_path),
-# }
+# Second plot - comparison against best case
+mass_resolutions_best = {
+    "$\mu=50$": load_variable_data(filepaths[1], "mass", truth_path=best_case_path),
+    "$\mu=100$": load_variable_data(filepaths[2], "mass", truth_path=best_case_path),
+    "$\mu=150$": load_variable_data(filepaths[3], "mass", truth_path=best_case_path),
+    "$\mu=200$": load_variable_data(filepaths[4], "mass", truth_path=best_case_path),
+}
 
-# pt_resolutions_best = {
-#     "$\mu=50$": load_variable_data(filepaths[1], "p_T", truth_path=best_case_path),
-#     "$\mu=100$": load_variable_data(filepaths[2], "p_T", truth_path=best_case_path),
-#     "$\mu=150$": load_variable_data(filepaths[3], "p_T", truth_path=best_case_path),
-#     "$\mu=200$": load_variable_data(filepaths[4], "p_T", truth_path=best_case_path),
-# }
+pt_resolutions_best = {
+    "$\mu=50$": load_variable_data(filepaths[1], "p_T", truth_path=best_case_path),
+    "$\mu=100$": load_variable_data(filepaths[2], "p_T", truth_path=best_case_path),
+    "$\mu=150$": load_variable_data(filepaths[3], "p_T", truth_path=best_case_path),
+    "$\mu=200$": load_variable_data(filepaths[4], "p_T", truth_path=best_case_path),
+}
 
-# colors={
-#         "$\mu=50$": colours[1],
-#         "$\mu=100$": colours[2],
-#         "$\mu=150$": colours[3],
-#         "$\mu=200$": colours[4],
-#     }
+colors={
+        "$\mu=50$": colours[1],
+        "$\mu=100$": colours[2],
+        "$\mu=150$": colours[3],
+        "$\mu=200$": colours[4],
+    }
 
-# plot_resolutions(
-#     mass_resolutions_best, pt_resolutions_best,
-#     colors=colors,
-#     save_path = f"{CWD}/data/plots/mu_comp_resplot",
-#     mass_cutoff=(-0.5, 3),
-#     pt_cutoff=(-0.1, 1),
-#     legend_title="",
-#     fig_vinch=4.5,
-#     vert_line_colour="blue",
-# )
+plot_resolutions(
+    mass_resolutions_best, pt_resolutions_best,
+    colors=colors,
+    save_path = f"{CWD}/data/plots/mu_comp_resplot",
+    mass_cutoff=(-0.5, 3),
+    pt_cutoff=(-0.1, 1),
+    legend_title="",
+    fig_vinch=4.5,
+    vert_line_colour="blue",
+)
 
 #################################################################################
 
-mus = [0, 50, 200, 500]
-mus = [200]
+# mus = [0, 50, 200, 500]
+# mus = [200]
 
-for mu in mus:
-    generator = NoisyGenerator(tt, pile_up, mu=mu)
-    # # next(generator)  # Load jet 0
-    # generator.select_jet(0)
-    # save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
-    # generator.visualise_current_event()
-    # generator.visualise_current_event(show_pdgids=True)
+# for mu in mus:
+#     generator = NoisyGenerator(tt, pile_up, mu=mu)
+#     # # next(generator)  # Load jet 0
+#     # generator.select_jet(0)
+#     # save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
+#     # generator.visualise_current_event()
+#     # generator.visualise_current_event(show_pdgids=True)
 
-    # generator.select_jet(1)
-    # save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
-    # generator.visualise_current_event(particle_scale_factor=1200, )
-    # generator.visualise_current_event(particle_scale_factor=1200, show_pdgids=True)
+#     # generator.select_jet(1)
+#     # save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
+#     # generator.visualise_current_event(particle_scale_factor=1200, )
+#     # generator.visualise_current_event(particle_scale_factor=1200, show_pdgids=True)
 
-    # generator.select_jet(42)
-    # save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
-    # generator.visualise_current_event()
-    # generator.visualise_current_event(show_pdgids=True)
+#     # generator.select_jet(42)
+#     # save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
+#     # generator.visualise_current_event()
+#     # generator.visualise_current_event(show_pdgids=True)
 
-    generator.select_jet(493)
-    save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
-    generator.visualise_current_event(particle_scale_factor=2000, )
-    generator.visualise_current_event(particle_scale_factor=2000, show_pdgids=True)
+#     generator.select_jet(493)
+#     save_to_bmap(generator.vectorise(), jet_no=generator.event_id, mu=generator.mu)
+#     generator.visualise_current_event(particle_scale_factor=2000, )
+#     generator.visualise_current_event(particle_scale_factor=2000, show_pdgids=True)
 
 #################################################################################
 
@@ -252,35 +252,35 @@ for mu in mus:
 
 #################################################################################
 
-# # Resplots for impact of gridding, compare against cts pure
-# bins = [4, 8, 16, 256]
-# save_path = f"{CWD}/data/plots/relative_resolutions/resolution_compare_grids_{'_'.join(map(str, bins))}.pdf"
+# Resplots for impact of gridding, compare against cts pure
+bins = [4, 8, 16, 256]
+save_path = f"{CWD}/data/plots/relative_resolutions/resolution_compare_grids_{'_'.join(map(str, bins))}.png"
 
-# paths = [f"{CWD}/data/3-grid/mu0/noisy_mu0_event_level_from_grid{bin}.csv" for bin in bins]
-# mass_resolutions_grids = { rf"$b={bin}$" : load_variable_data(paths[i], "mass")
-#                           for i, bin in enumerate(bins) }
-# pt_resolutions_grids = { rf"$b={bin}$" : load_variable_data(paths[i], "p_T")
-#                           for i, bin in enumerate(bins) }
+paths = [f"{CWD}/data/3-grid/mu0/noisy_mu0_event_level_from_grid{bin}.csv" for bin in bins]
+mass_resolutions_grids = { rf"$b={bin}$" : load_variable_data(paths[i], "mass")
+                          for i, bin in enumerate(bins) }
+pt_resolutions_grids = { rf"$b={bin}$" : load_variable_data(paths[i], "p_T")
+                          for i, bin in enumerate(bins) }
 
-# colors={
-#         f"$b={bins[0]}$": PLOT_COLOURS[1],
-#         f"$b={bins[1]}$": PLOT_COLOURS[2],
-#         f"$b={bins[2]}$": PLOT_COLOURS[3],
-#         f"$b={bins[3]}$": PLOT_COLOURS[4],
-#     }
+colors={
+        f"$b={bins[0]}$": PLOT_COLOURS[1],
+        f"$b={bins[1]}$": PLOT_COLOURS[2],
+        f"$b={bins[2]}$": PLOT_COLOURS[3],
+        f"$b={bins[3]}$": PLOT_COLOURS[4],
+    }
 
 
-# plot_resolutions(
-#     mass_resolutions_grids, pt_resolutions_grids,
-#     save_path = save_path,
-#     mass_cutoff=(-1, 4),
-#     pt_cutoff=(-0.1, 0.1),
-#     use_log=True,
-#     legend_title="",
-#     fig_vinch=4.5,
-#     colors=colors,
-#     vert_line_colour="blue",
-# )
+plot_resolutions(
+    mass_resolutions_grids, pt_resolutions_grids,
+    save_path = save_path,
+    mass_cutoff=(-1, 4),
+    pt_cutoff=(-0.1, 0.1),
+    use_log=True,
+    legend_title="",
+    fig_vinch=4.5,
+    colors=colors,
+    vert_line_colour="blue",
+)
 
 #################################################################################
 
