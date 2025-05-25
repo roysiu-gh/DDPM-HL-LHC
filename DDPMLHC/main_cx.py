@@ -55,23 +55,23 @@ CWD = os.getcwd()
 # from DDPMLHC.generate_plots.histograms_1d import *
 # from DDPMLHC.model_utils import *
 # from DDPMLHC.generate_plots.resolution_plots import *
+BMAP_SQUARE_SIDE_LENGTH = 16
 
 # # from 
-# tt = np.genfromtxt(
-#     TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-# )
-# pile_up = np.genfromtxt(
-#     PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
-# )
-# tt = EventSelector(tt)
-# pile_up = EventSelector(pu)
+tt = np.genfromtxt(
+    TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+)
+pile_up = np.genfromtxt(
+    PILEUP_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
+)
+tt = EventSelector(tt)
+pile_up = EventSelector(pile_up)
 
 # Some functions from denoising_diffusion_pytorch that are required but couldn't import
 def extract(a, t, x_shape):
     b, *_ = t.shape
     out = a.gather(-1, t)
     return out.reshape(b, *((1,) * (len(x_shape) - 1)))
-
 
 # %%
 
@@ -727,15 +727,20 @@ beta="001"
 #     vert_line_colour="black",
 # )
 
-files = [
-    f"{CWD}/data/2-intermediate/noisy_mu0_event_level.csv",
-    f"{CWD}/data/2-intermediate/noisy_mu{0}_event_level_grid{64}.csv",
-    f"{CWD}/data/2-intermediate/noisy_mu200_event_level.csv",
-    f"{CWD}/data/4-reconstruction/beta001/reconstructed_mu200_event_level_from_grid64_Unet64.csv",
-]
-labels = ["Original", "Best case", "Noisy", "Denoised"]
-save_path = f"{CWD}/data/plots/1D_histograms/overlaid_from_model/cx_overlaid_poster.pdf"
-create_overlay_plots_general(files, labels, mass_max=350, save_path=save_path)
+# files = [
+#     f"{CWD}/data/2-intermediate/noisy_mu0_event_level.csv",
+#     f"{CWD}/data/2-intermediate/noisy_mu{0}_event_level_grid{64}.csv",
+#     f"{CWD}/data/2-intermediate/noisy_mu200_event_level.csv",
+#     f"{CWD}/data/4-reconstruction/beta001/reconstructed_mu200_event_level_from_grid64_Unet64.csv",
+# ]
+# labels = ["Original", "Best case", "Noisy", "Denoised"]
+# save_path = f"{CWD}/data/plots/1D_histograms/overlaid_from_model/cx_overlaid_poster.pdf"
+# create_overlay_plots_general(files, labels, mass_max=350, save_path=save_path)
 
+output_path = f"{CWD}/data/plots/bmap_comparison/"
+
+plot_mu_comparison(tt, pile_up, 
+                  use_log=True,
+                  save_path=f"{output_path}/mu_comparison_b{16}_log_cx.pdf")
 
 
