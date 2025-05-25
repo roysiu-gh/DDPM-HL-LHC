@@ -22,6 +22,16 @@ from pathlib import Path
 from random import random
 from functools import partial
 from collections import namedtuple
+from DDPMLHC.config import *
+from DDPMLHC.calculate_quantities import *
+from DDPMLHC.data_loading import *
+from DDPMLHC.generate_plots.histograms_1d import plot_1d_histograms, plot_event_level_quantities_comparison, plot_particle_level_quantities_comparison, plot_particle_level_quantities_ttbar_only
+from DDPMLHC.generate_plots.overlaid_1d import create_overlay_plots
+from DDPMLHC.generate_plots.overlaid_debin import create_overlay_plots_debin
+from DDPMLHC.generate_plots.bmap import plot_mu_comparison, save_to_bmap
+from DDPMLHC.generate_plots.overlaid_general import create_overlay_plots_general
+from DDPMLHC.generate_plots.resolution_plots import *
+
 
 import os
 import sys
@@ -29,24 +39,24 @@ import gc
 CWD = os.getcwd()
 
 # Device stuff
-print("CUDA available:", torch.cuda.is_available())
-if torch.cuda.is_available():
-    print("GPU Device:", torch.cuda.get_device_name(0))
-    print("Number of GPUs:", torch.cuda.device_count())
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-print(f"Remember to use {device} device from here on")
+# print("CUDA available:", torch.cuda.is_available())
+# if torch.cuda.is_available():
+#     print("GPU Device:", torch.cuda.get_device_name(0))
+#     print("Number of GPUs:", torch.cuda.device_count())
+# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# print(f"Remember to use {device} device from here on")
 # print(os.chdir("../"))
 # %cd /home/physics/phuqza/E9/DDPM-HL-LHC/
-from DDPMLHC.config import *
-from DDPMLHC.calculate_quantities import *
-from DDPMLHC.data_loading import *
-# from DDPMLHC.generate_plots.overlaid_1d import create_overlay_plots
-from DDPMLHC.generate_plots.bmap import *
-from DDPMLHC.generate_plots.histograms_1d import *
-from DDPMLHC.model_utils import *
-from DDPMLHC.generate_plots.resolution_plots import *
+# from DDPMLHC.config import *
+# from DDPMLHC.calculate_quantities import *
+# from DDPMLHC.data_loading import *
+# # from DDPMLHC.generate_plots.overlaid_1d import create_overlay_plots
+# from DDPMLHC.generate_plots.bmap import *
+# from DDPMLHC.generate_plots.histograms_1d import *
+# from DDPMLHC.model_utils import *
+# from DDPMLHC.generate_plots.resolution_plots import *
 
-# from 
+# # from 
 # tt = np.genfromtxt(
 #     TT_PATH, delimiter=",", encoding="utf-8", skip_header=1, max_rows=MAX_DATA_ROWS
 # )
@@ -65,8 +75,8 @@ def extract(a, t, x_shape):
 
 # %%
 
-MAX_DATA_ROWS = None
-bins=BMAP_SQUARE_SIDE_LENGTH
+# MAX_DATA_ROWS = None
+# bins=BMAP_SQUARE_SIDE_LENGTH
 # %%
 # Generate samples
 # batch_size = 4
@@ -110,317 +120,317 @@ beta="001"
 # # NG_jet.reset()
 # # NG_pu.reset()
 # # sampled_images = diffusion.sample(batch_size=100)
-output_path = f"{CWD}/data/3-grid/Unet{UNET_DIMS}_bins{bins}_mu{mu}_beta{beta}"
-output_filename = f"noisy_mu{mu}_event_level_from_grid{bins}.csv"
-output_filepath = f"{output_path}/{output_filename}"
-histogram_path = f"{output_path}/grid{bins}_hist_beta{beta}"
-# mpl.rcParams.update(MPL_GLOBAL_PARAMS)
-if not(os.path.exists(output_path)):
-    os.makedirs(output_path,exist_ok=True)
-if not(os.path.exists(histogram_path)):
-    os.makedirs(histogram_path,exist_ok=True)
+# output_path = f"{CWD}/data/3-grid/Unet{UNET_DIMS}_bins{bins}_mu{mu}_beta{beta}"
+# output_filename = f"noisy_mu{mu}_event_level_from_grid{bins}.csv"
+# output_filepath = f"{output_path}/{output_filename}"
+# histogram_path = f"{output_path}/grid{bins}_hist_beta{beta}"
+# # mpl.rcParams.update(MPL_GLOBAL_PARAMS)
+# if not(os.path.exists(output_path)):
+#     os.makedirs(output_path,exist_ok=True)
+# if not(os.path.exists(histogram_path)):
+#     os.makedirs(histogram_path,exist_ok=True)
     
-# def tensor_to_data(tensor_images):
-#     # tensor_images_cpu = tensor_images.detach().cpu().numpy()
-#     save_image(tensor_images, f"{histogram_path}/saved_denoised_grids_new.png")
+# # def tensor_to_data(tensor_images):
+# #     # tensor_images_cpu = tensor_images.detach().cpu().numpy()
+# #     save_image(tensor_images, f"{histogram_path}/saved_denoised_grids_new.png")
 
 
-class OutData():
-    def __init__(self, diffusion, NG_jet, num_jets_to_process, bins=BMAP_SQUARE_SIDE_LENGTH, num_saved=4):
-        self.diffusion = diffusion
-        self.NG_jet = NG_jet
-        self.num_jets = num_jets_to_process
-        self.bins = bins
-        self.num_saved_row =  int(np.sqrt(num_saved))
-        #self.diffusion.begin_sample = 0 # ensure starting from first jet for sampling
-        self.diffusion.reset_sample()
-        self.jets_to_plot = []
-    @torch.inference_mode()
-    def _batch_sample(self, rescale=False):
-        #self.diffusion.reset()
-        #self.diffusion.reset_sample()
-        # while self.diffusion.begin_sample < self.NG_jet._max_TT_no:i=0
-        i = 0
-        while i == 0:
-            i += 1
-            try:
-              sampled_images = self.diffusion.sample(batch_size=4)
-              sampled_images = sampled_images * self.NG_jet.max_energy
-              if rescale:
-                  sampled_images = torch.log1p(sampled_images)
-              sampled_images = sampled_images.detach().cpu()            
-              yield sampled_images
-              del sampled_images
-              gc.collect()
-              torch.cuda.empty_cache()
-              torch.cuda.synchronize()
-            except StopIteration:
-                break
-        return None
-    def _calculate_event_level(self):
-        print(f"Iterating through dataset, adding noise and letting model denoise...")
-        counter = 0
-        eventid = 0
-        # sampled_images is a generator because of yield
-        # So each "element" in generator is a sample of jets
-        self.diffusion.reset_sample()
-        for sampled_images in self._batch_sample(rescale=False):
-            print("counter", counter)
-            all_data = []
+# class OutData():
+#     def __init__(self, diffusion, NG_jet, num_jets_to_process, bins=BMAP_SQUARE_SIDE_LENGTH, num_saved=4):
+#         self.diffusion = diffusion
+#         self.NG_jet = NG_jet
+#         self.num_jets = num_jets_to_process
+#         self.bins = bins
+#         self.num_saved_row =  int(np.sqrt(num_saved))
+#         #self.diffusion.begin_sample = 0 # ensure starting from first jet for sampling
+#         self.diffusion.reset_sample()
+#         self.jets_to_plot = []
+#     @torch.inference_mode()
+#     def _batch_sample(self, rescale=False):
+#         #self.diffusion.reset()
+#         #self.diffusion.reset_sample()
+#         # while self.diffusion.begin_sample < self.NG_jet._max_TT_no:i=0
+#         i = 0
+#         while i == 0:
+#             i += 1
+#             try:
+#               sampled_images = self.diffusion.sample(batch_size=4)
+#               sampled_images = sampled_images * self.NG_jet.max_energy
+#               if rescale:
+#                   sampled_images = torch.log1p(sampled_images)
+#               sampled_images = sampled_images.detach().cpu()            
+#               yield sampled_images
+#               del sampled_images
+#               gc.collect()
+#               torch.cuda.empty_cache()
+#               torch.cuda.synchronize()
+#             except StopIteration:
+#                 break
+#         return None
+#     def _calculate_event_level(self):
+#         print(f"Iterating through dataset, adding noise and letting model denoise...")
+#         counter = 0
+#         eventid = 0
+#         # sampled_images is a generator because of yield
+#         # So each "element" in generator is a sample of jets
+#         self.diffusion.reset_sample()
+#         for sampled_images in self._batch_sample(rescale=False):
+#             print("counter", counter)
+#             all_data = []
 
-            if sampled_images is None:
-                break
-        # rescaled = sampled_images
-        # Save first 4 jets only
+#             if sampled_images is None:
+#                 break
+#         # rescaled = sampled_images
+#         # Save first 4 jets only
         
-        # Remove channel dimension if exists
-            if counter ==0:
-                sampled = sampled_images[:4]
-                # print("sampled", sampled)
-                sys.stdout.flush()
-                sampled_scaled = torch.log1p(sampled)
-                # save_image_larger(tensor=sampled_scaled, nrow=self.num_saved_row,fp=f"{histogram_path}/saved_denoised_grids{self.num_saved_row}.png", normalize=True)
-                self.jets_to_plot = sampled_scaled
-                # print("samples scaled", sampled_scaled)
-                counter =1
-            break
-            if len(sampled_images.shape) == 4:  # (batch, channel, height, width)
-                sampled_images = sampled_images.squeeze(1)
-            for jidx, grid in enumerate(sampled_images):
-                # enumerate starts from 0
-                # whereas sampled_images is a batch of grids iterating through jet dataset
-                # Therefore use eventid as a running id to select the jet
-                NG_jet.select_jet(eventid)
-                axis = NG_jet.jet_axis
-                enes, detas, dphis = grid_to_ene_deta_dphi(grid, N=self.bins)
-                detas, dphis = decentre(axis, detas, dphis)
-                pxs, pys, pzs = deta_dphi_to_momenta(enes, detas, dphis)
-                # print("OutData eventlevel")
-                event_quantities = particle_momenta_to_event_level(enes, pxs, pys, pzs)
-                event_mass, event_px, event_py, event_pz, event_eta, event_phi, event_pT = event_quantities
+#         # Remove channel dimension if exists
+#             if counter ==0:
+#                 sampled = sampled_images[:4]
+#                 # print("sampled", sampled)
+#                 sys.stdout.flush()
+#                 sampled_scaled = torch.log1p(sampled)
+#                 # save_image_larger(tensor=sampled_scaled, nrow=self.num_saved_row,fp=f"{histogram_path}/saved_denoised_grids{self.num_saved_row}.png", normalize=True)
+#                 self.jets_to_plot = sampled_scaled
+#                 # print("samples scaled", sampled_scaled)
+#                 counter =1
+#             break
+#             if len(sampled_images.shape) == 4:  # (batch, channel, height, width)
+#                 sampled_images = sampled_images.squeeze(1)
+#             for jidx, grid in enumerate(sampled_images):
+#                 # enumerate starts from 0
+#                 # whereas sampled_images is a batch of grids iterating through jet dataset
+#                 # Therefore use eventid as a running id to select the jet
+#                 NG_jet.select_jet(eventid)
+#                 axis = NG_jet.jet_axis
+#                 enes, detas, dphis = grid_to_ene_deta_dphi(grid, N=self.bins)
+#                 detas, dphis = decentre(axis, detas, dphis)
+#                 pxs, pys, pzs = deta_dphi_to_momenta(enes, detas, dphis)
+#                 # print("OutData eventlevel")
+#                 event_quantities = particle_momenta_to_event_level(enes, pxs, pys, pzs)
+#                 event_mass, event_px, event_py, event_pz, event_eta, event_phi, event_pT = event_quantities
                 
-                event_level = np.array([
-                    eventid,
-                    event_px,
-                    event_py,
-                    event_pz,
-                    event_eta,
-                    event_phi,
-                    event_mass,
-                    event_pT,
-                ])
-                eventid +=1
-                # combined.append(np.copy(event_level))
-                all_data.append(np.copy(event_level)) 
+#                 event_level = np.array([
+#                     eventid,
+#                     event_px,
+#                     event_py,
+#                     event_pz,
+#                     event_eta,
+#                     event_phi,
+#                     event_mass,
+#                     event_pT,
+#                 ])
+#                 eventid +=1
+#                 # combined.append(np.copy(event_level))
+#                 all_data.append(np.copy(event_level)) 
            
-            all_data = np.vstack(all_data)
-            yield all_data
-        del sampled_images
-        gc.collect()
-        torch.cuda.empty_cache()
-        torch.cuda.synchronize()
-        return None
+#             all_data = np.vstack(all_data)
+#             yield all_data
+#         del sampled_images
+#         gc.collect()
+#         torch.cuda.empty_cache()
+#         torch.cuda.synchronize()
+#         return None
     
-    def save_event_level(self, output_folder=f"{CWD}/data/4-reconstruction", output_filename=None):
-        # return
-        if output_filename is None:
-            output_filename = f"reconstructed_mu{self.diffusion.mu}_event_level_from_grid{self.bins}_Unet{UNET_DIMS}.csv"
-        output_path = f"{output_folder}/{output_filename}"
-        data = self._calculate_event_level()
-        # return
-        # print(data)
-        with open(output_path, 'w') as f:
-            f.write("event_id,px,py,pz,eta,phi,mass,p_T\n")
-            f.close()
-        total_events = 0
-        with open(output_path, 'a+') as f:
-            for batch_data in data:
-                if batch_data is None:
-                    break
-                np.savetxt(f, batch_data,
-                            delimiter=",",
-                            fmt="%i,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f")
-            f.close()
-        print("Done writing")
+#     def save_event_level(self, output_folder=f"{CWD}/data/4-reconstruction", output_filename=None):
+#         # return
+#         if output_filename is None:
+#             output_filename = f"reconstructed_mu{self.diffusion.mu}_event_level_from_grid{self.bins}_Unet{UNET_DIMS}.csv"
+#         output_path = f"{output_folder}/{output_filename}"
+#         data = self._calculate_event_level()
+#         # return
+#         # print(data)
+#         with open(output_path, 'w') as f:
+#             f.write("event_id,px,py,pz,eta,phi,mass,p_T\n")
+#             f.close()
+#         total_events = 0
+#         with open(output_path, 'a+') as f:
+#             for batch_data in data:
+#                 if batch_data is None:
+#                     break
+#                 np.savetxt(f, batch_data,
+#                             delimiter=",",
+#                             fmt="%i,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f")
+#             f.close()
+#         print("Done writing")
 
-        # total_events += len(batch_data)
+#         # total_events += len(batch_data)
 
-        # print(f"Processed {total_events} events so far...")
+#         # print(f"Processed {total_events} events so far...")
 
-        # print("writing")
-        # np.savetxt(
-        #     output_path,
-        #     data,
-        #     delimiter=",",
-        #     header="event_id,px,py,pz,eta,phi,mass,p_T",
-        #     comments="",
-        #     fmt="%i,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f"
-        # )
+#         # print("writing")
+#         # np.savetxt(
+#         #     output_path,
+#         #     data,
+#         #     delimiter=",",
+#         #     header="event_id,px,py,pz,eta,phi,mass,p_T",
+#         #     comments="",
+#         #     fmt="%i,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f"
+#         # )
         
-        return output_path
+#         return output_path
 
-# Number of jets to sample - note very high memory requirement
-# model_cpu = model.
+# # Number of jets to sample - note very high memory requirement
+# # model_cpu = model.
 
 
-output_path = f"{CWD}/data/plots/bmap_comparison/"
-############### PURE JET NOISY JET AND DENOISED SIDE-BY-SIDE
-def compare_denoised(denoised_array, use_log=True):
-    save_path=f"{output_path}/denoised_comparison_linear_{beta}.png" if use_log == False else f"{output_path}/denoised_comparison_{beta}_log1p.png"
-    fig = plt.figure(figsize=(16, 6))  # Increased height slightly for labels
+# output_path = f"{CWD}/data/plots/bmap_comparison/"
+# ############### PURE JET NOISY JET AND DENOISED SIDE-BY-SIDE
+# def compare_denoised(denoised_array, use_log=True):
+#     save_path=f"{output_path}/denoised_comparison_linear_{beta}.png" if use_log == False else f"{output_path}/denoised_comparison_{beta}_log1p.png"
+#     fig = plt.figure(figsize=(16, 6))  # Increased height slightly for labels
     
-    # Create gridspec to have better control over spacing
-    gs = fig.add_gridspec(1, 3, wspace=0.3)
-    main_axes = [fig.add_subplot(gs[0, i]) for i in range(3)]
+#     # Create gridspec to have better control over spacing
+#     gs = fig.add_gridspec(1, 3, wspace=0.3)
+#     main_axes = [fig.add_subplot(gs[0, i]) for i in range(3)]
     
-    # Get mu values
-    # mu_values = [0, 100, 200]
-    vmin, vmax = float('inf'), -float('inf')
+#     # Get mu values
+#     # mu_values = [0, 100, 200]
+#     vmin, vmax = float('inf'), -float('inf')
 
-    # Store random state
-    rng_state = np.random.get_state()
+#     # Store random state
+#     rng_state = np.random.get_state()
     
-    # First pass to get global scaling across all jets and mu values
-    all_grids = []
-    # Get noisy jets
-    mu = 200
-    # for mu in mu_values:
-        # Reset random state to get same jets
-    np.random.set_state(rng_state)
+#     # First pass to get global scaling across all jets and mu values
+#     all_grids = []
+#     # Get noisy jets
+#     mu = 200
+#     # for mu in mu_values:
+#         # Reset random state to get same jets
+#     np.random.set_state(rng_state)
     
-    mu_grids = []
-    NG = NoisyGenerator(tt, pu, mu=mu)
-    NG.reset()
-    NG.mu = 0
-    for _ in range(4):
-        next(NG)
-        grid = NG.get_grid(normalise=False)
-        if use_log:
-            grid = np.log1p(grid)
-        vmin = min(vmin, grid.min())
-        vmax = max(vmax, grid.max())
-        mu_grids.append(grid)
-    all_grids.append(mu_grids)
-    # gets mu = 200 grids
-    NG.reset()
-    NG.mu = mu
-    for _ in range(4):
-        next(NG)
-        grid = NG.get_grid(normalise=False)
-        if use_log:
-            grid = np.log1p(grid)
-        vmin = min(vmin, grid.min())
-        vmax = max(vmax, grid.max())
-        mu_grids.append(grid)
-    all_grids.append(mu_grids)
-    # denoised_array comes from sampling of first 4 jets from model
-    #  Assume it has been converted to numpy array already
-    # Plot each mu subplot with its 4 jets
-    all_grids.append(denoised_array)
-    # print("????", all_grids[0][0].shape)
-    letters = ['(a)', '(b)', '(c)']
-    for idx, grids in enumerate(all_grids):
-        # Create 2x2 grid for this mu
-        grid_size = grids[0].shape[0]
-        combined_grid = np.zeros((grid_size * 2, grid_size * 2))
+#     mu_grids = []
+#     NG = NoisyGenerator(tt, pu, mu=mu)
+#     NG.reset()
+#     NG.mu = 0
+#     for _ in range(4):
+#         next(NG)
+#         grid = NG.get_grid(normalise=False)
+#         if use_log:
+#             grid = np.log1p(grid)
+#         vmin = min(vmin, grid.min())
+#         vmax = max(vmax, grid.max())
+#         mu_grids.append(grid)
+#     all_grids.append(mu_grids)
+#     # gets mu = 200 grids
+#     NG.reset()
+#     NG.mu = mu
+#     for _ in range(4):
+#         next(NG)
+#         grid = NG.get_grid(normalise=False)
+#         if use_log:
+#             grid = np.log1p(grid)
+#         vmin = min(vmin, grid.min())
+#         vmax = max(vmax, grid.max())
+#         mu_grids.append(grid)
+#     all_grids.append(mu_grids)
+#     # denoised_array comes from sampling of first 4 jets from model
+#     #  Assume it has been converted to numpy array already
+#     # Plot each mu subplot with its 4 jets
+#     all_grids.append(denoised_array)
+#     # print("????", all_grids[0][0].shape)
+#     letters = ['(a)', '(b)', '(c)']
+#     for idx, grids in enumerate(all_grids):
+#         # Create 2x2 grid for this mu
+#         grid_size = grids[0].shape[0]
+#         combined_grid = np.zeros((grid_size * 2, grid_size * 2))
         
-        # Fill the 2x2 grid
-        combined_grid[:grid_size, :grid_size] = grids[0]
-        combined_grid[:grid_size, grid_size:] = grids[1]
-        combined_grid[grid_size:, :grid_size] = grids[2]
-        combined_grid[grid_size:, grid_size:] = grids[3]
+#         # Fill the 2x2 grid
+#         combined_grid[:grid_size, :grid_size] = grids[0]
+#         combined_grid[:grid_size, grid_size:] = grids[1]
+#         combined_grid[grid_size:, :grid_size] = grids[2]
+#         combined_grid[grid_size:, grid_size:] = grids[3]
 
-        im = main_axes[idx].imshow(combined_grid, 
-                                    cmap='viridis',
-                                    vmin=vmin,
-                                    vmax=vmax,
-                                    norm=None,  # Add this to prevent automatic normalization
-                                    interpolation='nearest')
+#         im = main_axes[idx].imshow(combined_grid, 
+#                                     cmap='viridis',
+#                                     vmin=vmin,
+#                                     vmax=vmax,
+#                                     norm=None,  # Add this to prevent automatic normalization
+#                                     interpolation='nearest')
         
-        # Add grid lines to separate events
-        main_axes[idx].axhline(y=grid_size-0.5, color='white', linewidth=1)
-        main_axes[idx].axvline(x=grid_size-0.5, color='white', linewidth=1)
+#         # Add grid lines to separate events
+#         main_axes[idx].axhline(y=grid_size-0.5, color='white', linewidth=1)
+#         main_axes[idx].axvline(x=grid_size-0.5, color='white', linewidth=1)
         
-        # # Move mu label to bottom
-        # main_axes[idx].text(0.5, -0.1, f'{letter} $\mu = {mu}$',
-        #                   transform=main_axes[idx].transAxes,
-        #                   fontsize=18, ha='center')
+#         # # Move mu label to bottom
+#         # main_axes[idx].text(0.5, -0.1, f'{letter} $\mu = {mu}$',
+#         #                   transform=main_axes[idx].transAxes,
+#         #                   fontsize=18, ha='center')
         
-        main_axes[idx].axis('off')
+#         main_axes[idx].axis('off')
     
-    print(f"Maximum energy in any pixel: {max([grid.max() for grids in all_grids for grid in grids]):.4f}")
+#     print(f"Maximum energy in any pixel: {max([grid.max() for grids in all_grids for grid in grids]):.4f}")
 
-    # Add colorbar with proper spacing
-    cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])
-    cbar = fig.colorbar(im, cax=cbar_ax)
-    cbar.set_label('$\ln(1+E)$' if use_log else 'Energy', fontsize=18)
-    # plt.tight_layout()
-    # Save if path provided
-    plt.savefig(save_path, 
-                bbox_inches='tight', 
-                dpi=300,
-                pad_inches=0.2)
-    print(f"Saved figure to {save_path}")
-    plt.close()
-##### CODE FOR GENERATING MASS/ETA/PT PLOTS####
-# events_dat = np.genfromtxt(
-#         output_path, delimiter=",", encoding="utf-8", skip_header=1
-#     )
-# mass_num_bins = 50
-# mass_max = 400
-# pT_max = 5000
-# pT_num_bins = 50
-# pT_bins = np.mgrid[0:pT_max:(pT_num_bins+1)*1j]
-# mass_bins = np.mgrid[0:mass_max:(mass_num_bins+1)*1j]
-# fig, axs = plt.subplots(1,3,figsize=(14,6))
-# axs[0].hist(events_dat[:,6], bins=mass_bins, density=True)
-# axs[1].hist(events_dat[:,4], bins=50,density=True)
-# # axs[2].hist(events_dat[:,5], bins=50,density=True)
-# axs[2].hist(events_dat[:,7], bins = pT_bins, density=True)
-# plt.savefig(f"{CWD}/data/3-grid/grid{bins}/test.pdf")
-# plt.close()
+#     # Add colorbar with proper spacing
+#     cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])
+#     cbar = fig.colorbar(im, cax=cbar_ax)
+#     cbar.set_label('$\ln(1+E)$' if use_log else 'Energy', fontsize=18)
+#     # plt.tight_layout()
+#     # Save if path provided
+#     plt.savefig(save_path, 
+#                 bbox_inches='tight', 
+#                 dpi=300,
+#                 pad_inches=0.2)
+#     print(f"Saved figure to {save_path}")
+#     plt.close()
+# ##### CODE FOR GENERATING MASS/ETA/PT PLOTS####
+# # events_dat = np.genfromtxt(
+# #         output_path, delimiter=",", encoding="utf-8", skip_header=1
+# #     )
+# # mass_num_bins = 50
+# # mass_max = 400
+# # pT_max = 5000
+# # pT_num_bins = 50
+# # pT_bins = np.mgrid[0:pT_max:(pT_num_bins+1)*1j]
+# # mass_bins = np.mgrid[0:mass_max:(mass_num_bins+1)*1j]
+# # fig, axs = plt.subplots(1,3,figsize=(14,6))
+# # axs[0].hist(events_dat[:,6], bins=mass_bins, density=True)
+# # axs[1].hist(events_dat[:,4], bins=50,density=True)
+# # # axs[2].hist(events_dat[:,5], bins=50,density=True)
+# # axs[2].hist(events_dat[:,7], bins = pT_bins, density=True)
+# # plt.savefig(f"{CWD}/data/3-grid/grid{bins}/test.pdf")
+# # plt.close()
 
-##### CODE TO GENERATE RESOLUTION PLOTS #####
-def generate_event_level_gridded_jets(NG: NoisyGenerator, save_dir=INTERMEDIATE_PATH):
-    NG.reset()
-    # NG.bins = BMAP_SQUARE_SIDE_LENGTH
-    gt_file = f"{save_dir}/noisy_mu0_event_level_grid{NG.bins}.csv"
-    combined = []
-    for idx, _ in enumerate(NG):
-        # next(NG)
-        grid = NG.get_grid(normalise=False)
-        # NG.select_jet(idx)
-        axis = NG.jet_axis
-        enes, detas, dphis = grid_to_ene_deta_dphi(grid, N=NG.bins)
-        detas, dphis = decentre(axis, detas, dphis)
-        pxs, pys, pzs = deta_dphi_to_momenta(enes, detas, dphis)
-        # print("???")
-        event_quantities = particle_momenta_to_event_level(enes, pxs, pys, pzs)
-        event_mass, event_px, event_py, event_pz, event_eta, event_phi, event_pT = event_quantities
+# ##### CODE TO GENERATE RESOLUTION PLOTS #####
+# def generate_event_level_gridded_jets(NG: NoisyGenerator, save_dir=INTERMEDIATE_PATH):
+#     NG.reset()
+#     # NG.bins = BMAP_SQUARE_SIDE_LENGTH
+#     gt_file = f"{save_dir}/noisy_mu0_event_level_grid{NG.bins}.csv"
+#     combined = []
+#     for idx, _ in enumerate(NG):
+#         # next(NG)
+#         grid = NG.get_grid(normalise=False)
+#         # NG.select_jet(idx)
+#         axis = NG.jet_axis
+#         enes, detas, dphis = grid_to_ene_deta_dphi(grid, N=NG.bins)
+#         detas, dphis = decentre(axis, detas, dphis)
+#         pxs, pys, pzs = deta_dphi_to_momenta(enes, detas, dphis)
+#         # print("???")
+#         event_quantities = particle_momenta_to_event_level(enes, pxs, pys, pzs)
+#         event_mass, event_px, event_py, event_pz, event_eta, event_phi, event_pT = event_quantities
         
-        event_level = np.array([
-            idx,
-            event_px,
-            event_py,
-            event_pz,
-            event_eta,
-            event_phi,
-            event_mass,
-            event_pT,
-        ])
+#         event_level = np.array([
+#             idx,
+#             event_px,
+#             event_py,
+#             event_pz,
+#             event_eta,
+#             event_phi,
+#             event_mass,
+#             event_pT,
+#         ])
         
-        combined.append(np.copy(event_level))
+#         combined.append(np.copy(event_level))
             
-    all_data = np.vstack(combined)
-    np.savetxt(
-            gt_file,
-            all_data,
-            delimiter=",",
-            header="event_id,px,py,pz,eta,phi,mass,p_T",
-            comments="",
-            fmt="%i,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f"
-    )
-    return all_data, gt_file
+#     all_data = np.vstack(combined)
+#     np.savetxt(
+#             gt_file,
+#             all_data,
+#             delimiter=",",
+#             header="event_id,px,py,pz,eta,phi,mass,p_T",
+#             comments="",
+#             fmt="%i,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f,%10.10f"
+#     )
+#     return all_data, gt_file
 # generate_event_level_gridded_jets(NoisyGenerator(tt, pu, bins=4, mu=0))
 # generate_event_level_gridded_jets(NoisyGenerator(tt, pu, bins=8, mu=0))
 # generate_event_level_gridded_jets(NoisyGenerator(tt, pu, bins=64, mu=0))
@@ -716,5 +726,16 @@ def generate_event_level_gridded_jets(NG: NoisyGenerator, save_dir=INTERMEDIATE_
 #     colors=colors,
 #     vert_line_colour="black",
 # )
+
+files = [
+    f"{CWD}/data/2-intermediate/noisy_mu0_event_level.csv",
+    f"{CWD}/data/2-intermediate/noisy_mu{0}_event_level_grid{64}.csv",
+    f"{CWD}/data/2-intermediate/noisy_mu200_event_level.csv",
+    f"{CWD}/data/4-reconstruction/beta001/reconstructed_mu200_event_level_from_grid64_Unet64.csv",
+]
+labels = ["Original", "Best case", "Noisy", "Denoised"]
+save_path = f"{CWD}/data/plots/1D_histograms/overlaid_from_model/cx_overlaid_poster.pdf"
+create_overlay_plots_general(files, labels, mass_max=350, save_path=save_path)
+
 
 
